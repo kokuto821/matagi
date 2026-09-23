@@ -7,6 +7,7 @@ settings.development.local.json
 .claude/commands/
 .agents/plugins/matagi/plugin.json
 .agents/plugins/matagi/hooks.json
+.codex/config.toml
 __pycache__/
 *.pyc
 node_modules/
