@@ -207,8 +207,23 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
 
+const APPLY_PATCH_TOOL_NAME = "apply_patch";
+const APPLY_PATCH_PATH_HEADER_PATTERN = /^\*\*\* (?:Update|Add|Delete) File: (.+)$/gm;
+
 const isEditTool = (toolName: unknown): boolean => {
-  return typeof toolName === "string" && EDIT_TOOL_MARKERS.some((marker) => toolName.includes(marker));
+  return (
+    (typeof toolName === "string" && EDIT_TOOL_MARKERS.some((marker) => toolName.includes(marker))) ||
+    toolName === APPLY_PATCH_TOOL_NAME
+  );
+};
+
+/** apply_patch のパッチ本文から変更対象パスを全て抽出する。 */
+const applyPatchTargets = (command: string): string[] => {
+  const targets: string[] = [];
+  for (const match of command.matchAll(APPLY_PATCH_PATH_HEADER_PATTERN)) {
+    targets.push(match[1].trim());
+  }
+  return targets;
 };
 
 const editTarget = (toolInput: Record<string, unknown>): string | null => {
@@ -221,13 +236,8 @@ const editTarget = (toolInput: Record<string, unknown>): string | null => {
   return null;
 };
 
-/** 保護ブランチ上の追跡対象ファイルへの変更なら拒否理由を返す。問題なければ null。 */
-const editDenialReason = (toolInput: Record<string, unknown>, cwd: string, protected_: string[]): string | null => {
-  const path = editTarget(toolInput);
-  if (path === null) {
-    return null;
-  }
-
+/** path が保護ブランチ上の追跡対象ファイルなら拒否理由を返す。問題なければ null。 */
+const pathDenialReason = (path: string, cwd: string, protected_: string[]): string | null => {
   // シンボリックリンク経由でワークツリー内へ着弾する経路を塞ぐため実体パスで判定する
   const joined = isAbsolute(path) ? path : join(cwd, path);
   const target = realpathNonStrict(joined);
@@ -245,6 +255,34 @@ const editDenialReason = (toolInput: Record<string, unknown>, cwd: string, prote
     return null;
   }
   return editReason(branch, path);
+};
+
+/** 保護ブランチ上の追跡対象ファイルへの変更なら拒否理由を返す。問題なければ null。 */
+const editDenialReason = (toolInput: Record<string, unknown>, cwd: string, protected_: string[]): string | null => {
+  const path = editTarget(toolInput);
+  if (path === null) {
+    return null;
+  }
+  return pathDenialReason(path, cwd, protected_);
+};
+
+/** apply_patch の command からパッチ対象パスを抽出し、いずれかが拒否対象なら拒否理由を返す。 */
+const applyPatchDenialReason = (
+  toolInput: Record<string, unknown>,
+  cwd: string,
+  protected_: string[],
+): string | null => {
+  const command = toolInput.command;
+  if (typeof command !== "string" || !command) {
+    return null;
+  }
+  for (const path of applyPatchTargets(command)) {
+    const reason = pathDenialReason(path, cwd, protected_);
+    if (reason) {
+      return reason;
+    }
+  }
+  return null;
 };
 
 /** os.path.realpath 相当（存在しないパスでもエラーにせず可能な限り解決する）。 */
@@ -303,6 +341,9 @@ const resolveDenialReason = (
   cwd: string,
   protected_: string[],
 ): string | null => {
+  if (toolName === APPLY_PATCH_TOOL_NAME) {
+    return applyPatchDenialReason(toolInput, cwd, protected_);
+  }
   if (isEditTool(toolName)) {
     return editDenialReason(toolInput, cwd, protected_);
   }

@@ -242,6 +242,28 @@ test("不正なJSON入力に対してfail-openする", () => {
   expect(result.stdout.trim()).toBe("");
 });
 
+test("保護ブランチ上でapply_patchツールによるファイル変更を拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange (README.mdはリポジトリ初期化時からの追跡対象ファイル)
+
+    // Act
+    const result = runHook({
+      tool_name: "apply_patch",
+      tool_input: {
+        command: "*** Begin Patch\n*** Update File: README.md\n*** End Patch",
+      },
+      cwd: repo,
+    });
+
+    // Assert
+    assert.equal(result.status, 0);
+    const output = parseDenyOutput(result.stdout);
+    assert.equal(output.permissionDecision, "deny");
+    assert.match(output.permissionDecisionReason, /main/);
+    assert.match(output.permissionDecisionReason, /README\.md/);
+  });
+});
+
 test("対象外のツールに対してfail-openする", () => {
   withTempRepo((repo) => {
     // Arrange (対象外ツールReadを指定)
