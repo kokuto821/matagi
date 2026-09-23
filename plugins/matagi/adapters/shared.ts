@@ -9,7 +9,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-const SOURCE_PLUGIN_JSON = join(import.meta.dirname, "../../.claude-plugin/plugin.json");
+const SOURCE_PLUGIN_JSON = join(import.meta.dirname, "../.claude-plugin/plugin.json");
 
 export const readClaudePluginJson = <T>(): T => {
   return JSON.parse(readFileSync(SOURCE_PLUGIN_JSON, "utf-8")) as T;
