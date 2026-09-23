@@ -8,6 +8,7 @@ settings.development.local.json
 .agents/plugins/matagi/plugin.json
 .agents/plugins/matagi/hooks.json
 .codex/config.toml
+.codex/agents/
 __pycache__/
 *.pyc
 node_modules/

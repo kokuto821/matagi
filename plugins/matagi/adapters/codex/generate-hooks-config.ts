@@ -16,6 +16,7 @@
 import { basename, join, resolve } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { readClaudePluginJson } from "../shared.ts";
+import { tomlString } from "./toml.ts";
 
 // hook スクリプトのファイル名 → Codex 向け matcher（正規表現文字列）。
 // protected-branch-guard.ts: 保護ブランチ上の変更を拒否する。Codex のファイル編集は
@@ -76,16 +77,6 @@ const toCodexHookEntries = (source: ClaudePluginManifest, pluginRoot: string): C
     }
   }
   return entries;
-};
-
-const tomlString = (value: string): string => {
-  // TOML basic string のエスケープ対象（バックスラッシュ・二重引用符・制御文字）のみ扱う
-  const escaped = value
-    .replaceAll("\\", "\\\\")
-    .replaceAll('"', '\\"')
-    .replaceAll("\n", "\\n")
-    .replaceAll("\t", "\\t");
-  return `"${escaped}"`;
 };
 
 const toConfigToml = (entries: CodexHookEntry[]): string => {
