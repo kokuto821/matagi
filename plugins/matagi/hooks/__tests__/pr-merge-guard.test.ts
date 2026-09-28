@@ -1,11 +1,10 @@
-// Run: node --test plugins/matagi/hooks/__tests__/*.test.ts
+// Run: vitest run (plugins/matagi/ 配下)
 //
-// TDD Red フェーズ: pr-merge-guard.ts (未実装) に対する失敗するテスト。
+// pr-merge-guard.ts の起動契約テスト。
 // Python 実装（pr-merge-guard.py）の挙動を正として、TypeScript 版が
 // 同じ起動契約（stdin JSON -> stdout JSON / exit code）を満たすことを検証する。
 
-import test from "node:test";
-import assert from "node:assert/strict";
+import { test, expect } from "vitest";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { runHook as runHookBase, parseDenyOutput, type Payload } from "./helpers/hookTestHelpers.ts";
@@ -31,11 +30,11 @@ test("Bash経由の`gh pr merge`を拒否する", () => {
   const result = runHook(payload);
 
   // Assert
-  assert.equal(result.status, 0);
+  expect(result.status).toBe(0);
   const output = parseDenyOutput(result.stdout);
-  assert.equal(output.hookEventName, "PreToolUse");
-  assert.equal(output.permissionDecision, "deny");
-  assert.match(output.permissionDecisionReason, /gh pr merge/);
+  expect(output.hookEventName).toBe("PreToolUse");
+  expect(output.permissionDecision).toBe("deny");
+  expect(output.permissionDecisionReason).toMatch(/gh pr merge/);
 });
 
 test("サブコマンドの間にフラグが挟まる`gh pr merge`を拒否する", () => {
@@ -49,9 +48,9 @@ test("サブコマンドの間にフラグが挟まる`gh pr merge`を拒否す�
   const result = runHook(payload);
 
   // Assert
-  assert.equal(result.status, 0);
+  expect(result.status).toBe(0);
   const output = parseDenyOutput(result.stdout);
-  assert.equal(output.permissionDecision, "deny");
+  expect(output.permissionDecision).toBe("deny");
 });
 
 test("他コマンドに連結された`gh pr merge`を拒否する", () => {
@@ -65,9 +64,9 @@ test("他コマンドに連結された`gh pr merge`を拒否する", () => {
   const result = runHook(payload);
 
   // Assert
-  assert.equal(result.status, 0);
+  expect(result.status).toBe(0);
   const output = parseDenyOutput(result.stdout);
-  assert.equal(output.permissionDecision, "deny");
+  expect(output.permissionDecision).toBe("deny");
 });
 
 test("`gh pr view`は許可する", () => {
@@ -81,8 +80,8 @@ test("`gh pr view`は許可する", () => {
   const result = runHook(payload);
 
   // Assert
-  assert.equal(result.status, 0);
-  assert.equal(result.stdout.trim(), "");
+  expect(result.status).toBe(0);
+  expect(result.stdout.trim()).toBe("");
 });
 
 test("`gh pr list`は許可する", () => {
@@ -96,8 +95,8 @@ test("`gh pr list`は許可する", () => {
   const result = runHook(payload);
 
   // Assert
-  assert.equal(result.status, 0);
-  assert.equal(result.stdout.trim(), "");
+  expect(result.status).toBe(0);
+  expect(result.stdout.trim()).toBe("");
 });
 
 test("`gh pr merge`を経由しない`gh api .../merge`は許可する", () => {
@@ -113,8 +112,8 @@ test("`gh pr merge`を経由しない`gh api .../merge`は許可する", () => {
   const result = runHook(payload);
 
   // Assert
-  assert.equal(result.status, 0);
-  assert.equal(result.stdout.trim(), "");
+  expect(result.status).toBe(0);
+  expect(result.stdout.trim()).toBe("");
 });
 
 test("Bash以外のツールは入力内容によらず許可する", () => {
@@ -128,8 +127,8 @@ test("Bash以外のツールは入力内容によらず許可する", () => {
   const result = runHook(payload);
 
   // Assert
-  assert.equal(result.status, 0);
-  assert.equal(result.stdout.trim(), "");
+  expect(result.status).toBe(0);
+  expect(result.stdout.trim()).toBe("");
 });
 
 test("不正なJSON入力に対してfail-openする", () => {
@@ -142,8 +141,8 @@ test("不正なJSON入力に対してfail-openする", () => {
   });
 
   // Assert
-  assert.equal(result.status, 0);
-  assert.equal(result.stdout.trim(), "");
+  expect(result.status).toBe(0);
+  expect(result.stdout.trim()).toBe("");
 });
 
 test("tool_inputが欠落している場合にfail-openする", () => {
@@ -157,6 +156,6 @@ test("tool_inputが欠落している場合にfail-openする", () => {
   });
 
   // Assert
-  assert.equal(result.status, 0);
-  assert.equal(result.stdout.trim(), "");
+  expect(result.status).toBe(0);
+  expect(result.stdout.trim()).toBe("");
 });
