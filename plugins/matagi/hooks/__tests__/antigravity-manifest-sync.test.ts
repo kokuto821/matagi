@@ -1,6 +1,6 @@
-// Run: node --test plugins/matagi/hooks/__tests__/*.test.ts
+// Run: vitest run (plugins/matagi/ 配下)
 //
-// TDD Red フェーズ: antigravity-manifest-sync.ts (未実装) に対する失敗するテスト。
+// antigravity-manifest-sync.ts に対するテスト。
 //
 // この hook は PostToolUse で発火し、plugins/matagi/.claude-plugin/plugin.json への
 // 変更を検知したときだけ、作業リポジトリ直下の .agents/plugins/matagi/ に対して
@@ -11,10 +11,9 @@
 // 子プロセス起動・ファイルシステム存在確認は本体実装からの依存性注入（deps）でモック化する。
 // spawnSync をサブプロセス越しにモックする手段がないため（別プロセスの関数は差し替えられない）、
 // 本体側は `syncAntigravityManifest(payload, deps)` の形で existsSync / spawnSync を
-// 引数として受け取る設計を前提にテストを書く（本体は未実装のためこのテストは import 解決から失敗する）。
+// 引数として受け取る設計を前提にテストを書く。
 
-import test from "node:test";
-import assert from "node:assert/strict";
+import { test, expect } from "vitest";
 import { spawnSync as nodeSpawnSync } from "node:child_process";
 import { join } from "node:path";
 import {
@@ -61,7 +60,7 @@ test("対象外ファイル（plugin.json以外）への変更では子プロセ
   syncAntigravityManifest(payload, { existsSync, spawnSync });
 
   // Assert
-  assert.equal(spawnCalls.length, 0);
+  expect(spawnCalls.length).toBe(0);
 });
 
 test("対象ファイル（plugin.json）への変更だが.agents/plugins/matagi/が存在しない場合は子プロセスを起動しない", () => {
@@ -79,7 +78,7 @@ test("対象ファイル（plugin.json）への変更だが.agents/plugins/matag
   syncAntigravityManifest(payload, { existsSync, spawnSync });
 
   // Assert
-  assert.equal(spawnCalls.length, 0);
+  expect(spawnCalls.length).toBe(0);
 });
 
 test("対象ファイル（plugin.json）への変更かつ.agents/plugins/matagi/が存在する場合はgenerate-plugin-json.tsとgenerate-hooks-json.tsの2つを子プロセスとして起動する", () => {
@@ -98,27 +97,27 @@ test("対象ファイル（plugin.json）への変更かつ.agents/plugins/matag
   syncAntigravityManifest(payload, { existsSync, spawnSync });
 
   // Assert
-  assert.equal(spawnCalls.length, 2);
+  expect(spawnCalls.length).toBe(2);
 
   const joinedCommands = spawnCalls.map((call) => [call.command, ...call.args].join(" "));
-  assert.ok(
+  expect(
     joinedCommands.some(
       (cmd) =>
         cmd.includes("--experimental-strip-types") &&
         cmd.includes("plugins/matagi/adapters/antigravity/generate-plugin-json.ts") &&
         cmd.includes(ANTIGRAVITY_DIR_RELATIVE_PATH),
     ),
-    `generate-plugin-json.ts の呼び出しが見つからない: ${JSON.stringify(joinedCommands)}`,
-  );
-  assert.ok(
+    `generate-plugin-json.ts起動コマンドが見つからない: ${JSON.stringify(joinedCommands)}`,
+  ).toBeTruthy();
+  expect(
     joinedCommands.some(
       (cmd) =>
         cmd.includes("--experimental-strip-types") &&
         cmd.includes("plugins/matagi/adapters/antigravity/generate-hooks-json.ts") &&
         cmd.includes(ANTIGRAVITY_DIR_RELATIVE_PATH),
     ),
-    `generate-hooks-json.ts の呼び出しが見つからない: ${JSON.stringify(joinedCommands)}`,
-  );
+    `generate-hooks-json.ts起動コマンドが見つからない: ${JSON.stringify(joinedCommands)}`,
+  ).toBeTruthy();
 });
 
 test("tool_input に file_path が無い場合（不正なペイロード）は子プロセスを起動しない", () => {
@@ -137,7 +136,7 @@ test("tool_input に file_path が無い場合（不正なペイロード）は�
   syncAntigravityManifest(payload, { existsSync, spawnSync });
 
   // Assert
-  assert.equal(spawnCalls.length, 0);
+  expect(spawnCalls.length).toBe(0);
 });
 
 test("cwd が payload に無い場合は process.cwd() 相当にフォールバックする", () => {
@@ -155,7 +154,7 @@ test("cwd が payload に無い場合は process.cwd() 相当にフォールバ�
   syncAntigravityManifest(payload, { existsSync, spawnSync });
 
   // Assert
-  assert.equal(spawnCalls.length, 2);
+  expect(spawnCalls.length).toBe(2);
 });
 
 test("CLI起動時に不正なJSON入力を渡すとexit code 0で子プロセスを起動しない", () => {
@@ -168,6 +167,6 @@ test("CLI起動時に不正なJSON入力を渡すとexit code 0で子プロセ�
   });
 
   // Assert
-  assert.equal(result.status, 0);
-  assert.equal((result.stderr || "").trim(), "");
+  expect(result.status).toBe(0);
+  expect((result.stderr || "").trim()).toBe("");
 });

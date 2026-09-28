@@ -4,7 +4,7 @@
 
 フック = Claude判断に頼らず、ツール実行強制制御する仕組み。配線は `.claude-plugin/plugin.json` の `hooks` セクション。パスは `${CLAUDE_PLUGIN_ROOT}` 起点。
 
-実行ランタイム: Node v22.6+（`--experimental-strip-types` フラグでTypeScript直接実行、ビルド不要）。フラグなしでの直接実行はNode 23.6+/24系で安定するため、`plugin.json`のフック起動コマンドでは明示的に`node --experimental-strip-types`を指定している。テスト: `node --test plugins/matagi/hooks/__tests__/*.test.ts`。
+実行ランタイム: Node v22.6+（`--experimental-strip-types` フラグでTypeScript直接実行、ビルド不要）。フラグなしでの直接実行はNode 23.6+/24系で安定するため、`plugin.json`のフック起動コマンドでは明示的に`node --experimental-strip-types`を指定している。テスト: `cd plugins/matagi && npm test`（vitest）。
 
 | ファイル | 役割 |
 |---------|------|

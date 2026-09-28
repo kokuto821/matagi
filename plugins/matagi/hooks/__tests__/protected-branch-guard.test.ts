@@ -1,11 +1,10 @@
-// Run: node --test plugins/matagi/hooks/__tests__/*.test.ts
+// Run: vitest run (plugins/matagi/ 配下)
 //
-// TDD Red フェーズ: protected-branch-guard.ts (未実装) に対する失敗するテスト。
+// protected-branch-guard.ts の起動契約テスト。
 // Python 実装（protected-branch-guard.py）の挙動を正として、TypeScript 版が
 // 同じ起動契約（stdin JSON -> stdout JSON / exit code）を満たすことを検証する。
 
-import test from "node:test";
-import assert from "node:assert/strict";
+import { test, expect } from "vitest";
 import { spawnSync } from "node:child_process";
 import { writeFileSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -36,12 +35,12 @@ test("保護ブランチ(main)上でBash経由の`git commit`を拒否する", (
     });
 
     // Assert
-    assert.equal(result.status, 0);
+    expect(result.status).toBe(0);
     const output = parseDenyOutput(result.stdout);
-    assert.equal(output.hookEventName, "PreToolUse");
-    assert.equal(output.permissionDecision, "deny");
-    assert.match(output.permissionDecisionReason, /main/);
-    assert.match(output.permissionDecisionReason, /git commit/);
+    expect(output.hookEventName).toBe("PreToolUse");
+    expect(output.permissionDecision).toBe("deny");
+    expect(output.permissionDecisionReason).toMatch(/main/);
+    expect(output.permissionDecisionReason).toMatch(/git commit/);
   });
 });
 
@@ -57,11 +56,11 @@ test("保護ブランチ(main)上でBash経由の`git push`を拒否する", () 
     });
 
     // Assert
-    assert.equal(result.status, 0);
+    expect(result.status).toBe(0);
     const output = parseDenyOutput(result.stdout);
-    assert.equal(output.permissionDecision, "deny");
-    assert.match(output.permissionDecisionReason, /main/);
-    assert.match(output.permissionDecisionReason, /git push/);
+    expect(output.permissionDecision).toBe("deny");
+    expect(output.permissionDecisionReason).toMatch(/main/);
+    expect(output.permissionDecisionReason).toMatch(/git push/);
   });
 });
 
@@ -78,10 +77,10 @@ test("保護されていないブランチからでも`git push origin main`を�
     });
 
     // Assert
-    assert.equal(result.status, 0);
+    expect(result.status).toBe(0);
     const output = parseDenyOutput(result.stdout);
-    assert.equal(output.permissionDecision, "deny");
-    assert.match(output.permissionDecisionReason, /main/);
+    expect(output.permissionDecision).toBe("deny");
+    expect(output.permissionDecisionReason).toMatch(/main/);
   });
 });
 
@@ -98,11 +97,11 @@ test("保護ブランチ上でEdit系ツールによるファイル変更を拒�
     });
 
     // Assert
-    assert.equal(result.status, 0);
+    expect(result.status).toBe(0);
     const output = parseDenyOutput(result.stdout);
-    assert.equal(output.permissionDecision, "deny");
-    assert.match(output.permissionDecisionReason, /main/);
-    assert.match(output.permissionDecisionReason, /README\.md/);
+    expect(output.permissionDecision).toBe("deny");
+    expect(output.permissionDecisionReason).toMatch(/main/);
+    expect(output.permissionDecisionReason).toMatch(/README\.md/);
   });
 });
 
@@ -119,9 +118,9 @@ test("保護ブランチ上でnotebook_pathを使うWriteツールを拒否す�
     });
 
     // Assert
-    assert.equal(result.status, 0);
+    expect(result.status).toBe(0);
     const output = parseDenyOutput(result.stdout);
-    assert.equal(output.permissionDecision, "deny");
+    expect(output.permissionDecision).toBe("deny");
   });
 });
 
@@ -141,8 +140,8 @@ test("保護ブランチ上でも.gitignoreされたファイルの編集は許�
     });
 
     // Assert
-    assert.equal(result.status, 0);
-    assert.equal(result.stdout.trim(), "");
+    expect(result.status).toBe(0);
+    expect(result.stdout.trim()).toBe("");
   });
 });
 
@@ -159,8 +158,8 @@ test("gitで管理されていないディレクトリ外のコマンドは許�
     });
 
     // Assert
-    assert.equal(result.status, 0);
-    assert.equal(result.stdout.trim(), "");
+    expect(result.status).toBe(0);
+    expect(result.stdout.trim()).toBe("");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -183,8 +182,8 @@ test("detached HEAD状態は許可する", () => {
     });
 
     // Assert
-    assert.equal(result.status, 0);
-    assert.equal(result.stdout.trim(), "");
+    expect(result.status).toBe(0);
+    expect(result.stdout.trim()).toBe("");
   });
 });
 
@@ -201,8 +200,8 @@ test("保護されていないブランチでのgit commit/pushは許可する",
     });
 
     // Assert
-    assert.equal(result.status, 0);
-    assert.equal(result.stdout.trim(), "");
+    expect(result.status).toBe(0);
+    expect(result.stdout.trim()).toBe("");
   });
 });
 
@@ -222,10 +221,10 @@ test("CLAUDE_PROTECTED_BRANCHESによる上書きを尊重する", () => {
     );
 
     // Assert
-    assert.equal(result.status, 0);
+    expect(result.status).toBe(0);
     const output = parseDenyOutput(result.stdout);
-    assert.equal(output.permissionDecision, "deny");
-    assert.match(output.permissionDecisionReason, /release/);
+    expect(output.permissionDecision).toBe("deny");
+    expect(output.permissionDecisionReason).toMatch(/release/);
   });
 });
 
@@ -239,8 +238,8 @@ test("不正なJSON入力に対してfail-openする", () => {
   });
 
   // Assert
-  assert.equal(result.status, 0);
-  assert.equal(result.stdout.trim(), "");
+  expect(result.status).toBe(0);
+  expect(result.stdout.trim()).toBe("");
 });
 
 test("対象外のツールに対してfail-openする", () => {
@@ -255,7 +254,7 @@ test("対象外のツールに対してfail-openする", () => {
     });
 
     // Assert
-    assert.equal(result.status, 0);
-    assert.equal(result.stdout.trim(), "");
+    expect(result.status).toBe(0);
+    expect(result.stdout.trim()).toBe("");
   });
 });

@@ -1,10 +1,9 @@
-// Run: node --test plugins/matagi/hooks/__tests__/*.test.ts
+// Run: vitest run (plugins/matagi/ 配下)
 //
 // command-parser.ts (tokenize / splitSegments / stripPrefix / SEGMENT_SEPARATORS) の
 // ユニットテスト。
 
-import test from "node:test";
-import assert from "node:assert/strict";
+import { test, expect } from "vitest";
 import { tokenize, splitSegments, stripPrefix, SEGMENT_SEPARATORS } from "../command-parser.ts";
 
 test("空白区切りの通常コマンドをトークン列に分解する", () => {
@@ -15,7 +14,7 @@ test("空白区切りの通常コマンドをトークン列に分解する", ()
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["git", "commit", "-m", "message"]);
+  expect(result).toStrictEqual(["git", "commit", "-m", "message"]);
 });
 
 test("シングルクォート内の空白・特殊文字を1トークンとして保持する", () => {
@@ -26,7 +25,7 @@ test("シングルクォート内の空白・特殊文字を1トークンとし�
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["echo", "hello world $VAR \"quoted\""]);
+  expect(result).toStrictEqual(["echo", "hello world $VAR \"quoted\""]);
 });
 
 test("ダブルクォート内でエスケープされた文字を解決する", () => {
@@ -37,7 +36,7 @@ test("ダブルクォート内でエスケープされた文字を解決する",
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["echo", "\"\\$` "]);
+  expect(result).toStrictEqual(["echo", "\"\\$` "]);
 });
 
 test("単語先頭の#はコメント開始として以降を無視する", () => {
@@ -48,7 +47,7 @@ test("単語先頭の#はコメント開始として以降を無視する", () =
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["echo", "hello"]);
+  expect(result).toStrictEqual(["echo", "hello"]);
 });
 
 test("コメントは改行までで再開しない", () => {
@@ -59,7 +58,7 @@ test("コメントは改行までで再開しない", () => {
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["echo", "hello", "echo", "world"]);
+  expect(result).toStrictEqual(["echo", "hello", "echo", "world"]);
 });
 
 test("単語途中の#はコメントとして扱わない", () => {
@@ -70,7 +69,7 @@ test("単語途中の#はコメントとして扱わない", () => {
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["git", "commit", "-m", "fix#123"]);
+  expect(result).toStrictEqual(["git", "commit", "-m", "fix#123"]);
 });
 
 test("&&を1トークンとしてまとめる", () => {
@@ -81,7 +80,7 @@ test("&&を1トークンとしてまとめる", () => {
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["cmd1", "&&", "cmd2"]);
+  expect(result).toStrictEqual(["cmd1", "&&", "cmd2"]);
 });
 
 test("||を1トークンとしてまとめる", () => {
@@ -92,7 +91,7 @@ test("||を1トークンとしてまとめる", () => {
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["cmd1", "||", "cmd2"]);
+  expect(result).toStrictEqual(["cmd1", "||", "cmd2"]);
 });
 
 test("&単体は2文字演算子とは区別して1文字トークンにする", () => {
@@ -103,7 +102,7 @@ test("&単体は2文字演算子とは区別して1文字トークンにする",
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["cmd1", "&", "cmd2"]);
+  expect(result).toStrictEqual(["cmd1", "&", "cmd2"]);
 });
 
 test("|単体は2文字演算子とは区別して1文字トークンにする", () => {
@@ -114,7 +113,7 @@ test("|単体は2文字演算子とは区別して1文字トークンにする",
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["cmd1", "|", "cmd2"]);
+  expect(result).toStrictEqual(["cmd1", "|", "cmd2"]);
 });
 
 test("区切り文字がそれぞれ独立トークンになる", () => {
@@ -125,7 +124,7 @@ test("区切り文字がそれぞれ独立トークンになる", () => {
   const result = tokenize(command);
 
   // Assert
-  assert.deepEqual(result, ["cmd1", ";", "(", "cmd2", ")", "cmd3"]);
+  expect(result).toStrictEqual(["cmd1", ";", "(", "cmd2", ")", "cmd3"]);
 });
 
 test("閉じていないシングルクォートは例外になる", () => {
@@ -133,7 +132,7 @@ test("閉じていないシングルクォートは例外になる", () => {
   const command = "echo 'unterminated";
 
   // Act & Assert
-  assert.throws(() => tokenize(command), /unterminated quote/);
+  expect(() => tokenize(command)).toThrow(/unterminated quote/);
 });
 
 test("閉じていないダブルクォートは例外になる", () => {
@@ -141,7 +140,7 @@ test("閉じていないダブルクォートは例外になる", () => {
   const command = 'echo "unterminated';
 
   // Act & Assert
-  assert.throws(() => tokenize(command), /unterminated quote/);
+  expect(() => tokenize(command)).toThrow(/unterminated quote/);
 });
 
 test("SEGMENT_SEPARATORSに含まれるトークンでセグメント分割される", () => {
@@ -152,7 +151,7 @@ test("SEGMENT_SEPARATORSに含まれるトークンでセグメント分割さ�
   const result = splitSegments(tokens);
 
   // Assert
-  assert.deepEqual(result, [["cmd1"], ["cmd2"], ["cmd3"]]);
+  expect(result).toStrictEqual([["cmd1"], ["cmd2"], ["cmd3"]]);
 });
 
 test("空セグメントは結果から除外される", () => {
@@ -163,7 +162,7 @@ test("空セグメントは結果から除外される", () => {
   const result = splitSegments(tokens);
 
   // Assert
-  assert.deepEqual(result, [["cmd1"], ["cmd2"]]);
+  expect(result).toStrictEqual([["cmd1"], ["cmd2"]]);
 });
 
 test("先頭のsudoを読み飛ばす", () => {
@@ -174,7 +173,7 @@ test("先頭のsudoを読み飛ばす", () => {
   const result = stripPrefix(segment);
 
   // Assert
-  assert.deepEqual(result, ["rm", "-rf", "/"]);
+  expect(result).toStrictEqual(["rm", "-rf", "/"]);
 });
 
 test("先頭の環境変数代入を複数連続で読み飛ばす", () => {
@@ -185,7 +184,7 @@ test("先頭の環境変数代入を複数連続で読み飛ばす", () => {
   const result = stripPrefix(segment);
 
   // Assert
-  assert.deepEqual(result, ["echo", "hi"]);
+  expect(result).toStrictEqual(["echo", "hi"]);
 });
 
 test("環境変数代入でないトークンは読み飛ばさない", () => {
@@ -196,7 +195,7 @@ test("環境変数代入でないトークンは読み飛ばさない", () => {
   const result = stripPrefix(segment);
 
   // Assert
-  assert.deepEqual(result, ["1FOO=bar", "echo", "hi"]);
+  expect(result).toStrictEqual(["1FOO=bar", "echo", "hi"]);
 });
 
 test("該当しない場合はそのまま返す", () => {
@@ -207,7 +206,7 @@ test("該当しない場合はそのまま返す", () => {
   const result = stripPrefix(segment);
 
   // Assert
-  assert.deepEqual(result, ["git", "commit"]);
+  expect(result).toStrictEqual(["git", "commit"]);
 });
 
 test("SEGMENT_SEPARATORSは想定した区切り文字集合を持つ", () => {
@@ -218,5 +217,5 @@ test("SEGMENT_SEPARATORSは想定した区切り文字集合を持つ", () => {
   const actual = [...SEGMENT_SEPARATORS];
 
   // Assert
-  assert.deepEqual(actual.sort(), expected.sort());
+  expect(actual.sort()).toStrictEqual(expected.sort());
 });
