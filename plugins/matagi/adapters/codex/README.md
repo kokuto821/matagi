@@ -7,4 +7,4 @@
 - `generate-agents-toml.ts`: `agents/*.md` を Codex の `agents/<name>.toml` に変換する。
 - `toml.ts`: 上記が共有する TOML 文字列のシリアライザ。
 
-いずれも `node --experimental-strip-types <script>.ts <出力先ディレクトリ>` で実行します。導入手順・前提事実・実機検証状況は `plugins/matagi/documents/reference/multi-agent-support/codex-adapter.md` を参照してください。
+いずれも `node --experimental-strip-types <script>.ts <出力先ディレクトリ>` で実行します（`generate-hooks-config.ts` は出力先に `config.toml` が既にあると失敗し、上書きには `--force` が必要。`--force` は `config.toml` 全体の置換で、Codex の他の設定も消える）。導入手順・前提事実・実機検証状況は `plugins/matagi/documents/reference/multi-agent-support/codex-adapter.md` を参照してください。

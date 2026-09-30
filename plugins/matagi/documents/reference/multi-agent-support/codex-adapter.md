@@ -37,7 +37,7 @@ Claude Code の `plugin.json` の matcher は `Bash|Edit|Write|NotebookEdit` だ
 
 | hook | Codex 向け matcher | 備考 |
 |------|-------------------|------|
-| `protected-branch-guard.ts` | `Bash\|apply_patch` | `apply_patch` 対応は同スクリプト側に実装済み（パッチ本文の見出し行 `*** Update/Add/Delete File:` から対象パスを全件抽出し、保護ブランチ上の追跡対象なら拒否） |
+| `protected-branch-guard.ts` | `Bash\|apply_patch` | `apply_patch` 対応は同スクリプト側に実装済み（パッチ本文の見出し行 `*** Update/Add/Delete File:` と `*** Move to:`（移動先）から対象パスを全件抽出し、保護ブランチ上の追跡対象なら拒否。ヘッダを1件も抽出できない非空パッチは保護ブランチ上で拒否） |
 | `pr-merge-guard.ts` | `Bash` | `gh pr merge` を常に拒否 |
 | `antigravity-manifest-sync.ts` | 出力しない | Antigravity 専用の同期処理 |
 
@@ -53,6 +53,9 @@ node --experimental-strip-types plugins/matagi/adapters/codex/generate-agents-to
 
 - `.codex/skills/*` と `.codex/hooks` は `plugins/matagi/` への symlink で、git 管理対象。
 - `.codex/config.toml` と `.codex/agents/` は絶対パスを含む／source から派生する生成物のため git 管理外（`.gitignore`）。clone 後に上記を再実行して生成する。
+- `generate-hooks-config.ts` は、出力先に `config.toml` が既にある場合は失敗する（Codex 本体の設定を消さないため）。上書きするときだけ `--force` を付ける（壊れた symlink も既存扱い）。`--force` は `config.toml` 全体の置換で、Codex の他の設定も消える。他の設定と併用している場合は、生成結果を手動で既存の `config.toml` に統合する。
+- `link-source-dirs.ts` は、出力先が `plugins/matagi/` 配下（またはそこへ落ちる symlink）なら中止する。symlink 以外の既存物は削除せずエラーにする。
+- `generate-hooks-config.ts` は、matcher 未定義の未知のフックがある場合、および `protected-branch-guard.ts` が出力に含まれない場合に失敗する（保護ガードが黙って無効化されるのを防ぐ）。
 - `config.toml` の `command` には出力先の絶対パスが埋め込まれる（Codex が `${...}` 変数展開をサポートしないため）。
 - **hooks は信頼確認が要る。** Codex は非 managed な hooks を、ユーザーが定義内容を確認して信頼するまで実行しない。初回起動時に確認する。
 
@@ -62,6 +65,8 @@ node --experimental-strip-types plugins/matagi/adapters/codex/generate-agents-to
 - **未確認**: Codex 実機での skills 自動検出・description ベースの自動発火（確認には `codex exec` による API 呼び出しが要るため見送った）。生成 `config.toml` の hooks が実機で実際に発火し deny が効くこと（保護ブランチ上での確認は、対応コードがマージされるまで成立しない。symlink は作業ツリー実体を指すため）。`.codex/agents/*.toml` が実機で読み込まれること。
 
 ## 未確定事項（残るもの）
+
+- **割り切り**: Codex は `apply_patch` を Bash（シェル heredoc）経由で起動する場合があり、この経路の編集は `protected-branch-guard.ts` の Bash 判定（`git commit` / `git push` のみ）では追えない。Claude Code 側の「Bash 経由の書き込みは追わない」方針（`issue-driven-rule.md` §担保表）と同じ扱いとし、着地（commit / push）の拒否で担保する。実機での経路確認と対応は別 issue で検討する。
 
 - 上記「未確認」の実機検証。
 - **既知の制約**: 2026-03 時点の報告として、`spawn_agent` ツールが `agent_type` 等の明示指定のみを受け付け、`.codex/agents/*.toml` の定義済みエージェントを名前で直接呼び出せない事例がある。現行バージョンで解消済みかは未検証。委譲（coding → backend-coder 等）が Codex 上で成立するかはこの点に依存する。
