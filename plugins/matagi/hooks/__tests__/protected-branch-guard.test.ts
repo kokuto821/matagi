@@ -6,18 +6,30 @@
 
 import { test, expect } from "vitest";
 import { spawnSync } from "node:child_process";
-import { writeFileSync, mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { runHook as runHookBase, parseDenyOutput, withTempRepo, checkoutNewBranch, type Payload } from "./helpers/hookTestHelpers.ts";
+import {
+  runHook as runHookBase,
+  parseDenyOutput,
+  withTempRepo,
+  withTempDir,
+  checkoutNewBranch,
+  buildApplyPatch,
+  type Payload,
+} from "./helpers/hookTestHelpers.ts";
+import {
+  GUARD_SCRIPT_PATH as SCRIPT_PATH,
+  commitFile,
+  expectAllow,
+  expectDenyMatching,
+  ignoreFile,
+  runApplyPatch,
+} from "./helpers/protectedBranchGuardHelpers.ts";
 
-const SCRIPT_PATH = join(
-  import.meta.dirname ?? __dirname,
-  "..",
-  "protected-branch-guard.ts",
-);
-
-const runHook = (payload: Payload, envOverrides?: Record<string, string | undefined>) => {
+const runHook = (
+  payload: Payload,
+  envOverrides?: Record<string, string | undefined>,
+) => {
   return runHookBase(SCRIPT_PATH, payload, envOverrides);
 };
 
@@ -146,8 +158,7 @@ test("保護ブランチ上でも.gitignoreされたファイルの編集は許�
 });
 
 test("gitで管理されていないディレクトリ外のコマンドは許可する", () => {
-  const dir = mkdtempSync(join(tmpdir(), "no-git-"));
-  try {
+  withTempDir("no-git-", (dir) => {
     // Arrange (dirはgit未初期化のまま)
 
     // Act
@@ -158,11 +169,8 @@ test("gitで管理されていないディレクトリ外のコマンドは許�
     });
 
     // Assert
-    expect(result.status).toBe(0);
-    expect(result.stdout.trim()).toBe("");
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
+    expectAllow(result);
+  });
 });
 
 test("detached HEAD状態は許可する", () => {
@@ -242,6 +250,28 @@ test("不正なJSON入力に対してfail-openする", () => {
   expect(result.stdout.trim()).toBe("");
 });
 
+test("保護ブランチ上でapply_patchツールによるファイル変更を拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange (README.mdはリポジトリ初期化時からの追跡対象ファイル)
+
+    // Act
+    const result = runHook({
+      tool_name: "apply_patch",
+      tool_input: {
+        command: "*** Begin Patch\n*** Update File: README.md\n*** End Patch",
+      },
+      cwd: repo,
+    });
+
+    // Assert
+    expect(result.status).toBe(0);
+    const output = parseDenyOutput(result.stdout);
+    expect(output.permissionDecision).toBe("deny");
+    expect(output.permissionDecisionReason).toMatch(/main/);
+    expect(output.permissionDecisionReason).toMatch(/README\.md/);
+  });
+});
+
 test("対象外のツールに対してfail-openする", () => {
   withTempRepo((repo) => {
     // Arrange (対象外ツールReadを指定)
@@ -256,5 +286,247 @@ test("対象外のツールに対してfail-openする", () => {
     // Assert
     expect(result.status).toBe(0);
     expect(result.stdout.trim()).toBe("");
+  });
+});
+
+test("保護ブランチ上でapply_patchのAdd Fileを拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    const patch = buildApplyPatch("*** Add File: new-file.txt", "+hello");
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectDenyMatching(result, /new-file\.txt/);
+  });
+});
+
+test("保護ブランチ上でapply_patchのDelete Fileを拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    const patch = buildApplyPatch("*** Delete File: README.md");
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectDenyMatching(result, /README\.md/);
+  });
+});
+
+test("apply_patchが複数ファイルで2件目が拒否対象なら拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange (1件目は.gitignore対象で許可、2件目は追跡対象)
+    ignoreFile(repo, "ignored.txt");
+    const patch = buildApplyPatch(
+      "*** Update File: ignored.txt",
+      "@@",
+      "-a",
+      "+b",
+      "*** Update File: README.md",
+    );
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectDenyMatching(result, /README\.md/);
+  });
+});
+
+test("apply_patchのMove to宛先が追跡対象なら拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange (移動元は.gitignore対象、宛先はREADME.md)
+    ignoreFile(repo, "ignored.txt");
+    const patch = buildApplyPatch(
+      "*** Update File: ignored.txt",
+      "*** Move to: README.md",
+      "@@",
+      "-a",
+      "+b",
+    );
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectDenyMatching(result, /README\.md/);
+  });
+});
+
+test("apply_patchの対象が全て.gitignoreされたファイルなら保護ブランチでも許可する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    ignoreFile(repo, "ignored.txt");
+    const patch = buildApplyPatch(
+      "*** Update File: ignored.txt",
+      "*** Move to: ignored.txt",
+    );
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectAllow(result);
+  });
+});
+
+test("保護されていないブランチのapply_patchは許可する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    checkoutNewBranch(repo, "feat/#3_work");
+    const patch = buildApplyPatch("*** Update File: README.md");
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectAllow(result);
+  });
+});
+
+test.each([
+  ["空文字", ""],
+  ["非文字列(数値)", 123],
+  ["非文字列(配列)", ["*** Update File: README.md"]],
+  ["null", null],
+])("apply_patchのcommandが%sなら許可する(fail-open)", (_label, command) => {
+  withTempRepo((repo) => {
+    // Arrange (保護ブランチ main 上)
+
+    // Act
+    const result = runApplyPatch(repo, command);
+
+    // Assert
+    expectAllow(result);
+  });
+});
+
+test("apply_patchのtool_inputにcommandキーが無ければ許可する(fail-open)", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    const payload: Payload = {
+      tool_name: "apply_patch",
+      tool_input: {},
+      cwd: repo,
+    };
+
+    // Act
+    const result = runHook(payload);
+
+    // Assert
+    expectAllow(result);
+  });
+});
+
+test("ヘッダ0件かつcommand非空のapply_patchは保護ブランチ上で拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange (対象を判定できないパッチ)
+    const patch = "*** Begin Patch\nnot a header\n*** End Patch";
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectDenyMatching(result, /判定できない apply_patch/);
+  });
+});
+
+test("ヘッダ0件かつcommand非空のapply_patchでも非保護ブランチでは許可する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    checkoutNewBranch(repo, "feat/#4_work");
+
+    // Act
+    const result = runApplyPatch(repo, "not a header");
+
+    // Assert
+    expectAllow(result);
+  });
+});
+
+test("ヘッダ0件のapply_patchはgit管理外なら許可する", () => {
+  withTempDir("no-git-", (dir) => {
+    // Arrange (dirはgit未初期化)
+
+    // Act
+    const result = runApplyPatch(dir, "not a header");
+
+    // Assert
+    expectAllow(result);
+  });
+});
+
+test("apply_patchのサブディレクトリ相対パスを拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    commitFile(repo, "sub/dir/file.txt");
+    const patch = buildApplyPatch("*** Update File: sub/dir/file.txt");
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectDenyMatching(result, /sub\/dir\/file\.txt/);
+  });
+});
+
+test("cwdがサブディレクトリでもその相対パスのapply_patchを拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    commitFile(repo, "sub/file.txt");
+    const patch = buildApplyPatch("*** Update File: file.txt");
+
+    // Act
+    const result = runApplyPatch(repo, patch, join(repo, "sub"));
+
+    // Assert
+    expectDenyMatching(result, /file\.txt/);
+  });
+});
+
+test("apply_patchの絶対パスを拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    const patch = buildApplyPatch(
+      `*** Update File: ${join(repo, "README.md")}`,
+    );
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectDenyMatching(result, /README\.md/);
+  });
+});
+
+test("未作成の階層へのAdd Fileでも保護ブランチ上なら拒否する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    const patch = buildApplyPatch("*** Add File: not/yet/created.txt", "+x");
+
+    // Act
+    const result = runApplyPatch(repo, patch);
+
+    // Assert
+    expectDenyMatching(result, /created\.txt/);
+  });
+});
+
+test("git管理外の絶対パスに対するapply_patchは許可する", () => {
+  withTempRepo((repo) => {
+    // Arrange
+    withTempDir("outside-", (outside) => {
+      const patch = buildApplyPatch(
+        `*** Add File: ${join(outside, "scratch.txt")}`,
+      );
+
+      // Act
+      const result = runApplyPatch(repo, patch);
+
+      // Assert
+      expectAllow(result);
+    });
   });
 });
