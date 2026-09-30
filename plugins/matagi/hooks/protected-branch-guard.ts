@@ -6,15 +6,21 @@
  *
  * - Bash: `git commit` / `git push`（保護ブランチ宛ての push を含む）
  * - Edit / Write / NotebookEdit 等の編集系ツール: git 追跡対象になりうるファイルの変更
+ * - apply_patch（Codex CLI）: パッチ本文の `*** Update/Add/Delete File:` および
+ *   `*** Move to:` の各パスを検査する。ヘッダを1件も抽出できない非空パッチは、
+ *   保護ブランチ上に限り（対象を判定できないため安全側に倒して）拒否する。
  *
- * 判定できないケース（JSON 不正・git リポジトリ外・detached HEAD など）は許可する。
+ * 判定できないケース（JSON 不正・git リポジトリ外・detached HEAD・判定中の例外など）は許可する
+ * （fail-open）。ただし上記の「ヘッダ0件の apply_patch」は判定材料が壊れているのではなく
+ * 検査不能な入力を受けたケースなので、保護ブランチ上では拒否する。
  *
  * 対象外（意図的に見ない）:
  *
  * - git 管理外のパス（スクラッチパッド等）、`.gitignore` 済みのパス、`.git` 配下
  * - **Bash 経由のファイル書き込み**（`sed -i` / リダイレクト / `tee` 等）。シェルの網羅は
  *   原理的に不完全なため追わない。変更が保護ブランチへ着地することは commit / push の
- *   拒否で防ぐ。
+ *   拒否で防ぐ。Bash 経由（heredoc 等）で `apply_patch` コマンドを呼ぶ経路も同様に追わない
+ *   割り切りとする（apply_patch は専用ツール呼び出しのみ検査する）。
  *
  * 保護ブランチは環境変数 CLAUDE_PROTECTED_BRANCHES（スペース区切り）で上書きできる。
  */
@@ -208,13 +214,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 };
 
 const APPLY_PATCH_TOOL_NAME = "apply_patch";
-const APPLY_PATCH_PATH_HEADER_PATTERN = /^\*\*\* (?:Update|Add|Delete) File: (.+)$/gm;
+// Update/Add/Delete の対象パスに加え、リネーム先（`*** Move to:`）も変更対象として検査する
+const APPLY_PATCH_PATH_HEADER_PATTERN = /^\*\*\* (?:(?:Update|Add|Delete) File|Move to): (.+)$/gm;
 
 const isEditTool = (toolName: unknown): boolean => {
-  return (
-    (typeof toolName === "string" && EDIT_TOOL_MARKERS.some((marker) => toolName.includes(marker))) ||
-    toolName === APPLY_PATCH_TOOL_NAME
-  );
+  return typeof toolName === "string" && EDIT_TOOL_MARKERS.some((marker) => toolName.includes(marker));
 };
 
 /** apply_patch のパッチ本文から変更対象パスを全て抽出する。 */
@@ -266,7 +270,20 @@ const editDenialReason = (toolInput: Record<string, unknown>, cwd: string, prote
   return pathDenialReason(path, cwd, protected_);
 };
 
-/** apply_patch の command からパッチ対象パスを抽出し、いずれかが拒否対象なら拒否理由を返す。 */
+const applyPatchUnparsableReason = (branch: string): string => {
+  return (
+    `保護ブランチ \`${branch}\` 上で、変更対象を判定できない apply_patch はフックによりブロックされました。\n` +
+    "パッチ本文に `*** Update File:` 等のヘッダが見つかりません。パッチ形式を確認するか、\n" +
+    "issue に紐づく作業ブランチへ移動してから実行してください:\n" +
+    `${BRANCH_EXAMPLE}\n` +
+    `${protectedFooter()}`
+  );
+};
+
+/**
+ * apply_patch の command からパッチ対象パスを抽出し、いずれかが拒否対象なら拒否理由を返す。
+ * ヘッダが0件の非空 command は対象を検査できないため、保護ブランチ上に限り拒否する。
+ */
 const applyPatchDenialReason = (
   toolInput: Record<string, unknown>,
   cwd: string,
@@ -276,7 +293,12 @@ const applyPatchDenialReason = (
   if (typeof command !== "string" || !command) {
     return null;
   }
-  for (const path of applyPatchTargets(command)) {
+  const targets = applyPatchTargets(command);
+  if (targets.length === 0) {
+    const branch = currentBranch(cwd);
+    return branch !== null && protected_.includes(branch) ? applyPatchUnparsableReason(branch) : null;
+  }
+  for (const path of targets) {
     const reason = pathDenialReason(path, cwd, protected_);
     if (reason) {
       return reason;
@@ -334,7 +356,10 @@ const bashDenialReason = (command: string, cwd: string, protected_: string[]): s
   return null;
 };
 
-/** ツール種別に応じた拒否理由の解決を振り分ける。問題なければ null。 */
+/**
+ * ツール種別に応じた拒否理由の解決を振り分ける。問題なければ null。
+ * 本関数内での例外は握りつぶさず呼び出し元（main）が捕捉し、fail-open（許可）として扱う。
+ */
 const resolveDenialReason = (
   toolName: unknown,
   toolInput: Record<string, unknown>,
@@ -391,7 +416,13 @@ const main = async () => {
   const cwd: string = typeof payload.cwd === "string" && payload.cwd ? payload.cwd : process.cwd();
   const protected_ = protectedBranches();
 
-  const reason = resolveDenialReason(toolName, toolInput, cwd, protected_);
+  let reason: string | null = null;
+  try {
+    reason = resolveDenialReason(toolName, toolInput, cwd, protected_);
+  } catch {
+    // 判定不能（想定外の例外）は他の判定不能ケースと同様に許可する
+    allow();
+  }
 
   if (reason) {
     deny(reason);
