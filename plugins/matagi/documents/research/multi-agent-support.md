@@ -9,7 +9,7 @@ issue #55。matagi を Claude Code 以外のエージェント（Codex CLI・Goo
 | マニフェスト/プラグイン単位 | `plugin.json` + `marketplace.json` | 無し。`.codex/skills/<name>/SKILL.md` 単位 | `plugin.json`（skills/agents/rules/hooks/MCP バンドル） | `opencode.json` 中心。`plugins/*.ts` がエントリポイント |
 | config 置き場所 | `.claude/` | `~/.codex/config.toml` / `.codex/config.toml` | `.agents/`（ワークスペース）／`~/.gemini/antigravity-cli/plugins/<name>/`（インストール先） | `.opencode/` / `~/.config/opencode/` |
 | rules 相当（毎セッション自動ロード） | CLAUDE.md + `.claude/rules` symlink | `AGENTS.md`（git root〜cwd を連結、既定32KiB上限） | `AGENTS.md` / `GEMINI.md` + `.agents/rules/` | `AGENTS.md` + `opencode.json` で追加 instruction ファイル指定 |
-| hooks 相当（コード強制） | hooks（`settings.json` 配線） | 不明（公式ドキュメントに明記なし） | `hooks.json`（5コアcheckpoint、`matcher` で対象指定） | あり。プラグインが event hook を返す（`command.executed` 等多数） |
+| hooks 相当（コード強制） | hooks（`settings.json` 配線） | あり（`.codex/config.toml` の `[[hooks.PreToolUse]]`、Claude Code とほぼ同一形式。issue #58 で実機・公式ドキュメント確認） | `hooks.json`（5コアcheckpoint、`matcher` で対象指定） | あり。プラグインが event hook を返す（`command.executed` 等多数） |
 | SKILL.md 自動トリガー相当 | あり（description ベース自動発火） | あり。**フォーマットは Claude Code とほぼ同一（cross-agent standard）** | あり（`SKILL.md` 明記、Claude Code とほぼ同型） | `commands/` 配下 Markdown。自動トリガーの有無は未確認（明示 `/呼び出し` 前提の可能性） |
 | サブエージェント定義相当 | `agents/*.md`（frontmatter） | `.codex/agents/*.toml`（**TOML、フォーマット別**） | `agent.md`（frontmatter、`invoke_subagent` で動的スポーン） | `agents/*.md` または `opencode.json` 内定義（frontmatter、Claude Code に近い） |
 
@@ -24,7 +24,7 @@ issue #55。matagi を Claude Code 以外のエージェント（Codex CLI・Goo
 - SKILL.md はほぼそのまま配置できる見込み（cross-agent standard）。最有力候補。
 - `rules/` → Codex の AGENTS.md 連結方式への変換が必要（symlink ではなく「rules 内容を AGENTS.md へ集約」または「参照ファイルとして配置」の二択、要検証）。
 - サブエージェント（Markdown frontmatter → TOML）は変換スクリプトが要る。
-- hooks（コード強制層）の Codex 側相当が未確認。ここが埋まらないと harness-rule.md の「コードで強制すべきもの」を Codex 上で担保できない。**要追加調査**。
+- hooks（コード強制層）は Codex にネイティブであることを issue #58 で確認した（未確認だった点は解消）。ファイル編集ツールは `apply_patch` のみのため、matcher は Claude Code のツール名から機械変換せず個別に指定する。詳細は [[codex-adapter]]（`documents/reference/multi-agent-support/codex-adapter.md`）参照。
 
 ### Google Antigravity
 
@@ -48,10 +48,10 @@ issue #55。matagi を Claude Code 以外のエージェント（Codex CLI・Goo
 
 ## 未確定事項（issue #55 時点で残るもの）
 
-- Codex CLI の hooks 相当の有無・仕様
+- ~~Codex CLI の hooks 相当の有無・仕様~~ → issue #58 で解消（ネイティブに存在）。[[codex-adapter]] 参照
 - Antigravity の SKILL.md frontmatter フィールドの完全互換性 → issue #59 マージ後、実機（`agy`）でスキル一覧に認識されることを確認した。ただし個々のスキルが description ベースで正しく自動発火するかまでは未検証。`rules/`・`agents/*.md`・`hooks.json` の実機読み込みも未検証のまま残存。詳細は [[antigravity-adapter]]（`documents/reference/multi-agent-support/antigravity-adapter.md`）参照
 - OpenCode の commands/ 自動トリガー機構の有無
-- 3エージェントとも、`plugins/matagi/` を「複製せず参照」する具体的な配線（シンボリックリンク可否・パス指定の可否）の実機検証 → **Antigravity のみ判明**: ワークスペース `.agents/plugins/<name>/` 配置または `agy plugins install` によるステージングで、各作業リポジトリでの個別配線は不要（[[antigravity-adapter]] 参照）。Codex CLI・OpenCode は未検証のまま残存
+- 3エージェントとも、`plugins/matagi/` を「複製せず参照」する具体的な配線（シンボリックリンク可否・パス指定の可否）の実機検証 → **Antigravity のみ判明**: ワークスペース `.agents/plugins/<name>/` 配置または `agy plugins install` によるステージングで、各作業リポジトリでの個別配線は不要（[[antigravity-adapter]] 参照）。Codex CLI は issue #58 で判明（skills・hooks は symlink、agents は変換、詳細は [[codex-adapter]]）。OpenCode は未検証のまま残存
 
 いずれも各エージェント向け実装 issue の中で、対象エージェントに絞って検証する。issue #59 では Antigravity 向けの `plugin.json`/`hooks.json` 変換スクリプトを実装した（`plugins/matagi/adapters/antigravity/`）。
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
   "files": {
-    "includes": ["hooks/**/*.ts"]
+    "includes": ["hooks/**/*.ts", "adapters/**/*.ts"]
   },
   "linter": {
     "enabled": true,
@@ -47,7 +47,7 @@
   },
   "overrides": [
     {
-      "includes": ["hooks/__tests__/**"],
+      "includes": ["hooks/__tests__/**", "adapters/**/__tests__/**"],
       "linter": {
         "rules": {
           "style": {

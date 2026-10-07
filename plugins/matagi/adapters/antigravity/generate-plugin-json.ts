@@ -9,7 +9,7 @@
  */
 
 import { join, resolve } from "node:path";
-import { readClaudePluginJson, writeManifest } from "./shared.ts";
+import { readClaudePluginJson, writeManifest } from "../shared.ts";
 
 type ClaudePluginManifest = {
   name: string;

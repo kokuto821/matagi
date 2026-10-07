@@ -25,7 +25,10 @@ export const runHook = (
   payload: Payload,
   envOverrides: Record<string, string | undefined> = {},
 ) => {
-  const env: Record<string, string | undefined> = { ...process.env, CLAUDE_PROTECTED_BRANCHES: undefined };
+  const env: Record<string, string | undefined> = {
+    ...process.env,
+    CLAUDE_PROTECTED_BRANCHES: undefined,
+  };
   for (const [key, value] of Object.entries(envOverrides)) {
     env[key] = value;
   }
@@ -65,4 +68,19 @@ export const withTempRepo = <T>(fn: (repoDir: string) => T): T => {
 
 export const checkoutNewBranch = (dir: string, branch: string) => {
   spawnSync("git", ["switch", "-c", branch], { cwd: dir });
+};
+
+/** apply_patch のパッチ本文を組み立てる。headers には `*** Update File: x` 等の行を渡す。 */
+export const buildApplyPatch = (...headers: string[]): string => {
+  return ["*** Begin Patch", ...headers, "*** End Patch"].join("\n");
+};
+
+/** 一時ディレクトリ（git 未初期化）を作成し、fn に渡す。fn の完了後（例外時も含め）に必ず削除する。 */
+export const withTempDir = <T>(prefix: string, fn: (dir: string) => T): T => {
+  const dir = mkdtempSync(join(tmpdir(), prefix));
+  try {
+    return fn(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 };
