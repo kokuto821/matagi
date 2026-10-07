@@ -12,3 +12,9 @@ settings.development.local.json
 __pycache__/
 *.pyc
 node_modules/
+.opencode/skills/
+.opencode/plugins/matagi-hooks.ts
+.opencode/agents/
+.opencode/node_modules/
+.opencode/package.json
+.opencode/package-lock.json
