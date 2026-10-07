@@ -29,6 +29,7 @@ import { spawnSync } from "node:child_process";
 import { dirname, join, sep, isAbsolute } from "node:path";
 import { existsSync, statSync, realpathSync } from "node:fs";
 import { tokenize, splitSegments, stripPrefix } from "./command-parser.ts";
+import { reportFailOpen } from "./fail-open.ts";
 
 const DEFAULT_PROTECTED_BRANCHES = ["main", "master", "develop"];
 const BLOCKED_SUBCOMMANDS = new Set(["commit", "push"]);
@@ -358,7 +359,7 @@ const bashDenialReason = (command: string, cwd: string, protected_: string[]): s
 
 /**
  * ツール種別に応じた拒否理由の解決を振り分ける。問題なければ null。
- * 本関数内での例外は握りつぶさず呼び出し元（main）が捕捉し、fail-open（許可）として扱う。
+ * 本関数内での例外は握りつぶさず呼び出し元（main）が捕捉し、stderr に記録したうえで fail-open（許可）として扱う。
  */
 const resolveDenialReason = (
   toolName: unknown,
@@ -419,8 +420,10 @@ const main = async () => {
   let reason: string | null = null;
   try {
     reason = resolveDenialReason(toolName, toolInput, cwd, protected_);
-  } catch {
-    // 判定不能（想定外の例外）は他の判定不能ケースと同様に許可する
+  } catch (error) {
+    // 判定不能（想定外の例外）は他の判定不能ケースと同様に許可する（fail-open）。
+    // ただし保護が黙って外れないよう、原因を stderr に 1 行残す（stdout は deny JSON 専用のため触れない）。
+    reportFailOpen(error);
     allow();
   }
 

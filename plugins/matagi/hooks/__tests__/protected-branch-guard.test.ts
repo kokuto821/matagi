@@ -4,26 +4,26 @@
 // Python 実装（protected-branch-guard.py）の挙動を正として、TypeScript 版が
 // 同じ起動契約（stdin JSON -> stdout JSON / exit code）を満たすことを検証する。
 
-import { test, expect } from "vitest";
 import { spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { expect, test } from "vitest";
 import {
-  runHook as runHookBase,
-  parseDenyOutput,
-  withTempRepo,
-  withTempDir,
-  checkoutNewBranch,
   buildApplyPatch,
+  checkoutNewBranch,
   type Payload,
+  parseDenyOutput,
+  runHook as runHookBase,
+  withTempDir,
+  withTempRepo,
 } from "./helpers/hookTestHelpers.ts";
 import {
-  GUARD_SCRIPT_PATH as SCRIPT_PATH,
   commitFile,
   expectAllow,
   expectDenyMatching,
   ignoreFile,
   runApplyPatch,
+  GUARD_SCRIPT_PATH as SCRIPT_PATH,
 } from "./helpers/protectedBranchGuardHelpers.ts";
 
 const runHook = (
@@ -258,7 +258,7 @@ test("保護ブランチ上でapply_patchツールによるファイル変更を
     const result = runHook({
       tool_name: "apply_patch",
       tool_input: {
-        command: "*** Begin Patch\n*** Update File: README.md\n*** End Patch",
+        command: buildApplyPatch("*** Update File: README.md"),
       },
       cwd: repo,
     });
