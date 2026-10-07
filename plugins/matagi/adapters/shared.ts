@@ -6,8 +6,25 @@
  * 「直接実行された場合のみ main を走らせる」判定のみを担う。変換ロジックは各スクリプト側に残す。
  */
 
-import { readFileSync, realpathSync, writeFileSync, mkdirSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { randomBytes } from "node:crypto";
+import {
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SOURCE_PLUGIN_JSON = join(
@@ -85,6 +102,42 @@ export const assertOutsideSource = (
     throw new Error(
       `出力先がソースツリー配下または同一のため中止します（ソース破壊防止）: ${outputPath}`,
     );
+  }
+};
+
+/**
+ * 出力パスが「存在しない・通常ファイル・symlink」のいずれかであることを検証する。
+ * ディレクトリ等それ以外は置換対象にできないため --force でも拒否する（Error）。
+ */
+export const assertReplaceableOutput = (path: string): void => {
+  const stat = lstatSync(path, { throwIfNoEntry: false });
+  if (stat !== undefined && !stat.isFile() && !stat.isSymbolicLink()) {
+    throw new Error(
+      `出力先が通常ファイルでも symlink でもないため置換できません（--force でも不可。手動で退避してください）: ${path}`,
+    );
+  }
+};
+
+/**
+ * 同一ディレクトリの一時ファイルへ書いてから renameSync で path を置換する。
+ * path が symlink / ハードリンクでも、リンク先の inode は書き換えず path のエントリだけが差し替わる。
+ * 書き込み失敗時は一時ファイルを best effort で削除し、既存の path は変更されない。
+ */
+export const writeFileReplacing = (path: string, content: string): void => {
+  const temporaryPath = join(
+    dirname(path),
+    `.${basename(path)}.${process.pid}.${randomBytes(6).toString("hex")}.tmp`,
+  );
+  try {
+    writeFileSync(temporaryPath, content, { flag: "wx" });
+    renameSync(temporaryPath, path);
+  } catch (error) {
+    try {
+      unlinkSync(temporaryPath);
+    } catch {
+      // 後始末は best effort（元のエラーを優先する）
+    }
+    throw error;
   }
 };
 

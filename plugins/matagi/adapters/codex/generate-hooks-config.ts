@@ -18,18 +18,23 @@
  *   （新フックの黙った脱落を防ぐ）。protected-branch-guard が出力に無い場合も失敗させる。
  * - 既存の <出力先>/config.toml（壊れた symlink を含む）は --force 指定が無ければ上書きせず失敗する。
  *   --force は config.toml 全体の置換であり、Codex の他の設定も失われる。
+ *   書き込みは同一ディレクトリの一時ファイル経由の renameSync 置換で、既存が symlink / ハードリンクでも
+ *   リンク先の inode は書き換えず config.toml のエントリだけを差し替える（部分書き込みも残さない）。
+ *   通常ファイルでも symlink でもない既存（ディレクトリ等）は --force でも拒否する。
  * - 出力先がソースツリー（plugins/matagi）配下・同一なら中止する。
  *
  * 実行方法: node --experimental-strip-types generate-hooks-config.ts <出力先ディレクトリ（プラグインルート）> [--force]
  */
 
+import { lstatSync, mkdirSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
-import { lstatSync, mkdirSync, writeFileSync } from "node:fs";
 import {
   assertOutsideSource,
+  assertReplaceableOutput,
   isDirectRun,
   parseOutputDirArgs,
   readClaudePluginJson,
+  writeFileReplacing,
 } from "../shared.ts";
 import { tomlString } from "./toml.ts";
 
@@ -198,8 +203,11 @@ export const generateHooksConfig = (
       `${outputPath} が既に存在します。上書きするには --force を指定してください`,
     );
   }
+  assertReplaceableOutput(outputPath);
   mkdirSync(pluginRoot, { recursive: true });
-  writeFileSync(outputPath, toml);
+  // symlink 越しに書くとリンク先（ソースツリー内のファイル等）を上書きしてしまうため、
+  // 一時ファイルへ書いて rename で config.toml のエントリ自体を置換する
+  writeFileReplacing(outputPath, toml);
   return outputPath;
 };
 

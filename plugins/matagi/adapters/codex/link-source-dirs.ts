@@ -15,7 +15,6 @@
  * 実行方法: node --experimental-strip-types link-source-dirs.ts <出力先ディレクトリ（例: <repo>/.codex）>
  */
 
-import { join, resolve } from "node:path";
 import {
   lstatSync,
   mkdirSync,
@@ -24,6 +23,7 @@ import {
   symlinkSync,
   unlinkSync,
 } from "node:fs";
+import { join, resolve } from "node:path";
 import {
   assertOutsideSource,
   isDirectRun,
