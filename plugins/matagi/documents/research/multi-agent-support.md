@@ -38,7 +38,8 @@ issue #55。matagi を Claude Code 以外のエージェント（Codex CLI・Goo
 
 - `agents/`・`rules/`（AGENTS.md 相当）は Claude Code 構造に近く、変換コストが低い見込み。
 - hooks は TypeScript 実装必須。既存 `hooks/*.py` はロジック移植が要る（言語跨ぎの変換、他2エージェントより重い）。
-- `commands/` の自動トリガー（SKILL.md 相当の説明文ベース発火）の有無が未確認。無ければ「常に明示呼び出し」前提の設計変更が要る。
+- `commands/` は自動トリガーを持たない（明示 `/呼び出し`のみ）。一方 `skills/<name>/SKILL.md` は `skill` ツール経由で description をモデルへ提示する方式で、Claude Code と同型のため SKILL.md 相当は `skills/` に置けば設計変更は不要（issue #60 で確認）。
+- hooks は既存 `hooks/*.ts`（#57 で TypeScript 移行済み）を、プラグインの `tool.execute.before` から子プロセスで再利用する形で対応した（移植不要）。詳細は [[opencode-adapter]]（`documents/reference/multi-agent-support/opencode-adapter.md`）参照。
 
 ## 優先度・順序の示唆
 
@@ -50,8 +51,8 @@ issue #55。matagi を Claude Code 以外のエージェント（Codex CLI・Goo
 
 - ~~Codex CLI の hooks 相当の有無・仕様~~ → issue #58 で解消（ネイティブに存在）。[[codex-adapter]] 参照
 - Antigravity の SKILL.md frontmatter フィールドの完全互換性 → issue #59 マージ後、実機（`agy`）でスキル一覧に認識されることを確認した。ただし個々のスキルが description ベースで正しく自動発火するかまでは未検証。`rules/`・`agents/*.md`・`hooks.json` の実機読み込みも未検証のまま残存。詳細は [[antigravity-adapter]]（`documents/reference/multi-agent-support/antigravity-adapter.md`）参照
-- OpenCode の commands/ 自動トリガー機構の有無
-- 3エージェントとも、`plugins/matagi/` を「複製せず参照」する具体的な配線（シンボリックリンク可否・パス指定の可否）の実機検証 → **Antigravity のみ判明**: ワークスペース `.agents/plugins/<name>/` 配置または `agy plugins install` によるステージングで、各作業リポジトリでの個別配線は不要（[[antigravity-adapter]] 参照）。Codex CLI は issue #58 で判明（skills・hooks は symlink、agents は変換、詳細は [[codex-adapter]]）。OpenCode は未検証のまま残存
+- ~~OpenCode の commands/ 自動トリガー機構の有無~~ → issue #60 で解消（`commands/` は自動トリガー無し、`skills/` が description ベース）。[[opencode-adapter]] 参照
+- 3エージェントとも、`plugins/matagi/` を「複製せず参照」する具体的な配線（シンボリックリンク可否・パス指定の可否）の実機検証 → **Antigravity のみ判明**: ワークスペース `.agents/plugins/<name>/` 配置または `agy plugins install` によるステージングで、各作業リポジトリでの個別配線は不要（[[antigravity-adapter]] 参照）。Codex CLI は issue #58 で判明（skills・hooks は symlink、agents は変換、詳細は [[codex-adapter]]）。OpenCode は issue #60 で判明（skills は symlink、agents は変換、hooks はプラグインから既存フックを再利用、詳細は [[opencode-adapter]]）
 
 いずれも各エージェント向け実装 issue の中で、対象エージェントに絞って検証する。issue #59 では Antigravity 向けの `plugin.json`/`hooks.json` 変換スクリプトを実装した（`plugins/matagi/adapters/antigravity/`）。
 
