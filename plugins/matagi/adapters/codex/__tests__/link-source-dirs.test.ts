@@ -1,6 +1,5 @@
 // Run: vitest run (plugins/matagi/ 配下)
 
-import { test, expect } from "vitest";
 import {
   existsSync,
   lstatSync,
@@ -12,16 +11,17 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+import { expect, test } from "vitest";
+import { makeTempDir } from "../../__tests__/helpers/tempDir.ts";
+import * as shared from "../../shared.ts";
 import {
   assertOutsideSource,
   linkSourceDirs,
   listSkillNames,
+  realpathNonStrict,
   relink,
   removeStaleSkillLinks,
-  realpathNonStrict,
 } from "../link-source-dirs.ts";
-import * as shared from "../../shared.ts";
-import { makeTempDir } from "../../__tests__/helpers/tempDir.ts";
 
 /** skills/<name>/SKILL.md と hooks/ を持つ擬似プラグインルートを作る。 */
 const makePluginRoot = (skillNames: string[] = ["skill-a", "skill-b"]) => {

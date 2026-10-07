@@ -1,10 +1,10 @@
 // adapters テスト共通ヘルパー。一時ディレクトリの作成と、各テスト後の自動削除をまとめる。
 // このモジュールを import したテストファイルでは、afterEach で作成済みの一時ディレクトリを全て削除する。
 
-import { afterEach } from "vitest";
 import { mkdtempSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { afterEach } from "vitest";
 
 const tempDirs: string[] = [];
 

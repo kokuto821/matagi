@@ -2,8 +2,8 @@
 //
 // toml.ts のシリアライザ。期待値は文字列リテラルで固定する（外部 TOML パーサに依存しない）。
 
-import { test, expect } from "vitest";
-import { tomlString, tomlMultilineString } from "../toml.ts";
+import { expect, test } from "vitest";
+import { tomlMultilineString, tomlString } from "../toml.ts";
 
 test("tomlString: 通常文字列を二重引用符で囲む", () => {
   expect(tomlString("abc あ")).toBe('"abc あ"');

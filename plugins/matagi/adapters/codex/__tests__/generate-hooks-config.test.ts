@@ -1,8 +1,8 @@
 // Run: vitest run (plugins/matagi/ 配下)
 
-import { test, expect } from "vitest";
 import {
   existsSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
   readlinkSync,
@@ -10,15 +10,16 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+import { expect, test } from "vitest";
+import { makeTempDir } from "../../__tests__/helpers/tempDir.ts";
 import {
   assertShellSafePath,
+  type ClaudePluginManifest,
   generateHooksConfig,
   hookScriptName,
   toCodexHookEntries,
   toConfigToml,
-  type ClaudePluginManifest,
 } from "../generate-hooks-config.ts";
-import { makeTempDir } from "../../__tests__/helpers/tempDir.ts";
 
 const ROOT = "/opt/plugin-root";
 
@@ -337,5 +338,25 @@ test("generateHooksConfig: 壊れた symlink の config.toml は force 有りな
 
   generateHooksConfig(dir, { force: true }, GUARD_MANIFEST);
 
-  expect(existsSync(missing)).toBe(true);
+  expect(existsSync(missing)).toBe(false);
+  expect(lstatSync(join(dir, "config.toml")).isSymbolicLink()).toBe(false);
+  expect(readFileSync(join(dir, "config.toml"), "utf-8")).toContain(
+    "protected-branch-guard.ts",
+  );
+});
+
+test("generateHooksConfig: --force 時に config.toml がソース内実ファイルへの symlink でもソースは不変で config.toml は実ファイルになる", () => {
+  const sourceRoot = makeSourceRoot();
+  const sourceFile = join(sourceRoot, "hooks", "precious.toml");
+  writeFileSync(sourceFile, "original\n");
+  const out = makeTempDir();
+  symlinkSync(sourceFile, join(out, "config.toml"));
+
+  generateHooksConfig(out, { force: true }, GUARD_MANIFEST, sourceRoot);
+
+  expect(readFileSync(sourceFile, "utf-8")).toBe("original\n");
+  expect(lstatSync(join(out, "config.toml")).isSymbolicLink()).toBe(false);
+  expect(readFileSync(join(out, "config.toml"), "utf-8")).toContain(
+    "protected-branch-guard.ts",
+  );
 });

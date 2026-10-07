@@ -1,23 +1,24 @@
 // Run: vitest run (plugins/matagi/ 配下)
 
-import { test, expect } from "vitest";
 import {
   existsSync,
   mkdirSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
+import { expect, test } from "vitest";
+import { makeTempDir } from "../../__tests__/helpers/tempDir.ts";
 import {
   frontmatterValue,
+  GENERATED_MARKER,
   generateAgentsToml,
   parseAgent,
   parseAgents,
   toAgentToml,
 } from "../generate-agents-toml.ts";
-import { makeTempDir } from "../../__tests__/helpers/tempDir.ts";
 
 const agentMd = (name: string, description: string, body = "本文\n") =>
   `---\nname: ${name}\ndescription: ${description}\n---\n${body}`;
@@ -132,6 +133,7 @@ test("toAgentToml: 本文が developer_instructions の multi-line string に入
 
   expect(toml).toBe(
     [
+      GENERATED_MARKER,
       'name = "a"',
       'description = "d \\"q\\""',
       'developer_instructions = """',
@@ -150,9 +152,10 @@ test("generateAgentsToml: 対象 md のみ <out>/agents/<name>.toml に出力し
   writeFileSync(join(source, "README.md"), "# readme\n");
   writeFileSync(join(source, "note.txt"), "ignored");
 
-  const count = generateAgentsToml(out, source);
+  const { count, removed } = generateAgentsToml(out, source);
 
   expect(count).toBe(2);
+  expect(removed).toEqual([]);
   expect(readdirSync(join(out, "agents")).sort()).toEqual([
     "agent-a.toml",
     "agent-b.toml",
@@ -173,11 +176,15 @@ test("generateAgentsToml: 検証エラー時は agents 出力ディレクトリ�
   expect(existsSync(join(out, "agents"))).toBe(false);
 });
 
-test("generateAgentsToml: 空のソースディレクトリは 0 件を返す", () => {
+test("generateAgentsToml: 空のソースディレクトリは 0 件・削除なしを返す", () => {
   const source = makeTempDir();
   mkdirSync(join(source, "sub"));
 
-  expect(generateAgentsToml(makeTempDir(), source)).toBe(0);
+  expect(generateAgentsToml(makeTempDir(), source)).toEqual({
+    count: 0,
+    removed: [],
+    staleCleanupSkipped: true,
+  });
 });
 
 test.each([

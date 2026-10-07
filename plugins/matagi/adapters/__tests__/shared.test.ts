@@ -1,9 +1,9 @@
 // Run: vitest run (plugins/matagi/ 配下)
 
-import { test, expect } from "vitest";
 import { mkdirSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { expect, test } from "vitest";
 import {
   assertOutsideSource,
   isDirectRun,
