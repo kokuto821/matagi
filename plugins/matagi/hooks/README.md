@@ -8,7 +8,7 @@
 
 | ファイル | 役割 |
 |---------|------|
-| `protected-branch-guard.ts` | 保護ブランチ上 `git commit` / `git push`（Bash）と、編集系ツール（Edit / Write / NotebookEdit 等）および Codex CLI の `apply_patch` によるファイル変更を `PreToolUse` でブロック、作業ブランチ切るよう促す |
+| `protected-branch-guard.ts` | 保護ブランチ上 `git commit` / `git push`（Bash）と、編集系ツール（Edit / Write / NotebookEdit 等）および Codex CLI / OpenCode の `apply_patch` によるファイル変更を `PreToolUse` でブロック、作業ブランチ切るよう促す |
 | `pr-merge-guard.ts` | `gh pr merge`（Bash）をブランチ・状態問わず常に `PreToolUse` でブロック、PRマージはユーザーがブラウザ上で行うよう促す |
 | `__tests__/` | テスト一式。`helpers/test-helpers.ts` に両テストファイル共通ヘルパー（runHook / Payload型 / 拒否出力パース / 一時gitリポジトリ管理） |
 

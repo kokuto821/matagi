@@ -1,0 +1,1 @@
+../../plugins/matagi/adapters/opencode/matagi-hooks.ts
