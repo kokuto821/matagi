@@ -6,11 +6,12 @@ import {
   mkdirSync,
   readdirSync,
   readlinkSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { expect, test } from "vitest";
 import { makeTempDir } from "../../__tests__/helpers/tempDir.ts";
 import * as shared from "../../shared.ts";
@@ -95,7 +96,8 @@ test("relink: symlink が無ければ新規に張る", () => {
 
   relink(join(dir, "link"), target);
 
-  expect(readlinkSync(join(dir, "link"))).toBe(target);
+  expect(readlinkSync(join(dir, "link"))).toBe("target");
+  expect(realpathSync(join(dir, "link"))).toBe(realpathSync(target));
 });
 
 test("relink: 既存 symlink を張り直し、繰り返しても冪等", () => {
@@ -109,7 +111,7 @@ test("relink: 既存 symlink を張り直し、繰り返しても冪等", () => 
   relink(join(dir, "link"), newTarget);
   relink(join(dir, "link"), newTarget);
 
-  expect(readlinkSync(join(dir, "link"))).toBe(newTarget);
+  expect(readlinkSync(join(dir, "link"))).toBe("new");
 });
 
 test("relink: 壊れた symlink も張り直せる", () => {
@@ -120,7 +122,7 @@ test("relink: 壊れた symlink も張り直せる", () => {
 
   relink(join(dir, "link"), target);
 
-  expect(readlinkSync(join(dir, "link"))).toBe(target);
+  expect(readlinkSync(join(dir, "link"))).toBe("target");
 });
 
 test("relink: 実ディレクトリは削除せず Error にする", () => {
@@ -181,9 +183,13 @@ test("linkSourceDirs: hooks と全スキルを symlink し、スキル数を返�
   const count = linkSourceDirs(out, root);
 
   expect(count).toBe(2);
-  expect(readlinkSync(join(out, "hooks"))).toBe(join(root, "hooks"));
-  expect(readlinkSync(join(out, "skills", "skill-a"))).toBe(
-    join(root, "skills", "skill-a"),
+  // 相対 symlink（git 管理でき、リポジトリを移動しても壊れない）で、解決先がソースと一致する
+  expect(isAbsolute(readlinkSync(join(out, "hooks")))).toBe(false);
+  expect(realpathSync(join(out, "hooks"))).toBe(
+    realpathSync(join(root, "hooks")),
+  );
+  expect(realpathSync(join(out, "skills", "skill-a"))).toBe(
+    realpathSync(join(root, "skills", "skill-a")),
   );
   expect(readdirSync(join(out, "skills")).sort()).toEqual([
     "skill-a",

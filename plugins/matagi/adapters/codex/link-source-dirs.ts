@@ -23,7 +23,7 @@ import {
   symlinkSync,
   unlinkSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import {
   assertOutsideSource,
   isDirectRun,
@@ -37,7 +37,11 @@ export { assertOutsideSource, realpathNonStrict };
 
 const SOURCE_PLUGIN_ROOT = join(import.meta.dirname, "../../");
 
-/** 既存の symlink のみ除去して symlink を張り直す。symlink 以外が存在する場合は削除せず Error を投げる。 */
+/**
+ * 既存の symlink のみ除去して symlink を張り直す。symlink 以外が存在する場合は削除せず Error を投げる。
+ * 参照先は symlink 設置先からの相対パスで張る（リポジトリごと移動・clone しても壊れず、git 管理できる）。
+ * 設置先の親が symlink 経由でも正しく解決されるよう、相対化は realpath 同士で行う。
+ */
 export const relink = (linkPath: string, targetPath: string): void => {
   const stat = lstatSync(linkPath, { throwIfNoEntry: false });
   if (stat !== undefined) {
@@ -48,7 +52,11 @@ export const relink = (linkPath: string, targetPath: string): void => {
     }
     unlinkSync(linkPath);
   }
-  symlinkSync(targetPath, linkPath, "dir");
+  const relativeTarget = relative(
+    realpathNonStrict(dirname(linkPath)),
+    realpathNonStrict(targetPath),
+  );
+  symlinkSync(relativeTarget, linkPath, "dir");
 };
 
 /** plugins/matagi/skills/ 配下のスキルディレクトリ名一覧を返す（README.md 等のファイルは除く）。 */

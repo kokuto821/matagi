@@ -4,10 +4,11 @@ import {
   lstatSync,
   mkdirSync,
   readlinkSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { expect, test } from "vitest";
 import { makeTempDir } from "../../__tests__/helpers/tempDir.ts";
 import { linkSourceDirs } from "../link-source-dirs.ts";
@@ -37,12 +38,15 @@ test("skills の各ディレクトリと hooks プラグインを symlink する
   const count = linkSourceDirs(out, root, pluginEntry);
 
   expect(count).toBe(2);
-  expect(readlinkSync(join(out, "skills", "skill-a"))).toBe(
-    join(root, "skills", "skill-a"),
+  const skillLink = join(out, "skills", "skill-a");
+  const pluginLink = join(out, "plugins", "matagi-hooks.ts");
+  // 相対 symlink（git 管理でき、リポジトリを移動しても壊れない）で、解決先がソースと一致する
+  expect(isAbsolute(readlinkSync(skillLink))).toBe(false);
+  expect(isAbsolute(readlinkSync(pluginLink))).toBe(false);
+  expect(realpathSync(skillLink)).toBe(
+    realpathSync(join(root, "skills", "skill-a")),
   );
-  expect(readlinkSync(join(out, "plugins", "matagi-hooks.ts"))).toBe(
-    pluginEntry,
-  );
+  expect(realpathSync(pluginLink)).toBe(realpathSync(pluginEntry));
 });
 
 test("ソースから消えたスキルの symlink を除去する", () => {
