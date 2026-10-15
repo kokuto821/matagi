@@ -49,6 +49,74 @@ description: 変更内容から、issue番号とプレフィックス付きの�
 
 # 指示
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 issue番号を確定する"]
+        S1a["git branch で現在のブランチ名を取得する"]
+        S1b{"ブランチ名が issue 番号付きの命名規則に一致するか？"}
+        S1c["キャプチャした数字を issue 番号とする"]
+        S1d["issue 番号の位置に x を使う"]
+        S1a --> S1b
+        S1b -->|YES| S1c
+        S1b -->|NO| S1d
+    end
+
+    subgraph L2["2 分割の要否を判断する"]
+        S2a["変更内容を分析し 変更の意図が複数混ざっているかを判断する"]
+        S2b{"分割が必要か？"}
+        S2a --> S2b
+    end
+
+    subgraph L3["3 論理的なグループに分ける"]
+        S3a["対象ファイルや変更内容を論理的なグループに分ける"]
+    end
+
+    subgraph L4["4 プレフィックスを選択する"]
+        S4a["グループごとに最も適したプレフィックスを選択する"]
+    end
+
+    subgraph L5["5 目的と内容を把握する"]
+        S5a["グループごとに なぜ行われたか と 何を行ったか を把握する"]
+    end
+
+    subgraph L6["6 メッセージを作成する"]
+        S6a["コミットメッセージを作成する 確定した issue 番号を全コミットに共通で使う"]
+    end
+
+    subgraph L7["7 コミット計画を提案する"]
+        S7a["コミット処理の前に ファイル構成とメッセージのコミット計画をユーザーに提案する"]
+    end
+
+    subgraph L8["8 承認を得る"]
+        S8a{"承認されたか？"}
+        S8b["後続の操作へ進む"]
+        S8a -->|YES| S8b
+    end
+
+    START --> S1a
+    S1c --> S2a
+    S1d --> S2a
+    S2b -->|YES| S3a
+    S2b -->|NO| S4a
+    S3a --> S4a
+    S4a --> S5a
+    S5a --> S6a
+    S6a --> S7a
+    S7a --> S8a
+    S8a -->|NO| S7a
+    S8b --> END
+
+    classDef user fill:#fff3bf,stroke:#f08c00,color:#000
+    class S8a user
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 黄 = ユーザーの確認・承認
+
 1. `git branch --show-current` で現在のブランチ名を取得し、「issue番号の取得」の手順で issue番号（または `x`）を確定する。
 2. 対象となる変更内容（diffや説明）を分析し、変更の意図が複数混ざっていないか（分割すべきか）を判断する。
 3. 分割が必要な場合は、対象ファイルや変更内容を論理的なグループに分ける。

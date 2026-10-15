@@ -24,6 +24,99 @@ disable-model-invocation: true
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 CLI の有無を確認する"]
+        S1a{"openspec コマンドが使えるか？"}
+        S1b["npm view で最新版を確認する"]
+        S1c{"npm install の実行が承認されたか？"}
+        S1d["npm install でグローバルに導入する"]
+        S1a -->|NO| S1b
+        S1b --> S1c
+        S1c -->|YES| S1d
+    end
+
+    subgraph L2["2 既存導入の確認"]
+        S2a{"openspec/ が既にあるか？"}
+        S2b["不足分を特定し 以降は不足分のみ実施する旨をユーザーに伝える"]
+        S2a -->|YES| S2b
+    end
+
+    subgraph L3["3 openspec init"]
+        S3x{"config.yaml と schema の設定が不足しているか？"}
+        S3a["openspec init を実行する"]
+        S3x -->|YES| S3a
+    end
+
+    subgraph L4["4 生成物の確認"]
+        S4a["git status と git diff で生成物を確認する"]
+        S4b{".gitignore に生成物のディレクトリが含まれているか？"}
+        S4c["追加を提案する"]
+        S4a --> S4b
+        S4b -->|NO| S4c
+    end
+
+    subgraph L5["5 schema のローカル fork"]
+        S5x{"schema の Source が project ではないか？"}
+        S5a["openspec schema fork でローカルに fork し Source が project であることを確認する"]
+        S5x -->|YES| S5a
+    end
+
+    subgraph L6["6 テンプレートへポインタを埋め込む"]
+        S6x{"テンプレートに matagi の参照ポインタが無いか？"}
+        S6a["fork したテンプレートに matagi の参照ポインタを HTML コメントで埋め込む"]
+        S6x -->|YES| S6a
+    end
+
+    subgraph L7["7 config.yaml を編集する"]
+        S7x{"手順3と同じ判定で config.yaml と schema の設定が不足していたか？"}
+        S7a["schema context rules operations を編集する"]
+        S7x -->|YES| S7a
+    end
+
+    subgraph L8["8 CLI 生成スキルの自動起動をブロックする"]
+        S8a["settings.json の permissions.deny に apply と archive の CLI 生成スキルを追加する"]
+    end
+
+    subgraph L9["9 検証する"]
+        S9a["openspec schema validate を実行し成功を確認する"]
+    end
+
+    subgraph L10["10 完了報告する"]
+        S10a["生成・編集したファイル一覧と次の一手をユーザーに提示する"]
+    end
+
+    START --> S1a
+    S1a -->|YES| S2a
+    S1c -->|NO| END
+    S1d --> S2a
+    S2a -->|NO| S3x
+    S2b --> S3x
+    S3a --> S4a
+    S3x -->|NO| S4a
+    S4b -->|YES| S5x
+    S4c --> S5x
+    S5a --> S6x
+    S5x -->|NO| S6x
+    S6a --> S7x
+    S6x -->|NO| S7x
+    S7a --> S8a
+    S7x -->|NO| S8a
+    S8a --> S9a
+    S9a --> S10a
+    S10a --> END
+
+    classDef user fill:#fff3bf,stroke:#f08c00,color:#000
+    class S1c,S4c user
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 黄 = ユーザーの確認・承認
+
 1. **CLI の有無を確認する** — `openspec --version` を実行する。失敗したら `npm view @fission-ai/openspec version` で最新版を確認し、`npm install -g @fission-ai/openspec@<version>` の実行をユーザーに確認してから実施する（グローバル環境への副作用のため）。
 2. **既存導入の確認（冪等性）** — 対象ディレクトリに `openspec/` が既にあれば、以下で不足分を特定し、以降の手順はその不足分のみ実施する（フルスクラッチではないことをユーザーに伝える）。
    - `openspec/config.yaml` の有無・`schema: spec-driven` の有無 → 無ければ手順3・7

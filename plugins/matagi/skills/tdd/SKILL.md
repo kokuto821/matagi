@@ -36,6 +36,81 @@ List/Red/Green/Refactor はいずれも domain（frontend/backend 等）を問�
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 List と Red 失敗するテストを書く"]
+        S1a["test-coding を起動し テストリストを洗い出して 1項目の失敗するテストを実装させる"]
+        S1b["テストが RED であることを確認する"]
+        S1a --> S1b
+    end
+
+    subgraph L2["2 Green テストを通す最小実装"]
+        S2a["coding を起動し テストを通す最小限の実装をさせる"]
+        S2b["全テストが GREEN であることを確認し 中間コミットする"]
+        S2a --> S2b
+    end
+
+    subgraph L3["3 反復"]
+        S3a{"テストリストが空か？"}
+        S3b{"反復上限に達したか？"}
+        S3c["達成範囲と残課題を報告し 人の判断を仰ぐ"]
+        S3a -->|NO| S3b
+        S3b -->|YES| S3c
+    end
+
+    subgraph L4["4 Refactor レビュー主導の改善"]
+        S4a["coding-review を起動し 指摘のみ受け取る"]
+        S4b{"指摘があるか？"}
+        S4c["産出者が全テスト緑を維持したまま指摘を適用する"]
+        S4d["ラウンドの指摘要旨と適用状況を tdd-notes.md に退避する"]
+        S4e{"ラウンド上限まで適用済みか？"}
+        S4f["残課題を報告し 人の判断を仰ぐ"]
+        S4a --> S4b
+        S4b -->|YES| S4e
+        S4e -->|YES| S4f
+        S4e -->|NO| S4c
+        S4c --> S4d
+        S4d --> S4a
+    end
+
+    subgraph L5["5 Commit チェックポイントを記録"]
+        S5a["全テストが緑であることをテスト実行で最終確認する"]
+        S5b["git add して 意味ある単一作業単位でコミットし ノートを退避する"]
+        S5a --> S5b
+    end
+
+    subgraph L6["6 次サイクルへ"]
+        S6a{"Refactor 中に気づいた新規テスト項目があるか？"}
+        S6b{"反復上限に達したか？"}
+        S6a -->|YES| S6b
+    end
+
+    START --> S1a
+    S1b --> S2a
+    S2b --> S3a
+    S3a -->|YES| S4a
+    S3b -->|NO| S1a
+    S3c --> END
+    S4b -->|NO| S5a
+    S4f --> END
+    S5b --> S6a
+    S6a -->|NO| END
+    S6b -->|NO| S1a
+    S6b -->|YES| S3c
+
+    classDef user fill:#fff3bf,stroke:#f08c00,color:#000
+    classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
+    class S3c,S4f user
+    class S1a,S2a,S4a,S4c delegate
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 黄 = ユーザーの確認・承認、青 = 他スキル・エージェントへの委譲
+
 1. **List — テストリストを洗い出す** / **Red — 失敗するテストを書く**
    - `test-coding` スキルを in-context 起動。同スキルが検証すべき振る舞いのシナリオを洗い出し（List。[[tdd-rule]] Phase 0）、リストから1項目を選んで失敗するテストを実装する（Red。[[tdd-rule]] Phase 1）。「失敗するテストのみを実装し、実装コードは書かない」と明示する。Red の実装段階では同スキル内部で domain 判定の上、対応するサブエージェント（例: `frontend-tester` / `backend-tester`、専用サブエージェントが無い domain は汎用サブエージェント）へ隔離委譲される（[[domain-classification-rule]]）。テストが RED であることを確認する。
 2. **Green — テストを通す最小実装**
