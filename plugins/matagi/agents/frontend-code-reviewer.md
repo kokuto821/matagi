@@ -14,6 +14,51 @@ description: コーディング規約に照らしてコードをレビュー・�
 
 ## 呼ばれたときの手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 coding-rule を読み込む"]
+        S1a["coding-rule.md を読み込む"]
+        S1b{"呼び出し時に除外指示があったか？"}
+        S1c["coding-lint-rule.md も読み込み ルール名が対応付けられた項目もチェック観点に加える"]
+        S1a --> S1b
+        S1b -->|NO| S1c
+    end
+
+    subgraph L2["2 対象を読む"]
+        S2a["レビュー対象のファイルと差分を読み 文脈を把握する"]
+    end
+
+    subgraph L3["3 違反を抽出する"]
+        S3a["チェック観点でコードを走査し 違反を抽出する"]
+    end
+
+    subgraph L4["4 違反ごとに整理する"]
+        S4a["違反ごとに 該当箇所 違反した規約 なぜ問題か 修正の方向性 を整理する"]
+    end
+
+    subgraph L5["5 結果を返す"]
+        S5a{"違反があるか？"}
+        S5b["適用が必要なら frontend-coder に委ねる旨を添える"]
+        S5c["違反がない旨を明記する"]
+        S5a -->|YES| S5b
+        S5a -->|NO| S5c
+    end
+
+    START --> S1a
+    S1b -->|YES| S2a
+    S1c --> S2a
+    S2a --> S3a
+    S3a --> S4a
+    S4a --> S5a
+    S5b --> END
+    S5c --> END
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
 1. `plugins/matagi/shared-rules/coding-conventions/coding-rule.md` を読み込む。
 2. レビュー対象のファイル / 差分を読み、文脈を把握する。
 3. 下のチェック観点でコードを走査し、違反を抽出する。
