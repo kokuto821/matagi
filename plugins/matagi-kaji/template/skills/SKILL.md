@@ -28,6 +28,41 @@ description: >
 - △△は [[yyy-rule]] (`rules/<topic>/yyy-rule.md`) に従う。
 
 ## 手順
+
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 入力を確認する"]
+        S1a["入力を確認する"]
+        S1b{"入力が足りているか？"}
+        S1c["ユーザーに確認する"]
+        S1a --> S1b
+        S1b -->|NO| S1c
+        S1c --> S1b
+    end
+
+    subgraph L2["2 ○○を実行する"]
+        S2a["○○スキルへ委譲する"]
+    end
+
+    START --> S1a
+    S1b -->|YES| S2a
+    S2a --> END
+
+    classDef user fill:#fff3bf,stroke:#f08c00,color:#000
+    classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
+    class S1c user
+    class S2a delegate
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 黄 = ユーザーの確認・承認、青 = 他スキル・エージェントへの委譲
+
+<!-- 手順の記述形式は [[template-rule]]（matagi-kaji/shared-rules/template/template-rule.md）§手順の記述形式 に従う -->
+
 1. ...
 2. ...
 

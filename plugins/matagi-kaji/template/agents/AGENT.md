@@ -8,6 +8,34 @@ description: いつこのエージェントに委譲すべきか。積極的に�
 あなたは〇〇の専門家です。
 
 呼ばれたときの手順:
+
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 入力を確認する"]
+        S1a["入力を確認する"]
+        S1b{"条件を満たすか？"}
+        S1c["確認事項を呼び出し元へ返す"]
+        S1a --> S1b
+        S1b -->|NO| S1c
+    end
+
+    subgraph L2["2 ○○を実行する"]
+        S2a["○○を実行する"]
+    end
+
+    START --> S1a
+    S1b -->|YES| S2a
+    S1c --> END
+    S2a --> END
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+<!-- 手順の記述形式は [[template-rule]]（matagi-kaji/shared-rules/template/template-rule.md）§手順の記述形式 に従う -->
+
 1. ...
 2. ...
 
