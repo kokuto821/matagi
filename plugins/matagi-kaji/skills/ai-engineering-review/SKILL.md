@@ -24,6 +24,51 @@ Claude Code のステアリング資産を **プロンプト品質 / ステア�
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 レビュー対象を確定する"]
+        S1a{"ユーザーがファイル・ディレクトリを明示したか？"}
+        S1b["明示された対象を採用する"]
+        S1c["git status と git diff で変更差分を把握する"]
+        S1a -->|YES| S1b
+        S1a -->|NO| S1c
+    end
+
+    subgraph L2["2 観点ごとに振り分ける"]
+        S2a{"各資産について 指示文を持つ資産か？"}
+        S2b["その資産を プロンプト品質 ステアリング手法 コンテキスト設計の3観点の対象にする"]
+        S2c["その資産を ステアリング手法の観点の対象にする"]
+        S2a -->|YES| S2b
+        S2a -->|NO| S2c
+    end
+
+    subgraph L3["3 専門エージェントへ委譲する"]
+        S3a["対象がある観点だけを並行で委譲する プロンプト品質は prompt-reviewer ステアリング手法は steering-reviewer コンテキスト設計は context-reviewer"]
+    end
+
+    subgraph L4["4 所見を統合する"]
+        S4a["観点ラベル付きで束ね 重複を排除し 優先度で並べ替える"]
+    end
+
+    START --> S1a
+    S1b --> S2a
+    S1c --> S2a
+    S2b --> S3a
+    S2c --> S3a
+    S3a --> S4a
+    S4a --> END
+
+    classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
+    class S3a delegate
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 青 = 他スキル・エージェントへの委譲
+
 ### 1. レビュー対象を確定する
 
 デフォルトは **git 変更差分**（`git status` ＋ `git diff`（未コミット）＋ `git diff main...HEAD`）。
