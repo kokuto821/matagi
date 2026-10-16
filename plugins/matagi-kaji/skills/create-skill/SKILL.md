@@ -11,8 +11,8 @@ description: >
 
 ## 概要
 
-本リポジトリのルール（命名規則・配置先・テンプレート）に沿い、スキルまたは
-サブエージェントのファイルを対話的に生成。
+本リポジトリのルール（命名規則・配置先・テンプレート）沿い、スキルまたは
+サブエージェントのファイル対話的に生成。
 
 ## 参照するルール・テンプレート
 
@@ -136,10 +136,10 @@ flowchart TD
 
 ### 1. 種別と目的を確認する
 
-ユーザーの発言から以下を読み取る。不明なら質問。
+ユーザー発言から以下を読み取る。不明→質問。
 
 - **種別**: スキル or サブエージェント
-- **名前（候補）**: ユーザーが挙げた名前、または目的から導出
+- **名前（候補）**: ユーザー挙げた名前、または目的から導出
 - **目的**: 何をするか（1〜2行）
 
 ### 2. 名前を命名規則に照らして確定する
@@ -153,8 +153,8 @@ flowchart TD
 | サブエージェント | 役割名詞 | `code-reviewer`, `docker-expert` |
 
 - kebab-case 必須
-- `helper`, `stuff`, `my-skill-v2` などは不可
-- ユーザーの候補が規則に合わないなら修正案を提示してから確認
+- `helper`, `stuff`, `my-skill-v2` 等は不可
+- ユーザー候補が規則不適合→修正案提示後に確認
 
 ### 3. 配置先を決定する
 
@@ -167,12 +167,12 @@ flowchart TD
 
 ### 4. 内包するルールを外部化できるか確認する
 
-`shared-rules/rule-externalization/externalization-rule.md` に従い、スキル・エージェントに書くルール・制約・判断基準が `rules/` に切り出せるか判断。
+`shared-rules/rule-externalization/externalization-rule.md` に従い、スキル・エージェントに書くルール・制約・判断基準 `rules/` へ切り出せるか判断。
 
-- **切り出す**: 他のスキル・エージェントにも適用できる、または「常に従うべき不変のガイドライン」の性質を持つもの
+- **切り出す**: 他スキル・エージェントにも適用可、または「常に従うべき不変のガイドライン」性質のもの
 - **インラインのまま**: そのスキル固有の手順・実行ロジック
 
-切り出す場合は先に `rules/<topic>/` にルールファイル作成、スキル・エージェントからはパスで参照。
+切り出す場合 先に `rules/<topic>/` にルールファイル作成、スキル・エージェントからパス参照。
 
 また `shared-rules/harness-engineering/harness-rule.md` に従い、スキル付随の自動化・制御処理の媒体を判断。
 
@@ -196,9 +196,9 @@ description: >
 ---
 ```
 
-本文構成（概要／ルール／手順／出力・500行未満）と手順の記述形式（mermaid `flowchart TD`）は [[template-rule]] (`shared-rules/template/template-rule.md`) を唯一の出典とする。テンプレートの構成をそのまま埋める。構成を独自に定義し直さない。Step 4 で外部化したルールがあれば `## ルール` 節に参照を記載、無ければ節ごと削除。
+本文構成（概要／ルール／手順／出力・500行未満）と手順の記述形式（mermaid `flowchart TD`）は [[template-rule]] (`shared-rules/template/template-rule.md`) を唯一の出典とする。テンプレート構成そのまま埋める。構成を独自に定義し直さない。Step 4 で外部化したルールあり→`## ルール` 節に参照記載、なし→節ごと削除。
 
-description・手順・出力など指示文を書くとき、[[composition-rule]] (`shared-rules/prompt-engineering/composition-rule.md`) の構成要素が揃っているか確認。多段の判断を含むスキル・エージェントには [[scaffolding-rule]] (`shared-rules/prompt-engineering/scaffolding-rule.md`) に従い推論の足場を組み込む（単純タスクには足さない）。
+description・手順・出力など指示文を書くとき、[[composition-rule]] (`shared-rules/prompt-engineering/composition-rule.md`) の構成要素が揃っているか確認。多段判断を含むスキル・エージェント→[[scaffolding-rule]] (`shared-rules/prompt-engineering/scaffolding-rule.md`) に従い推論の足場を組み込む（単純タスクには足さない）。
 
 #### サブエージェントの場合
 
@@ -213,11 +213,11 @@ description: <委譲条件を具体的に。いつ・何を・どう返すかを
 ---
 ```
 
-本文は「役割宣言 → 手順 → チェックリスト/観点 → 出力フォーマット」の職務記述書スタイル。手順の記述形式（mermaid `flowchart TD`）は [[template-rule]] を唯一の出典とする。
+本文=「役割宣言 → 手順 → チェックリスト/観点 → 出力フォーマット」職務記述書スタイル。手順の記述形式（mermaid `flowchart TD`）は [[template-rule]] を唯一の出典とする。
 
 ### 6. ドラフトをユーザーに提示して確認を取る
 
-作成予定のファイル内容を全文提示、以下を確認。
+作成予定ファイル内容を全文提示、以下を確認。
 
 - 名前・配置先は正しいか
 - description のトリガー語は自然か
