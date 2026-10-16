@@ -1,5 +1,5 @@
 # rules-directory
 
-`rules/` ディレクトリ自体の運用規約を置く場所です。
+`rules/` ディレクトリ自体の運用規約置き場。
 
-何を rules に置くか・サブディレクトリ構造・命名を `directory-rule.md` にまとめています。
+rules に何を置くか・サブディレクトリ構造・命名 → `directory-rule.md` に集約。

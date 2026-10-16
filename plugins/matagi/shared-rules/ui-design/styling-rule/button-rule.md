@@ -31,10 +31,10 @@ const buttonStyle = {
 };
 
 ### ルール
-- `base` は必ず全ボタンに付与する
+- `base` は必ず全ボタンに付与
 - variantとsizeを組み合わせる：
   `${buttonStyle.base} ${buttonStyle.primary} ${buttonStyle.md}`
-- hover・disabled・activeの状態はTailwindの修飾子で表現し、
+- hover・disabled・active状態=Tailwind修飾子で表現、
   インラインstyleは使わない
-- disabled時は必ず `opacity-50 cursor-not-allowed` を付与する
-- モバイルでは44px*44px以上確保する
+- disabled時は必ず `opacity-50 cursor-not-allowed` を付与
+- モバイルでは44px*44px以上確保

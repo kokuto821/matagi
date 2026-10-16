@@ -1,6 +1,6 @@
 # adapters
 
-`plugins/matagi/` を Claude Code 以外のエージェントから使うための、変換・配線スクリプトを置く場所です。エージェントごとにサブディレクトリを分け、`plugins/matagi/` を唯一の source of truth のまま維持します（複製しない）。
+`plugins/matagi/` を Claude Code 以外エージェントから使う変換・配線スクリプト置き場。エージェント別サブディレクトリ分離。`plugins/matagi/` 唯一 source of truth 維持（複製なし）。
 
 | ディレクトリ | 対象 |
 |-------------|------|
@@ -8,4 +8,4 @@
 | `codex/` | Codex CLI（issue #58） |
 | `opencode/` | OpenCode（issue #60） |
 
-`shared.ts` は各アダプタが共有する、Claude Code 向け `plugin.json` の読み込みとマニフェスト書き出しの共通処理です。各エージェント固有の事実・導入手順は `../documents/reference/multi-agent-support/` を参照してください。
+`shared.ts` = 各アダプタ共有、Claude Code 向け `plugin.json` 読込・マニフェスト書出の共通処理。各エージェント固有事実・導入手順 → `../documents/reference/multi-agent-support/` 参照。

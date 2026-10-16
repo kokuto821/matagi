@@ -1,5 +1,5 @@
 # reference
 
-github-issue-create スキルが参照する補助ファイルを置く場所です。
+github-issue-create スキルが参照する補助ファイル置き場。
 
-issue 本文のテンプレート（`template.md`）が入っています。
+issue 本文テンプレート（`template.md`）格納。

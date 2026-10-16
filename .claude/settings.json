@@ -1,6 +1,7 @@
 {
   "enabledPlugins": {
-    "matagi@matagi": true
+    "matagi@matagi": true,
+    "genshijin@genshijin": true
   },
   "permissions": {
     "deny": [

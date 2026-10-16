@@ -1,5 +1,5 @@
 # harness-review
 
-プロジェクトの Claude Code ステアリング構成（AGENTS.md/CLAUDE.md・rules・skills・subagents・hooks・output styles）を、各手法の公式の意図に照らしてレビューするスキルです。
+プロジェクトの Claude Code ステアリング構成（AGENTS.md/CLAUDE.md・rules・skills・subagents・hooks・output styles）を各手法の公式の意図に照らしレビューするスキル。
 
-手法の誤用・逸脱を Critical / Warning / Suggestion で指摘します（改善の適用はしない）。監査は `steering-reviewer` エージェントに委譲する入口スキルです。判断基準は `shared-rules/harness-engineering/selection-rule.md`・`shared-rules/harness-engineering/harness-rule.md`、事実は `documents/reference/harness-engineering/steering-claude-code.md`。プロンプト品質・コンテキスト設計も含めて横断でまとめて見る場合は `ai-engineering-review` を使います。人間向けの概要はここ、AI/ハーネス向けの定義は `SKILL.md` にあります。
+手法の誤用・逸脱を Critical / Warning / Suggestion で指摘（改善適用なし）。監査→`steering-reviewer` エージェントへ委譲する入口スキル。判断基準=`shared-rules/harness-engineering/selection-rule.md`・`shared-rules/harness-engineering/harness-rule.md`、事実=`documents/reference/harness-engineering/steering-claude-code.md`。プロンプト品質・コンテキスト設計含む横断→`ai-engineering-review`。人間向け概要=ここ、AI/ハーネス向け定義=`SKILL.md`。

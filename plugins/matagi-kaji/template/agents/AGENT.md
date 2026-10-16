@@ -43,4 +43,4 @@ flowchart TD
 - ...
 
 出力フォーマット:
-- 優先度（Critical / Warning / Suggestion）ごとに整理して返す。3段階の定義は再掲せず [[severity-rule]]（`matagi/shared-rules/review-severity/severity-rule.md`）に従い、そのドメインの Critical 該当例のみ添える
+- 優先度（Critical / Warning / Suggestion）ごと整理して返す。3段階定義は再掲せず [[severity-rule]]（`matagi/shared-rules/review-severity/severity-rule.md`）に従い、当該ドメインの Critical 該当例のみ添える
