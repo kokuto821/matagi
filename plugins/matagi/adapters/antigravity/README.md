@@ -1,11 +1,11 @@
 # antigravity
 
-Claude Code 向けプラグインマニフェスト（`plugins/matagi/.claude-plugin/plugin.json`）を、Google Antigravity 向け `plugin.json` / `hooks.json` に変換するスクリプト置き場。
+Claude Code 向けプラグインマニフェスト（`plugins/matagi/.claude-plugin/plugin.json`）→ Google Antigravity 向け `plugin.json` / `hooks.json` 変換スクリプト置き場。
 
-- `generate-plugin-json.ts`: `plugin.json` から `name` / `description` を抽出、Antigravity 向け `plugin.json` を出力。
-- `generate-hooks-json.ts`: `plugin.json` の `hooks` フィールドを Antigravity の hooks.json 形式に変換して出力。
+- `generate-plugin-json.ts`: `plugin.json` から `name` / `description` 抽出、Antigravity 向け `plugin.json` 出力。
+- `generate-hooks-json.ts`: `plugin.json` の `hooks` フィールド → Antigravity hooks.json 形式変換出力。
 
-いずれも `node --experimental-strip-types <script>.ts <出力先ディレクトリ>` で実行。出力先ディレクトリ（= Antigravity プラグインルート）は CLI 引数で必須指定、直下に `plugin.json` / `hooks.json` を書き出す（ファイル名は固定）。引数省略時はエラーで案内。
+いずれも `node --experimental-strip-types <script>.ts <出力先ディレクトリ>` 実行。出力先ディレクトリ（= Antigravity プラグインルート）= CLI 引数必須、直下に `plugin.json` / `hooks.json` 書出（ファイル名固定）。引数省略時 エラー案内。
 
 例:
 

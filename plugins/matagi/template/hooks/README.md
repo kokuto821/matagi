@@ -5,7 +5,7 @@ Claude Code のフック機能で実行するスクリプトのひな形置き�
 ## フックとは
 
 特定イベント（ツール実行前後・セッション終了など）で自動実行されるシェルスクリプト。
-Claude の判断に頼らず**強制的な制約**を設けたいときに使う。
+Claude 判断に頼らず**強制的制約**を設けたいとき使う。
 
 ## 主なイベント種別
 
@@ -23,9 +23,9 @@ Claude の判断に頼らず**強制的な制約**を設けたいときに使う
 
 ## 参考
 
-設定（配線）の書き場所は 2 つ。
+設定（配線）書き場所 = 2つ。
 
-- プラグインとして配布するフック: `plugins/matagi/.claude-plugin/plugin.json` の `hooks` セクション。スクリプト本体は `plugins/matagi/hooks/` に置き、パスは `${CLAUDE_PLUGIN_ROOT}` 起点で記述。
-- そのプロジェクト限定のフック: `.claude/settings.json` の `hooks` セクション。
+- プラグイン配布フック: `plugins/matagi/.claude-plugin/plugin.json` の `hooks` セクション。スクリプト本体 = `plugins/matagi/hooks/` に置き、パス = `${CLAUDE_PLUGIN_ROOT}` 起点記述。
+- プロジェクト限定フック: `.claude/settings.json` の `hooks` セクション。
 
 実装例: `../../hooks/protected-branch-guard.ts`（保護ブランチ上の `git commit` / `git push` を `PreToolUse` でブロックする）。
