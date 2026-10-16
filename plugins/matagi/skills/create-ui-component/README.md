@@ -1,5 +1,5 @@
 # create-ui-component
 
-ui-design ルールに沿って新規 UI コンポーネントを生成するスキルです（React / Tailwind 想定）。
+ui-design ルールに沿って新規 UI コンポーネントを生成するスキル（React / Tailwind 想定）。
 
-定義は `SKILL.md` を参照してください。
+定義は `SKILL.md` を参照。

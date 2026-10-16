@@ -1,5 +1,5 @@
 # skills
 
-Claude Code のスキルを置く場所です。
+Claude Code のスキル置き場。
 
-各スキルは `<skill-name>/SKILL.md` の形で1ディレクトリ1スキルとして管理します。`SKILL.md` は AI／ハーネス向けの定義で、各ディレクトリの `README.md` は人間向けの概要です。
+各スキル = `<skill-name>/SKILL.md` の1ディレクトリ1スキル。`SKILL.md` は AI／ハーネス向け定義、各ディレクトリの `README.md` は人間向け概要。
