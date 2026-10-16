@@ -1,5 +1,5 @@
 # architecture
 
-UI アーキテクチャのルール置き場。
+UI アーキテクチャルール置き場。
 
-画面・コンポーネントの構造設計方針を `ui-architecture.md` に集約。
+画面・コンポーネント構造設計方針を `ui-architecture.md` に集約。
