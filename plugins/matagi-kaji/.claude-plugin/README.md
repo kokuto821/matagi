@@ -1,3 +1,3 @@
 # .claude-plugin
 
-matagi-kaji プラグインのマニフェスト（`plugin.json`）を置く場所です。
+matagi-kaji プラグインのマニフェスト（`plugin.json`）の置き場。

@@ -11,8 +11,8 @@ description: >
 
 ## 概要
 
-このリポジトリのルール（命名規則・配置先・テンプレート）に沿って、スキルまたは
-サブエージェントのファイルを対話的に生成する。
+本リポジトリのルール（命名規則・配置先・テンプレート）に沿い、スキルまたは
+サブエージェントのファイルを対話的に生成。
 
 ## 参照するルール・テンプレート
 
@@ -130,21 +130,21 @@ flowchart TD
     class S1c,S2b,S6b user
 ```
 
-遷移は図に従い、判定基準・詳細は下の本文に従う。
+遷移は図、判定基準・詳細は下の本文に従う。
 
 凡例: 黄 = ユーザーの確認・承認
 
 ### 1. 種別と目的を確認する
 
-ユーザーの発言から以下を読み取る。不明な場合は質問する。
+ユーザーの発言から以下を読み取る。不明なら質問。
 
 - **種別**: スキル or サブエージェント
-- **名前（候補）**: ユーザーが挙げた名前、または目的から導出する
+- **名前（候補）**: ユーザーが挙げた名前、または目的から導出
 - **目的**: 何をするか（1〜2行）
 
 ### 2. 名前を命名規則に照らして確定する
 
-`shared-rules/naming-conventions/naming-rule.md` のルールに従う。
+`shared-rules/naming-conventions/naming-rule.md` に従う。
 
 | 種別 | 形 | 例 |
 |------|----|----|
@@ -154,7 +154,7 @@ flowchart TD
 
 - kebab-case 必須
 - `helper`, `stuff`, `my-skill-v2` などは不可
-- ユーザーの候補が規則に合わない場合は修正案を提示してから確認する
+- ユーザーの候補が規則に合わないなら修正案を提示してから確認
 
 ### 3. 配置先を決定する
 
@@ -167,14 +167,14 @@ flowchart TD
 
 ### 4. 内包するルールを外部化できるか確認する
 
-`shared-rules/rule-externalization/externalization-rule.md` に従い、スキル・エージェントに書こうとしているルール・制約・判断基準が `rules/` に切り出せるものかを判断する。
+`shared-rules/rule-externalization/externalization-rule.md` に従い、スキル・エージェントに書くルール・制約・判断基準が `rules/` に切り出せるか判断。
 
 - **切り出す**: 他のスキル・エージェントにも適用できる、または「常に従うべき不変のガイドライン」の性質を持つもの
 - **インラインのまま**: そのスキル固有の手順・実行ロジック
 
-切り出す場合は先に `rules/<topic>/` にルールファイルを作成し、スキル・エージェントからはパスで参照する。
+切り出す場合は先に `rules/<topic>/` にルールファイル作成、スキル・エージェントからはパスで参照。
 
-また、`shared-rules/harness-engineering/harness-rule.md` に従い、スキルに付随する自動化・制御処理の媒体を判断する。
+また `shared-rules/harness-engineering/harness-rule.md` に従い、スキル付随の自動化・制御処理の媒体を判断。
 
 - **コード（`.sh` / `.ts` / `.js`）**: 「破られたら困る」制御（パーミッション、フック実行ロジック、リトライ）
 - **Markdown（`.md`）**: モデルへのソフトな指針（方針、規約、トーン）
@@ -196,9 +196,9 @@ description: >
 ---
 ```
 
-本文構成（概要／ルール／手順／出力・500行未満）と手順の記述形式（mermaid `flowchart TD`）は [[template-rule]] (`shared-rules/template/template-rule.md`) を唯一の出典とする。テンプレートの構成をそのまま埋め、構成を独自に定義し直さない。Step 4 で外部化したルールがあれば `## ルール` 節に参照を記載し、無ければ節ごと削除する。
+本文構成（概要／ルール／手順／出力・500行未満）と手順の記述形式（mermaid `flowchart TD`）は [[template-rule]] (`shared-rules/template/template-rule.md`) を唯一の出典とする。テンプレートの構成をそのまま埋める。構成を独自に定義し直さない。Step 4 で外部化したルールがあれば `## ルール` 節に参照を記載、無ければ節ごと削除。
 
-description・手順・出力など指示文を書くときは、[[composition-rule]] (`shared-rules/prompt-engineering/composition-rule.md`) の構成要素が揃っているかを確認する。多段の判断を含むスキル・エージェントには [[scaffolding-rule]] (`shared-rules/prompt-engineering/scaffolding-rule.md`) に従って推論の足場を組み込む（単純タスクには足さない）。
+description・手順・出力など指示文を書くとき、[[composition-rule]] (`shared-rules/prompt-engineering/composition-rule.md`) の構成要素が揃っているか確認。多段の判断を含むスキル・エージェントには [[scaffolding-rule]] (`shared-rules/prompt-engineering/scaffolding-rule.md`) に従い推論の足場を組み込む（単純タスクには足さない）。
 
 #### サブエージェントの場合
 
@@ -217,17 +217,17 @@ description: <委譲条件を具体的に。いつ・何を・どう返すかを
 
 ### 6. ドラフトをユーザーに提示して確認を取る
 
-作成予定のファイル内容を全文提示し、以下を確認する。
+作成予定のファイル内容を全文提示、以下を確認。
 
 - 名前・配置先は正しいか
 - description のトリガー語は自然か
 - 手順・出力フォーマットは意図通りか
 
-修正があれば反映してから再提示する。
+修正があれば反映して再提示。
 
 ### 7. ファイルを書き込む
 
-承認を得たら Write ツールでファイルを作成する。
+承認後、Write ツールでファイル作成。
 
 ### 8. 後続作業を案内する
 

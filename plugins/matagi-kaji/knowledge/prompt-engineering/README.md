@@ -1,7 +1,7 @@
 # prompt-engineering
 
-プロンプトエンジニアリング手法に関する知見メモを置く場所です。
+プロンプトエンジニアリング手法の知見メモ置き場。
 
-常時従う原則は `shared-rules/prompt-engineering/*` に、手法の詳細な要約は `documents/reference/prompt-engineering/` にあります。
+常時従う原則は `shared-rules/prompt-engineering/*`、手法の詳細要約は `documents/reference/prompt-engineering/`。
 
-現在このディレクトリにコンテンツはありません（汎用性の低い個人メモは private-agent-harness リポジトリへ移送済み）。
+現在コンテンツなし（汎用性の低い個人メモは private-agent-harness リポジトリへ移送済み）。

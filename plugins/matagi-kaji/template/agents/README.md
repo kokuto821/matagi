@@ -1,6 +1,6 @@
 # agents テンプレート
 
-複数のスキルから共有して使うサブエージェントのひな形を置くディレクトリ。
+複数スキルから共有するサブエージェントのひな形置き場。
 
 ## ここに置くもの
 
@@ -13,7 +13,7 @@
 
 ## 使い方
 
-`AGENT.md` をコピーして `plugins/matagi/agents/<name>.md` に配置する。
+`AGENT.md` をコピーして `plugins/matagi/agents/<name>.md` に配置。
 
 > 命名規則・フロントマターの詳細は `shared-rules/naming-conventions/naming-rule.md` と
 > `shared-rules/template/template-rule.md` を参照。

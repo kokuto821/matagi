@@ -1,8 +1,8 @@
 # agent
 
-サブエージェントの定義ファイル（`<role>.md`）を置く場所です。
+サブエージェントの定義ファイル（`<role>.md`）の置き場。
 
-特定の役割を持つエージェントを定義します。**1エージェント＝1役割**：レビュワー（評価・指摘のみ）と産出者（実装／修正適用）は常に別エージェントに分ける（`shared-rules/harness-engineering/review-independence-rule.md`）。
+特定の役割を持つエージェントを定義。**1エージェント＝1役割**：レビュワー（評価・指摘のみ）と産出者（実装／修正適用）は常に別エージェント（`shared-rules/harness-engineering/review-independence-rule.md`）。
 
 ### レビュワー（評価・指摘のみ。修正は適用しない）
 

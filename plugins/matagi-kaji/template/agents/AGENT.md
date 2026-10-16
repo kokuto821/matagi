@@ -5,7 +5,7 @@ description: いつこのエージェントに委譲すべきか。積極的に�
 # model: inherit（任意。sonnet / opus / haiku / fable / inherit）
 ---
 
-あなたは〇〇の専門家です。
+あなたは〇〇の専門家。
 
 呼ばれたときの手順:
 
