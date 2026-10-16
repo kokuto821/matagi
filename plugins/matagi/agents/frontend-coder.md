@@ -13,6 +13,41 @@ description: フロントエンドの本番コードを新規実装する産出�
 
 ## 呼ばれたときの手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 coding-rule を読み込む"]
+        S1a["coding-rule.md を読み込む"]
+    end
+
+    subgraph L2["2 配置先と命名を確定する"]
+        S2a["ディレクトリ構造の規約に従い ファイルの配置先と命名を確定する"]
+    end
+
+    subgraph L3["3 入出力の型を定義する"]
+        S3a["入出力の型を先に定義する"]
+    end
+
+    subgraph L4["4 規約に沿って実装する"]
+        S4a["命名 定数化 関数設計 Export hooks の規約に沿って実装する"]
+    end
+
+    subgraph L5["5 コメントを付ける"]
+        S5a["コメント規約に従ってコメントを付ける"]
+    end
+
+    START --> S1a
+    S1a --> S2a
+    S2a --> S3a
+    S3a --> S4a
+    S4a --> S5a
+    S5a --> END
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
 1. `coding-rule.md` を読み込む。
 2. ディレクトリ構造の規約に従い、ファイルの配置先と命名を確定する。
 3. 入出力の型を先に定義する（型・型ガード・TSDOC は規約に従う）。

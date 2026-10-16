@@ -26,6 +26,105 @@ OpenSpec のフェーズ（explore/propose/apply/archive）を統括する。CLI
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L0["0 前提確認"]
+        S0a{"対象ディレクトリに openspec/ があるか？"}
+        S0b["openspec-setup へ誘導して停止する"]
+        S0a -->|NO| S0b
+    end
+
+    subgraph L1["1 EXPLORE 任意"]
+        S1a{"要件が固まっているか？"}
+        S1b["CLI 生成の openspec-explore を in-context 起動する"]
+        S1a -->|NO| S1b
+    end
+
+    subgraph L2["2 PROPOSE"]
+        S2a["CLI 生成の openspec-propose を in-context 起動し proposal design specs delta tasks.md を生成する"]
+        S2b["内容をユーザーに提示する"]
+        S2c{"承認されたか？"}
+        S2d["CLI 生成の openspec-update-change で変更する"]
+        S2a --> S2b
+        S2b --> S2c
+        S2c -->|NO| S2d
+        S2d --> S2b
+    end
+
+    subgraph L3["3 APPLY"]
+        S3a{"ユーザーが change 名を指定したか？"}
+        S3b{"active な change が1件のみか？"}
+        S3c["その change を使う"]
+        S3d["一覧を提示してユーザーに選んでもらう"]
+        S3e["openspec status と openspec instructions apply で進捗 contextFiles タスク一覧を取得する"]
+        S3f["contextFiles に列挙された各ファイルを読む"]
+        S3g{"未完了タスクがあるか？"}
+        S3h["未完了タスクを1件 IMPLEMENT 表に従い tdd coding test-coding へ委譲する 範囲を明示する"]
+        S3i{"タスクが曖昧 範囲超過 エラーのいずれかでブロックされたか？"}
+        S3j["委譲先の結果を受け取り tasks.md の該当タスクをチェック済みにする"]
+        S3k["その場で止めてユーザーに確認する"]
+        S3a -->|YES| S3e
+        S3a -->|NO| S3b
+        S3b -->|YES| S3c
+        S3b -->|NO| S3d
+        S3c --> S3e
+        S3d --> S3e
+        S3e --> S3f
+        S3f --> S3g
+        S3g -->|YES| S3h
+        S3h --> S3i
+        S3i -->|NO| S3j
+        S3i -->|YES| S3k
+        S3j --> S3g
+    end
+
+    subgraph L4["4 REVIEW"]
+        S4a["変更の性質に応じて coding-review と ai-engineering-review の該当する方を起動する 両方にまたがる場合は両方を起動する"]
+        S4b{"指摘があるか？"}
+        S4c["指摘を手順3で委譲した産出者へ戻して適用する"]
+        S4d["レビューを再実行して解消を確認する"]
+        S4e{"指摘が解消したか？"}
+        S4f{"ラウンド上限に達したか？"}
+        S4g["残るものを残課題として報告する"]
+        S4a --> S4b
+        S4b -->|YES| S4c
+        S4c --> S4d
+        S4d --> S4e
+        S4e -->|NO| S4f
+        S4f -->|NO| S4c
+        S4f -->|YES| S4g
+    end
+
+    subgraph L5["5 ARCHIVE"]
+        S5a["CLI 生成の openspec-archive-change を in-context 起動する"]
+    end
+
+    START --> S0a
+    S0a -->|YES| S1a
+    S0b --> END
+    S1a -->|YES| S2a
+    S1b --> S2a
+    S2c -->|YES| S3a
+    S3g -->|NO| S4a
+    S3k --> END
+    S4b -->|NO| S5a
+    S4e -->|YES| S5a
+    S4g --> S5a
+    S5a --> END
+
+    classDef user fill:#fff3bf,stroke:#f08c00,color:#000
+    classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
+    class S2c,S3d,S3k user
+    class S1b,S2a,S2d,S3h,S4a,S5a,S4c,S4d delegate
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 黄 = ユーザーの確認・承認、青 = 他スキル・エージェントへの委譲
+
 0. **前提確認** — 対象ディレクトリに `openspec/` が無ければ [[openspec-setup]] へ誘導して停止する。
 
 1. **EXPLORE**（任意） — 要件が固まっていなければ、CLI 生成の `openspec-explore` スキルをそのまま in-context 起動する（コードを書かないため委譲問題はない）。

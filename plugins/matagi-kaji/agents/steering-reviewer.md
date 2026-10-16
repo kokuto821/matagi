@@ -13,6 +13,46 @@ description: プロジェクトの Claude Code ステアリング構成（AGENTS
 
 ## 呼ばれたときの手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 レビュー対象を特定する"]
+        S1a["ステアリング資産を特定し 差分が分かれば変更箇所を優先する"]
+    end
+
+    subgraph L2["2 ルールを読み込む"]
+        S2a["selection-rule と harness-rule を読み込み 手法ごとの事実は steering-claude-code を参照する"]
+    end
+
+    subgraph L3["3 誤用・逸脱を洗い出す"]
+        S3a["チェック観点で各資産を照合し 手法の誤用・逸脱を洗い出す"]
+    end
+
+    subgraph L4["4 逸脱ごとに整理する"]
+        S4a["逸脱ごとに 箇所 逸脱した手法選択 問題点 あるべき置き場所 を整理する"]
+    end
+
+    subgraph L5["5 結果を返す"]
+        S5a{"逸脱があるか？"}
+        S5b["指摘のみ返す"]
+        S5c["逸脱がない旨を明記する"]
+        S5a -->|YES| S5b
+        S5a -->|NO| S5c
+    end
+
+    START --> S1a
+    S1a --> S2a
+    S2a --> S3a
+    S3a --> S4a
+    S4a --> S5a
+    S5b --> END
+    S5c --> END
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
 1. レビュー対象のステアリング資産を特定する：ルート/サブの AGENTS.md / CLAUDE.md、`rules/`、`skills/`、
    `agents/`、`settings.json` の hooks、`output-styles/`。差分が分かる場合は変更箇所を優先する。
 2. [[selection-rule]] と [[harness-rule]] を読み込む。手法ごとの事実は [[steering-claude-code]] を参照する。

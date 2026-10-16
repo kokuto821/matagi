@@ -24,6 +24,78 @@ description: >
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 反映すべきルールを得る"]
+        S1a["coding-lint-rule と test-lint-rule を Read し 反映すべきルールの一覧を得る"]
+    end
+
+    subgraph L2["2 言語・フレームワークを検出する"]
+        S2a["package.json を Read し 言語・フレームワークを検出して該当しない項目を外す"]
+    end
+
+    subgraph L3["3 ESLint 設定を確認する"]
+        S3a["ルール名で grep し 未設定のものを追加対象にする"]
+    end
+
+    subgraph L4["4 Stylelint 設定を確認する"]
+        S4a{"Stylelint 対応ルールの記載があるか？"}
+        S4b["Stylelint 設定を確認し 未設定のものを追加対象にする"]
+        S4c["スキップした旨を出力に明記する"]
+        S4a -->|YES| S4b
+        S4a -->|NO| S4c
+    end
+
+    subgraph L5["5 Biome 設定を確認する"]
+        S5a{"biome.json または biome.jsonc が存在するか？"}
+        S5b["Biome ルール名で grep し 未設定のものを追加対象にする"]
+        S5c["スキップした旨を出力に明記する"]
+        S5a -->|YES| S5b
+        S5a -->|NO| S5c
+    end
+
+    subgraph L6["6 追加対象を提示して反映する"]
+        S6a["追加対象を diff 形式でユーザーに提示する"]
+        S6b{"承認された項目があるか？"}
+        S6c["承認された項目を Edit で設定ファイルへ反映し 承認されない項目は反映しない"]
+        S6d["反映せずに終える"]
+        S6a --> S6b
+        S6b -->|YES| S6c
+        S6b -->|NO| S6d
+    end
+
+    subgraph L7["7 lint を実行して確認する"]
+        S7a["scripts から lint コマンドを検出し 追加したルール名で絞り込んで実行する"]
+        S7b{"エラーが出たか？"}
+        S7c["該当箇所を提示し対応を確認する"]
+        S7a --> S7b
+        S7b -->|YES| S7c
+    end
+
+    START --> S1a
+    S1a --> S2a
+    S2a --> S3a
+    S3a --> S4a
+    S4b --> S5a
+    S4c --> S5a
+    S5b --> S6a
+    S5c --> S6a
+    S6c --> S7a
+    S6d --> END
+    S7b -->|NO| END
+    S7c --> END
+
+    classDef user fill:#fff3bf,stroke:#f08c00,color:#000
+    class S6b,S7c user
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 黄 = ユーザーの確認・承認
+
 1. [[coding-lint-rule]]・[[test-lint-rule]] を Read し、反映すべきルールと対応する ESLint/Stylelint/Biome ルール名の一覧を得る。対象は「規則 → 対応する ESLint/Stylelint/Biome ルール名」の形式で書かれた項目（表・箇条書きいずれの形式も含む）のみとする。「標準 ESLint ルールでの機械化が難しいため `coding-rule.md`/`test-rule.md` に残す」「Biome: 対応ルールなし」といった、対応ルール名を伴わない散文の注記は元々この形式に当てはまらないため、自然に対象外となる。
 2. 対象プロダクトの `package.json` を Read し、言語・フレームワーク（TypeScript / React / Jest の有無）を検出する。該当しない項目（例: React 不在なら React 前提のルール）は対象から外す。
 3. 既存の `.eslintrc*` / `eslint.config.*` を確認する。まず手順1で得た各ルール名で grep し、ヒットしなければ未設定と判定する。overrides の構造把握など grep だけで判定できない場合のみ全文 Read する。未設定のものを「追加対象」としてリストアップする。
@@ -40,4 +112,4 @@ description: >
 | 追加対象ルールの一覧 | 表（ルール名 / 対応する ESLint・Stylelint・Biome ルール名 / 状態） |
 | スキップした項目とその理由（該当ルール無し・Biome 未導入等） | 箇条書き |
 | 承認を得た追加内容の diff と反映結果 | diff＋一言の反映結果 |
-| lint 実行結果 | 成功 or 該当箇所のみ抜粋したエラー内容 |
+| lint 実行結果 | 成功 or 該当箇所のみ抜粋したエラー内容 or 未実行（反映なし） |

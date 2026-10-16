@@ -14,6 +14,41 @@ description: バックエンドの本番コードを新規実装する産出エ�
 
 ## 呼ばれたときの手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 対象言語・フレームワークを特定する"]
+        S1a["対象言語・フレームワークを特定する"]
+        S1b{"公式スタイルガイドや linter formatter 設定が存在するか？"}
+        S1c["それを一般的なイディオムより優先する"]
+        S1a --> S1b
+        S1b -->|YES| S1c
+    end
+
+    subgraph L2["2 design-rule を読み込む"]
+        S2a["design-rule.md を読み込む"]
+    end
+
+    subgraph L3["3 配置先・命名・型を決める"]
+        S3a["一般的なイディオムに沿って配置先 命名 型を決める"]
+    end
+
+    subgraph L4["4 設計原則に沿って実装する"]
+        S4a["DRY SRP SoC 疎結合 高凝集 情報隠蔽 KISS YAGNI に沿って実装する"]
+    end
+
+    START --> S1a
+    S1b -->|NO| S2a
+    S1c --> S2a
+    S2a --> S3a
+    S3a --> S4a
+    S4a --> END
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
 1. 対象言語・フレームワークを特定する。既存コードに公式スタイルガイドや主要な linter/formatter 設定（例: ESLint, RuboCop, gofmt, ruff, checkstyle 等の設定ファイル）が存在するか先に確認し、あればそれを一般的なイディオムより優先する。
 2. `design-rule.md` を読み込む。
 3. 対象言語の一般的なイディオムに沿って、配置先・命名・型を決める。

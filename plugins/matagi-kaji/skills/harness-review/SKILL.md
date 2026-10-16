@@ -32,6 +32,36 @@ Critical / Warning / Suggestion で指摘する。**指摘までが責務**で�
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 レビュー範囲を特定する"]
+        S1a["ステアリング資産を洗い出し 差分が分かれば変更箇所を優先する"]
+    end
+
+    subgraph L2["2 規模に応じて委譲を判断する"]
+        S2a{"多数の資産を横断する または本格的な監査か？"}
+        S2b["steering-reviewer エージェントへ委譲する"]
+        S2c["本スキル内で selection-rule と harness-rule を基準に直接レビューする"]
+        S2a -->|YES| S2b
+        S2a -->|NO| S2c
+    end
+
+    START --> S1a
+    S1a --> S2a
+    S2b --> END
+    S2c --> END
+
+    classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
+    class S2b delegate
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 青 = 他スキル・エージェントへの委譲
+
 ### 1. レビュー範囲を特定する
 
 対象プロジェクトのステアリング資産を洗い出す：ルート/サブディレクトリの AGENTS.md / CLAUDE.md、

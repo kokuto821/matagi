@@ -31,6 +31,40 @@ TDD の **List（テストリスト洗い出し）と Red（失敗するテス�
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 List テストリスト洗い出し"]
+        S1a["test-design の技法でテスト観点を決める"]
+        S1b["テストケースを設計し test.todo が使える言語では test.todo で列挙する"]
+        S1a --> S1b
+    end
+
+    subgraph L2["2 Red 失敗するテストを書く"]
+        S2a["domain-classification-rule の判定基準で domain を判定する"]
+        S2b{"専用サブエージェントがある domain か？"}
+        S2c["専用サブエージェントへ隔離委譲し リストから1項目の失敗するテストを実装させる"]
+        S2d["フォールバック方針に従い汎用サブエージェントへ隔離委譲し 同様に実装させる"]
+        S2a --> S2b
+        S2b -->|YES| S2c
+        S2b -->|NO| S2d
+    end
+
+    START --> S1a
+    S1b --> S2a
+    S2c --> END
+    S2d --> END
+
+    classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
+    class S2c,S2d delegate
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 青 = 他スキル・エージェントへの委譲
+
 ### List（テストリスト洗い出し）
 
 1. テスト観点を決める（[[test-design]] の技法を参照する）

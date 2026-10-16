@@ -17,6 +17,53 @@ description: >
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 索引を読み 扱うコンポーネントを特定する"]
+        S1a["ui-design の README 索引を読み 該当する component ルールのパスを特定する"]
+    end
+
+    subgraph L2["2 分類と配置先を決める"]
+        S2a["ui-architecture に従い button edit view を決定する"]
+        S2b{"再利用するコンポーネントか？"}
+        S2c["components に配置する"]
+        S2d{"React Router 構成か？"}
+        S2e["pages に配置する"]
+        S2f["features に配置する"]
+        S2a --> S2b
+        S2b -->|YES| S2c
+        S2b -->|NO| S2d
+        S2d -->|YES| S2e
+        S2d -->|NO| S2f
+    end
+
+    subgraph L3["3 該当ルールを読む"]
+        S3a["該当する component ルールと 共通の styling-rule を読む"]
+    end
+
+    subgraph L4["4 雛形をもとに生成する"]
+        S4a["template-ui を雛形に tsx css stories test をコロケーションで生成する"]
+    end
+
+    subgraph L5["5 スタイリングを適用する"]
+        S5a["手順3で読んだ styling-rule を唯一の正として適用する"]
+    end
+
+    START --> S1a
+    S1a --> S2a
+    S2c --> S3a
+    S2e --> S3a
+    S2f --> S3a
+    S3a --> S4a
+    S4a --> S5a
+    S5a --> END
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
 ### 1. 索引を読み、扱うコンポーネントを特定する
 
 `shared-rules/ui-design/README.md`（索引）を読み、作るものに該当する `component/` ルールのパスを特定する。全ファイルは読み込まない。

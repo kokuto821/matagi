@@ -36,6 +36,55 @@ description: >
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 レビュー範囲を決める"]
+        S1a["対象のスキル サブエージェント定義 AGENTS.md CLAUDE.md プロンプトを特定し 差分が分かれば変更箇所を優先する"]
+    end
+
+    subgraph L2["2 レビューを委譲する"]
+        S2a{"多数のファイルを横断する または本格的な監査か？"}
+        S2b["context-reviewer エージェントへ委譲する"]
+        S2c["本スキル内で context-engineering の5ルールを基準に直接レビューする"]
+        S2a -->|YES| S2b
+        S2a -->|NO| S2c
+    end
+
+    subgraph L3["3 指摘を提示し 承認を得る"]
+        S3a["指摘を優先度順に提示し 適用する指摘をユーザーに確認する"]
+        S3b{"承認されたか？"}
+        S3c["指摘のみで終える"]
+        S3a --> S3b
+        S3b -->|NO| S3c
+    end
+
+    subgraph L4["4 承認された修正を委譲する"]
+        S4a["承認された指摘だけを context-engineer エージェントに渡し 破壊的変更・意図不明箇所は再確認させた上で適用させる"]
+        S4b["適用後に変更前後を提示する"]
+        S4a --> S4b
+    end
+
+    START --> S1a
+    S1a --> S2a
+    S2b --> S3a
+    S2c --> S3a
+    S3b -->|YES| S4a
+    S3c --> END
+    S4b --> END
+
+    classDef user fill:#fff3bf,stroke:#f08c00,color:#000
+    classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
+    class S3b user
+    class S2b,S4a delegate
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 黄 = ユーザーの確認・承認、青 = 他スキル・エージェントへの委譲
+
 ### 1. レビュー範囲を決める
 
 対象のスキル／サブエージェント定義／AGENTS.md/CLAUDE.md／プロンプトを特定する。差分が分かる場合は変更箇所を優先する。

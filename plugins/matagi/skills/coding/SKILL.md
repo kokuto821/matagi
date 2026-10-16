@@ -26,6 +26,66 @@ description: >
 
 ## 手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 対象を特定する"]
+        S1a["実装対象のファイルパスと既存コードを確認し対象を特定する"]
+    end
+
+    subgraph L2["2 domain を判定する"]
+        S2a["domain-classification-rule の判定基準で domain を判定する"]
+    end
+
+    subgraph L3["3 委譲する"]
+        S3a{"専用サブエージェントがある domain か？"}
+        S3b["専用サブエージェントへ隔離委譲する"]
+        S3c["フォールバック方針に従い汎用サブエージェントへ委譲する"]
+        S3a -->|YES| S3b
+        S3a -->|NO| S3c
+    end
+
+    subgraph L4["4 産出結果を受け取る"]
+        S4a["委譲先の実装結果をそのまま受け取る"]
+    end
+
+    subgraph L5["5 lint を実行する"]
+        S5a{"package.json に scripts.lint があるか？"}
+        S5b["対象ファイルにスコープして lint を実行する"]
+        S5c{"lint が成功したか？"}
+        S5d{"再実行の上限に達したか？"}
+        S5e["対象ファイルのエラー行のみ手順3の委譲先へ提示し修正させる"]
+        S5f["残エラーをユーザーへ提示し判断を仰ぐ"]
+        S5a -->|YES| S5b
+        S5b --> S5c
+        S5c -->|NO| S5d
+        S5d -->|NO| S5e
+        S5e --> S5b
+        S5d -->|YES| S5f
+    end
+
+    START --> S1a
+    S1a --> S2a
+    S2a --> S3a
+    S3b --> S4a
+    S3c --> S4a
+    S4a --> S5a
+    S5a -->|NO| END
+    S5c -->|YES| END
+    S5f --> END
+
+    classDef user fill:#fff3bf,stroke:#f08c00,color:#000
+    classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
+    class S5f user
+    class S3b,S3c,S5e delegate
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
+凡例: 黄 = ユーザーの確認・承認、青 = 他スキル・エージェントへの委譲
+
 1. **対象を特定する** — 実装対象のファイルパス・既存コードを確認する。新規ファイルの場合は配置先ディレクトリと周辺コードから判定する。
 2. **domain を判定する** — [[domain-classification-rule]] の判定基準に従う。
 3. **委譲する**（隔離起動） — [[domain-classification-rule]] の対応表に従い、frontend/backend なら専用サブエージェントへ、専用サブエージェントが無い domain なら同ルールのフォールバック方針に従い汎用サブエージェントへ委譲する。

@@ -15,6 +15,51 @@ description: バックエンドのコーディング規約に照らしてコー�
 
 ## 呼ばれたときの手順
 
+```mermaid
+flowchart TD
+    START(["START"])
+    END(["END"])
+
+    subgraph L1["1 design-rule を読み込む"]
+        S1a["design-rule.md を読み込む"]
+    end
+
+    subgraph L2["2 対象を読み 規約を把握する"]
+        S2a["レビュー対象のファイルと差分を読み 対象言語・フレームワークの慣用的な規約を把握する"]
+        S2b{"公式スタイルガイドや linter formatter 設定が存在するか？"}
+        S2c["それを判定基準として優先する"]
+        S2a --> S2b
+        S2b -->|YES| S2c
+    end
+
+    subgraph L3["3 違反を抽出する"]
+        S3a["チェック観点でコードを走査し 違反を抽出する"]
+    end
+
+    subgraph L4["4 違反ごとに整理する"]
+        S4a["違反ごとに 該当箇所 根拠 なぜ問題か 修正の方向性 を整理する"]
+    end
+
+    subgraph L5["5 結果を返す"]
+        S5a{"違反があるか？"}
+        S5b["適用が必要なら backend-coder に委ねる旨を添える"]
+        S5c["違反がない旨を明記する"]
+        S5a -->|YES| S5b
+        S5a -->|NO| S5c
+    end
+
+    START --> S1a
+    S1a --> S2a
+    S2b -->|NO| S3a
+    S2c --> S3a
+    S3a --> S4a
+    S4a --> S5a
+    S5b --> END
+    S5c --> END
+```
+
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+
 1. `design-rule.md` を読み込む。
 2. レビュー対象のファイル / 差分を読み、対象言語・フレームワークの慣用的な規約を把握する。既存コードに公式スタイルガイドや主要な linter/formatter 設定が存在するか先に確認し、あればそれを判定基準として優先する。根拠が薄い（一般論のみに基づく）指摘は Suggestion 止まりとし、Critical/Warning には格上げしない。
 3. 下のチェック観点でコードを走査し、違反を抽出する。
