@@ -1,8 +1,8 @@
 # context-engineering ルール索引
 
-有限な注意予算（コンテキスト）を、ランタイムでどうキュレーションし、長時間軸タスクで文脈を維持するかのルール群の**索引（ルーター）**。全部を読み込まず、**まずこの索引を読み、扱う関心事に該当するルールだけを読む**運用とする。
+有限な注意予算（コンテキスト）をランタイムでどうキュレーションし、長時間軸タスクで文脈をどう維持するか。そのルール群の**索引（ルーター）**。全部は読み込まない。**まずこの索引を読み、扱う関心事に該当するルールだけ読む**運用。
 
-`prompt-engineering/` が「1回のプロンプトの中身」、`harness-engineering/` が「命令の置き場所・手法選択」を扱うのに対し、本領域は**「進化し続ける情報の宇宙から、限られたウィンドウに何を入れ続けるか」**を扱う。出典は `documents/reference/context-engineering/`。
+`prompt-engineering/` は「1回のプロンプトの中身」、`harness-engineering/` は「命令の置き場所・手法選択」。本領域は**「進化し続ける情報の宇宙から、限られたウィンドウに何を入れ続けるか」**。出典は `documents/reference/context-engineering/`。
 
 ## 全体構成
 
@@ -19,10 +19,10 @@ context-engineering/
 
 | 関心事 | ルール |
 |--------|--------|
-| なぜ「詰め込むほど良い」が成り立たないかを踏まえて情報量を絞りたい | `budget-rule.md` |
+| 「詰め込むほど良い」が成り立たない前提で情報量を絞りたい | `budget-rule.md` |
 | システムプロンプト／指示の高度・区切り・部品の並べ方を設計したい | `assembly-rule.md` |
 | 全ロードせず実行時に必要分だけ取りに行く設計にしたい | `retrieval-rule.md` |
-| ウィンドウを超える長時間タスクで一貫性を保ちたい（compact/ノート/サブエージェント） | `long-horizon-rule.md` |
-| ツールセットの肥大化を避け、トークン効率のよいツールを設計したい | `tool-design-rule.md` |
+| ウィンドウ超過の長時間タスクで一貫性を保ちたい（compact/ノート/サブエージェント） | `long-horizon-rule.md` |
+| ツールセット肥大化を避け、トークン効率のよいツールを設計したい | `tool-design-rule.md` |
 
-各ルールは `[[budget-rule]]` のように `[[wikilink]]` で相互参照される（記法の定義は [[directory-rule]]（`shared-rules/rules-directory/directory-rule.md`）「相互リンク記法」）。
+各ルールは `[[budget-rule]]` のように `[[wikilink]]` で相互参照（記法の定義は [[directory-rule]]（`shared-rules/rules-directory/directory-rule.md`）「相互リンク記法」）。

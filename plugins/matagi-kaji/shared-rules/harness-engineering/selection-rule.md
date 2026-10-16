@@ -3,9 +3,9 @@
 ## 原則
 
 命令を Markdown に書くと決めたら、次に **どの手法で届けるか** を意図通りに選ぶ。
-Claude Code の各手法は「読み込みタイミング・compaction をまたぐ永続性・命令の強さ・コンテキストコスト」が異なる。**内容ではなく "性質" で置き場所を決める。**
+Claude Code の各手法は「読み込みタイミング・compaction をまたぐ永続性・命令の強さ・コンテキストコスト」が異なる。**内容でなく "性質" で置き場所を決める。**
 
-前段の判断（そもそもコードで強制すべきか Markdown でよいか）は [[harness-rule]] に従う。本ルールは「Markdown／指示系の中でどれを使うか」を扱う。
+前段の判断（コードで強制すべきか Markdown でよいか）は [[harness-rule]] に従う。本ルールは「Markdown／指示系の中でどれを使うか」を扱う。
 
 ## 手法ごとの意図と置き場所
 
@@ -21,18 +21,18 @@ Claude Code の各手法は「読み込みタイミング・compaction をまた
 
 ## 用語（委譲の種別）
 
-- **スキル起動**：現行コンテキストで in-context 実行する（上表「手順をメインで見せて操縦したい」に対応）。
-- **エージェント委譲**：別コンテキストで隔離起動する（上表「隔離したい副次タスク」に対応）。中間結果でメインコンテキストを汚さない。
+- **スキル起動**：現行コンテキストで in-context 実行（上表「手順をメインで見せて操縦したい」に対応）。
+- **エージェント委譲**：別コンテキストで隔離起動（上表「隔離したい副次タスク」に対応）。中間結果でメインコンテキストを汚さない。
 
-この2用語の定義は本節を唯一の正とし、他ファイルは再掲せず `[[selection-rule]]` で参照する（[[externalization-rule]]）。
+この2用語の定義は本節を唯一の正とする。他ファイルは再掲せず `[[selection-rule]]` で参照（[[externalization-rule]]）。
 | 個人の好み | ユーザーレベルのファイル | プロジェクト AGENTS.md / CLAUDE.md に個人設定を書かない |
 | デフォルトの振る舞い自体を変える | output styles | 慎重に。まず組み込み（Proactive/Explanatory/Learning）で足りるか確認 |
 | その 1 回だけの標準・出力形式 | append-system-prompt | 短く保つ。既存指示と矛盾させない |
 
 ## 適用手順
 
-1. [[harness-rule]] で「コードで強制すべきか」を判定する。強制なら hooks／settings.json へ（ここで終了）。
-2. Markdown なら、内容の *性質* を見る：**事実か／手順か／一部限定か／隔離したいか／個人的か**。
+1. [[harness-rule]] で「コードで強制すべきか」を判定。強制なら hooks／settings.json へ（ここで終了）。
+2. Markdown なら内容の *性質* を見る：**事実か／手順か／一部限定か／隔離したいか／個人的か**。
 3. 上表で手法を1つ選ぶ。迷ったら「起動時に常に載せる必要があるか？」を問い、不要なら AGENTS.md / CLAUDE.md 以外（skill・path スコープ rule・subagent）へ寄せる。
 4. AGENTS.md / CLAUDE.md が肥大化していたら、手順は skill へ、限定的な規約は path スコープ rule へ、個人設定はユーザーファイルへ移す。
 
@@ -40,14 +40,14 @@ Claude Code の各手法は「読み込みタイミング・compaction をまた
 
 - 「毎回 X したら必ず Y」を AGENTS.md / CLAUDE.md に書く → 決定的に効かせたいなら hooks（[[harness-rule]]）。
 - 長い手順書を AGENTS.md / CLAUDE.md に貼る → skill へ。常時ロードでトークンを食う。
-- 全体に効かせたい訳ではない規約を未スコープ rule にする → `paths:` でスコープする。
-- 副次的な調査ログをメインで垂れ流す → subagent に隔離する。
+- 全体に効かせたい訳ではない規約を未スコープ rule にする → `paths:` でスコープ。
+- 副次的な調査ログをメインで垂れ流す → subagent に隔離。
 
 ## 背景
 
-`documents/reference/harness-engineering/steering-claude-code.md`（Anthropic 公式ブログ「Steering Claude Code」の日本語まとめ）で整理した 7 手法の意図を、このリポジトリでスキル・ルール・AGENTS.md / CLAUDE.md を作る際の判断基準に落とし込んだもの。各手法の *挙動そのもの*（compaction 再注入・ネスト階層など）はリファレンス側に置き、本ルールは *選び方* だけを持つ。
+`documents/reference/harness-engineering/steering-claude-code.md`（Anthropic 公式ブログ「Steering Claude Code」の日本語まとめ）で整理した 7 手法の意図を、このリポジトリでスキル・ルール・AGENTS.md / CLAUDE.md を作る際の判断基準に落とし込んだもの。各手法の *挙動そのもの*（compaction 再注入・ネスト階層など）はリファレンス側。本ルールは *選び方* のみ持つ。
 
-上表の rule／`paths:` は Claude Code の一般挙動を述べたもの。本 kit 自身の `rules/` は `.claude/rules/` 自動ロードではなく `[[link]]` 参照の md として運用する点は [[directory-rule]]（「本 kit での運用」）を参照。
+上表の rule／`paths:` は Claude Code の一般挙動を述べたもの。本 kit 自身の `rules/` は `.claude/rules/` 自動ロードでなく `[[link]]` 参照の md として運用。詳細は [[directory-rule]]（「本 kit での運用」）を参照。
 
 ## 関連ルール
 

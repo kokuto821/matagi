@@ -1,10 +1,10 @@
 # prompt-engineering ルール索引
 
-プロンプト・スキル・サブエージェントの指示文を設計／レビュー／改善するためのルール群の**索引（ルーター）**。
-全部を読み込まず、**まずこの索引を読み、扱う関心事に該当するルールだけを読む**運用とする。
+プロンプト・スキル・サブエージェントの指示文を設計／レビュー／改善するルール群の**索引（ルーター）**。
+全部は読み込まない。**まずこの索引を読み、扱う関心事に該当するルールだけ読む**運用。
 
-対象は Claude Code のプロンプト・SKILL.md・エージェント定義。これらを新規作成するとき、
-レビューするとき（`prompt-review` スキル / `prompt-engineer` エージェント）、改善するときの判断基準を定める。
+対象は Claude Code のプロンプト・SKILL.md・エージェント定義。新規作成時、
+レビュー時（`prompt-review` スキル / `prompt-engineer` エージェント）、改善時の判断基準を定める。
 
 ## 全体構成
 
@@ -17,7 +17,7 @@ prompt-engineering/
 ```
 
 対象は**プロンプト本文の品質**（構成・足場・頑健性・改善）に限る。どの手法で表現するか
-（AGENTS.md/CLAUDE.md/rules/skills/subagents 等の選択）は `shared-rules/harness-engineering/selection-rule.md` を参照する。
+（AGENTS.md/CLAUDE.md/rules/skills/subagents 等の選択）は `shared-rules/harness-engineering/selection-rule.md` を参照。
 
 ## 利用ガイド（いつどれを読むか）
 
@@ -28,4 +28,4 @@ prompt-engineering/
 | フォーマットの一貫性・値の再掲によるドリフト・追従/過信・外部入力の扱いを点検したい | `robustness-rule.md` |
 | 既存プロンプトを診断ベースで的を絞って改善したい | `improvement-rule.md` |
 
-各ルールは `[[composition-rule]]` のように `[[wikilink]]` で相互参照される（記法の定義は [[directory-rule]]（`shared-rules/rules-directory/directory-rule.md`）「相互リンク記法」）。
+各ルールは `[[composition-rule]]` のように `[[wikilink]]` で相互参照（記法の定義は [[directory-rule]]（`shared-rules/rules-directory/directory-rule.md`）「相互リンク記法」）。
