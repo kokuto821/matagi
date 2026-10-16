@@ -1,5 +1,5 @@
 # readme-convention
 
-README の配置ルールを置く場所です。
+README の配置ルールの置き場。
 
-すべてのディレクトリに人間向け `README.md` を必須化する取り決めを `readme-rule.md` にまとめています。
+全ディレクトリに人間向け `README.md` を必須化する取り決めを `readme-rule.md` に集約。

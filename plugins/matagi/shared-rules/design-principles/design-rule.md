@@ -1,15 +1,15 @@
 # 設計原則ルール
 
-コード設計の普遍的原則（DRY・SRP・関心の分離・疎結合/高凝集・情報隠蔽/カプセル化・KISS・YAGNI・ETC）を実務で適用する際の**観点（チェックリスト）**を定める。
-各原則の**定義**は [[design-principles-glossary]]（`documents/reference/design/design-principles-glossary.md`）§コード設計の中核原則 を唯一の正とし、本ルールでは定義を再掲しない。役割分担 ── 定義＝glossary、適用観点＝本ルール。
+コード設計の普遍的原則（DRY・SRP・関心の分離・疎結合/高凝集・情報隠蔽/カプセル化・KISS・YAGNI・ETC）を実務で適用する際の**観点（チェックリスト）**を規定。
+各原則の**定義**は [[design-principles-glossary]]（`documents/reference/design/design-principles-glossary.md`）§コード設計の中核原則 を唯一の正とし、本ルールで定義は再掲しない。役割分担 ── 定義＝glossary、適用観点＝本ルール。
 
 ## 原則
 
-**重複を持たず（DRY）、各単位は単一の責務を持ち（SRP）、関心を分離（SoC）して疎結合・高凝集に保ち、変わりやすい実装詳細は境界の内に隠す（情報隠蔽/カプセル化）。過剰な複雑さ・機能を持ち込まず（KISS / YAGNI）、迷えば変更しやすい方を選ぶ（ETC）。** 言語・フレームワークに依存しないコード設計の土台であり、実装・リファクタ・レビューの共通の判断基準とする。
+**重複を持たず（DRY）、各単位は単一の責務を持ち（SRP）、関心を分離（SoC）して疎結合・高凝集に保ち、変わりやすい実装詳細は境界の内に隠す（情報隠蔽/カプセル化）。過剰な複雑さ・機能を持ち込まず（KISS / YAGNI）、迷えば変更しやすい方を選ぶ（ETC）。** 言語・フレームワーク非依存のコード設計の土台。実装・リファクタ・レビュー共通の判断基準とする。
 
 ## 判断の観点
 
-各原則を満たしているかは以下で確認する（各原則の定義は [[design-principles-glossary]]）。
+各原則を満たすかは以下で確認（各原則の定義は [[design-principles-glossary]]）。
 
 | 原則 | 満たしているかの観点 |
 |------|--------------------|
@@ -24,15 +24,15 @@
 
 ## やってはいけないこと
 
-- 同じ値・ロジックを複数箇所にコピーして持つ（DRY 違反）。共通化して一箇所に置く。
+- 同じ値・ロジックを複数箇所にコピーして持つ（DRY 違反）。共通化し一箇所に置く。
 - 1つの関数・モジュールに複数の責務・関心を詰め込む（SRP / SoC 違反）。
 - 実装詳細を公開インターフェースから漏らす／呼び出しが遠い相手の内部構造を辿る（情報隠蔽・デメテルの法則 違反）。
 - まだ必要でない機能・汎用化・拡張点を先回りで作る（YAGNI 違反）。単純な手段があるのに技巧で複雑化する（KISS 違反）。
-- 各原則の定義を本ルールや参照元（実装・テスト・レビューのルールやエージェント）に再掲する。定義は [[design-principles-glossary]] を唯一の正とし、本ルールは観点のみを持つ（値の二重管理を避ける。[[externalization-rule]]（`matagi-kaji/shared-rules/rule-externalization/externalization-rule.md`）§単一情報源）。
+- 各原則の定義を本ルールや参照元（実装・テスト・レビューのルールやエージェント）に再掲。定義は [[design-principles-glossary]] を唯一の正とし、本ルールは観点のみ保持（値の二重管理を避ける。[[externalization-rule]]（`matagi-kaji/shared-rules/rule-externalization/externalization-rule.md`）§単一情報源）。
 
 ## 背景
 
-DRY・SRP・疎結合/高凝集の定義が `coding-conventions/tdd-rule.md`・`coding-conventions/coding-rule.md`・各レビュー/テストエージェントに散在し、文言がずれ始めていた。そこで役割を二分した ── **定義**は用語集 [[design-principles-glossary]] に一本化し、本ルールは**適用時の観点**だけを持つ。ドキュメント/資産側での重複回避（単一情報源）は [[externalization-rule]] が担い、本ルールはコード側の判断観点を担う。
+DRY・SRP・疎結合/高凝集の定義が `coding-conventions/tdd-rule.md`・`coding-conventions/coding-rule.md`・各レビュー/テストエージェントに散在、文言がずれ始めていた。そこで役割を二分 ── **定義**は用語集 [[design-principles-glossary]] に一本化、本ルールは**適用時の観点**のみ保持。ドキュメント/資産側の重複回避（単一情報源）は [[externalization-rule]] が担当、本ルールはコード側の判断観点を担当。
 
 中核原則に含めない周辺の設計法則・用語（SOLID・UNIX哲学・分散システムの定番・認知バイアス・比喩など、判断観点として単独では機能しないもの）も [[design-principles-glossary]] に定義を置く。
 

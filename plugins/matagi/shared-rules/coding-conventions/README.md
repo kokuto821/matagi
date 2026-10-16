@@ -1,8 +1,8 @@
 # coding-conventions
 
-コーディング規約のルールを置く場所です。
+コーディング規約ルールの置き場。
 
-実装時に守るコーディング上の取り決めを `coding-rule.md` に、テスト固有の取り決めを `test-rule.md` に、TDD の方法論を `tdd-rule.md` に、coding/test-coding/coding-review スキルの domain 判定・委譲基準を `domain-classification-rule.md` にまとめています。`coding-rule.md`・`test-rule.md` のうち機械的に判定可能な項目（linter対応可能）は、それぞれ `coding-lint-rule.md` / `test-lint-rule.md` に分離しています。
+実装時のコーディング上の取り決めは `coding-rule.md`、テスト固有の取り決めは `test-rule.md`、TDD の方法論は `tdd-rule.md`、coding/test-coding/coding-review スキルの domain 判定・委譲基準は `domain-classification-rule.md` に集約。`coding-rule.md`・`test-rule.md` のうち機械的に判定可能な項目（linter対応可能）は、それぞれ `coding-lint-rule.md` / `test-lint-rule.md` に分離。
 
 | ファイル | 内容 |
 |---------|------|

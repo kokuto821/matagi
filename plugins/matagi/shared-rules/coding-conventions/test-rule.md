@@ -1,8 +1,8 @@
 # テストルール
 
-テストの命名・構造・分割・ヘルパー・記述スタイルを定める。`coding-rule.md` から分離した、テスト専用の規約。
+テストの命名・構造・分割・ヘルパー・記述スタイルを規定。`coding-rule.md` から分離したテスト専用規約。
 
-機械的に判定可能なルール（ヘルパー関数の命名・describe ネスト制限・`it()`禁止・500行制限・`toStrictEqual`使用）は `test-lint-rule.md` を参照する。本ファイルには文脈依存でレビューでしか検出できない項目を残す。
+機械的に判定可能なルール（ヘルパー関数の命名・describe ネスト制限・`it()`禁止・500行制限・`toStrictEqual`使用）は `test-lint-rule.md` 参照。本ファイルには文脈依存でレビューでしか検出できない項目を残す。
 
 ## 命名規則
 
@@ -15,7 +15,7 @@
 
 ## 同一構造テストのまとめ方
 
-- 入力のみ異なり構造同一 複数テスト → `test.each` でまとめる
+- 入力のみ異なり構造が同一の複数テスト → `test.each` でまとめる
 
 ```typescript
 // ✅ 良い例
@@ -47,7 +47,7 @@ describe('determineSwipeDirection', () => {
 
 ## ファイル分割
 
-- ファイル行数の上限は `test-lint-rule.md` を参照する。上限を超えた場合は関心ごとに別ファイルへの分割を検討する
+- ファイル行数の上限は `test-lint-rule.md` 参照。上限超過時は関心ごとに別ファイルへの分割を検討
 
 ```
 feature/map/utils/__tests__/
@@ -60,8 +60,8 @@ feature/map/utils/__tests__/
 
 ## テストヘルパーの共通化
 
-- 複数のテストで使い回せるロジックは **テストヘルパー**として切り出す
-- ヘルパーファイルは `__tests__/helpers/` ディレクトリに配置する
+- 複数テストで使い回せるロジックは **テストヘルパー**として切り出す
+- ヘルパーファイルは `__tests__/helpers/` ディレクトリに配置
 
 ```typescript
 // __tests__/helpers/swipeTestHelpers.ts
@@ -84,8 +84,8 @@ export const createSwipeParams = (
 
 ## AAA パターン
 
-- テストは **Arrange（準備）→ Act（実行）→ Assert（検証）** の3ステップで記述する
-- 各ステップをコメントで明示する
+- テストは **Arrange（準備）→ Act（実行）→ Assert（検証）** の3ステップで記述
+- 各ステップをコメントで明示
 
 ```typescript
 test('deltaXが閾値を超えた場合、右スワイプを返す', () => {
