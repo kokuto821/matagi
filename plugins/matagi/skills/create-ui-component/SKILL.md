@@ -13,7 +13,7 @@ description: >
 
 ## 概要
 
-`shared-rules/ui-design/` のルールに沿って新規 UI コンポーネントを生成するタスクスキル。アーキテクチャ分類（button / edit / view）を決め、該当コンポーネントルールと共通スタイリングルールを適用。
+`shared-rules/ui-design/` ルールに沿って新規 UI コンポーネント生成するタスクスキル。アーキテクチャ分類（button / edit / view）決定→該当コンポーネントルール・共通スタイリングルール適用。
 
 ## 手順
 
@@ -66,26 +66,26 @@ flowchart TD
 
 ### 1. 索引を読み、扱うコンポーネントを特定する
 
-`shared-rules/ui-design/README.md`（索引）を読み、作るものに該当する `component/` ルールのパスを特定。全ファイルは読み込まない。
+`shared-rules/ui-design/README.md`（索引）を読み、作るものに該当する `component/` ルールパス特定。全ファイルは読み込まない。
 
 ### 2. 分類と配置先を決める
 
-`shared-rules/ui-design/architecture/ui-architecture.md` に従い button / edit / view を決定。配置先は次表。
+`shared-rules/ui-design/architecture/ui-architecture.md` 従い button / edit / view 決定。配置先 = 次表。
 
 | 種別 | 配置先 |
 |------|--------|
-| 再利用するコンポーネント | `components/` |
+| 再利用コンポーネント | `components/` |
 | 単一画面専用（React Router 構成） | `pages/` |
 | 単一画面専用（非 Router 構成） | `features/` |
 
 ### 3. 該当ルールを読む
 
-- 該当する `component/<分類>/<name>.md`
+- 該当 `component/<分類>/<name>.md`
 - 共通: `styling-rule/color.md` / `styling-rule/space-and-radius.md` / `styling-rule/button-rule.md`（ボタン系のとき）
 
 ### 4. 雛形をもとに生成する
 
-`shared-rules/ui-design/component/template-ui.md` を雛形に、tsx / css / stories / test をコロケーション（同一フォルダ）で生成。既存プロジェクトの構成・命名を読んで合わせる。
+`shared-rules/ui-design/component/template-ui.md` を雛形に、tsx / css / stories / test をコロケーション（同一フォルダ）で生成。既存プロジェクト構成・命名を読んで合わせる。
 
 ### 5. スタイリングを適用する
 
@@ -94,4 +94,4 @@ flowchart TD
 ## 出力
 
 - 生成コンポーネントファイル一式。
-- 適用ルール（分類・該当 component ルール・スタイリング）の要約と、参照ルールファイルのパス。
+- 適用ルール（分類・該当 component ルール・スタイリング）要約＋参照ルールファイルパス。
