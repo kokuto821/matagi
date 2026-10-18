@@ -1,5 +1,5 @@
 # rule-externalization
 
-スキル・エージェント内のルールを外部化する方針を置く場所です。
+スキル・エージェント内ルール外部化方針置き場。
 
-ルールを `rules/` に切り出して参照させる考え方を `externalization-rule.md` にまとめています。
+ルールを `rules/` に切り出し参照させる考え方 → `externalization-rule.md` に集約。

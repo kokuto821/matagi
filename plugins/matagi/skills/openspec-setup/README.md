@@ -1,5 +1,5 @@
 # openspec-setup
 
-作業ディレクトリに OpenSpec を導入するタスク型スキルを置く場所です。
+作業ディレクトリへ OpenSpec 導入するタスク型スキル置き場。
 
-npm でのインストール確認から `openspec init`・schema のローカル fork・matagi のルールファイルへの参照ポインタ埋め込みまでを自動化します。導入後のワークフロー進行は `openspec-workflow` スキルに委ねます。
+npm インストール確認から `openspec init`・schema ローカル fork・matagi ルールファイルへの参照ポインタ埋め込みまで自動化。導入後ワークフロー進行 = `openspec-workflow` スキルに委ねる。
