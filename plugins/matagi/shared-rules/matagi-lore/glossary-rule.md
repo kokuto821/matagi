@@ -11,7 +11,7 @@
 | シカリ | Shikari | 全体指揮・オーケストレーター。issue/spec 受け各役職へ差配 | `github-issue-resolve` / `openspec-workflow` / `tdd` |
 | セコ | Seko | 獲物（コンテキスト・情報）追い立て、シカリ・ブッパ支える探索者兼サポーター | `hikitsugi` |
 | ブッパ | Buppa | 仕様通り正確に撃ち抜く実装者。狙い外さない | `coding` / `test-coding` / `create-ui-component` / `lint-sync` |
-| オキテ | Okite | 掟（規約・テスト）逸脱許さぬ検証者。産出者と別人格で裁く | `coding-review` / `ui-review` / `ai-engineering-review` / `harness-review` / `prompt-review` / `context-engineering-review` |
+| オキテ | Okite | 掟（規約・テスト）逸脱許さぬ検証者。産出者と別人格で裁く | `coding-review` / `ui-review` / `ai-engineering-review` / `harness-review` / `prompt-review` / `context-engineering-review` / `evaluate-skill` |
 
 役職と実在スキル対応 = 上表が唯一の正。各 SKILL.md = 役職名のみ短く注入、本表再掲しない（[[externalization-rule]] §単一情報源）。
 

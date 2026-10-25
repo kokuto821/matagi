@@ -48,6 +48,7 @@ Claude Code スキル・ナレッジの共有リポジトリ。日本の伝統�
 | shared-rules ディレクトリ規約（配置・命名・相互リンク記法 `[[slug]]`） | `plugins/matagi-kaji/shared-rules/rules-directory/directory-rule.md` |
 | 命名規則（スキル・エージェント） | `plugins/matagi-kaji/shared-rules/naming-conventions/naming-rule.md` |
 | ドキュメント文体（genshijin 通常レベルを既定・変換対象外） | `plugins/matagi-kaji/shared-rules/document-writing/writing-rule.md` |
+| スキル評価の役割分担と評価ケース規約（create-skill＝作成／evaluate-skill＝評価・evals 配置・書き手は産出者と別） | `plugins/matagi-kaji/shared-rules/skill-evaluation/evaluation-rule.md` |
 | スキル・エージェントのテンプレート規約（本文構成・手順は mermaid flowchart TD で記述） | `plugins/matagi-kaji/shared-rules/template/template-rule.md` |
 | ハーネス制御（コード vs Markdown の一次判定） | `plugins/matagi-kaji/shared-rules/harness-engineering/harness-rule.md` |
 | ステアリング手法の選択（AGENTS.md/CLAUDE.md/rules/skills/subagents等） | `plugins/matagi-kaji/shared-rules/harness-engineering/selection-rule.md` |

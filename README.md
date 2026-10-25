@@ -73,6 +73,7 @@ AI 向けのプロジェクト指示は `AGENTS.md` を参照。Claude Code は 
 | `harness-review` | オキテ | ステアリング手法の選択が公式意図通りかレビュー |
 | `prompt-review` | オキテ | プロンプト・SKILL.md・エージェント定義をレビュー |
 | `context-engineering-review` | オキテ | コンテキスト設計（注意予算・長時間軸戦略）をレビュー |
+| `evaluate-skill` | オキテ | skill-creator の評価機能でスキルの eval・ベンチマーク・trigger 評価を実施（手動起動） |
 | `branch-and-push` | - | 未コミット変更のコミット単位提案からブランチ作成・push まで一気通貫 |
 | `commit-message-simple` | - | issue 番号・プレフィックス付きコミットメッセージ生成 |
 | `create-skill` | - | スキル・サブエージェントの新規作成 |
