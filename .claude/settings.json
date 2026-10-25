@@ -1,7 +1,8 @@
 {
   "enabledPlugins": {
     "matagi@matagi": true,
-    "genshijin@genshijin": true
+    "genshijin@genshijin": true,
+    "skill-creator@claude-plugins-official": true
   },
   "permissions": {
     "deny": [
