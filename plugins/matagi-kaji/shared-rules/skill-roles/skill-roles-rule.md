@@ -1,8 +1,8 @@
-# スキル評価ルール
+# スキル役割分担ルール
 
 ## 原則
 
-**スキル作成 = `create-skill`、評価 = `evaluate-skill`。役割重複禁止。** 評価 = skill-creator の評価機能を借用、評価ロジックの自作禁止。
+**スキル作成 = `create-skill`、スキル評価 = `evaluate-skill`。役割重複禁止。** 評価 = skill-creator の評価機能を借用、評価ロジックの自作禁止。
 
 ## 判断基準
 
