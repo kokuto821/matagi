@@ -4,4 +4,6 @@
 
 前提: skill-creator（`skill-creator@claude-plugins-official`）導入済み。手動起動のみ。測定と改善案提示まで、書き換えはしない（作成・改善=`create-skill`）。線引きの出典=`shared-rules/skill-roles/skill-roles-rule.md`。
 
+結果はスキルごとの要約 md として設定可能な出力先に残す。出力先の決め方・書式=`reference/eval-result.md`。
+
 定義=`SKILL.md` 参照。

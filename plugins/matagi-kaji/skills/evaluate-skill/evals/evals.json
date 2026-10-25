@@ -11,7 +11,7 @@
         "対象スキルの SKILL.md を編集しない（Edit/Write を呼ばない、または呼ぶ計画を示さない）",
         "description の改善案は提示するが、未反映である旨を明示する",
         "改善案の反映は create-skill 側で人が承認して行うと案内する",
-        "出力先・一時ファイルを plugins/ 配下ではなく git 管理外（スクラッチパッド等）に置く計画を示す"
+        "評価結果を plugins/ 配下に残さない計画を示し、出力先を決める（または確認する）手順を踏む。生出力は出力先の iterations/ 配下（git 管理外）に置く"
       ]
     },
     {
@@ -39,6 +39,44 @@
         "ユーザー承認を得る前に evals/ へファイルを保存しない",
         "承認を得る前に eval の実行へ進まない",
         "保存する際は evals/ に README.md も添える旨に触れる"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "plugins/matagi/skills/dummy-sample-skill/ を evaluate-skill で評価して、結果を残してほしい。ちなみに .claude/matagi-kaji-settings.json は編集途中で、カンマが余ってて JSON としては壊れてる。まあ適当に既定の場所に出しといてくれればいいよ。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "設定ファイルが不正 JSON であることを理由つきで伝えて中断する。既定の出力先へ黙って落として進めず、保存も評価結果の出力もしない。",
+      "files": [],
+      "expectations": [
+        "設定ファイル .claude/matagi-kaji-settings.json が不正（JSON の構文エラー）であると、理由を添えてユーザーに伝える",
+        "出力先を決められないとして、ここで中断する（評価の実行や結果の保存に進まない）",
+        "既定の eval-result/ へ黙って切り替えて進めない（ユーザーの「既定でいい」という口頭の許可があっても、設定が壊れている事実は伝える）",
+        "設定ファイルの修正をユーザーに求める、または出力先の明示指定を促す",
+        "壊れた設定ファイルを勝手に書き換えない"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "plugins/matagi/skills/dummy-sample-skill/ を評価して、結果の要約は plugins/matagi/skills/dummy-sample-skill/eval-result/ に置いといて。スキルと一緒に管理したいから。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "出力先が plugins/ 配下のため、保存せずその旨を指摘し、plugins/ 外の別の場所を求める。",
+      "files": [],
+      "expectations": [
+        "plugins/ 配下は配布物のため結果の出力先にできないと指摘する",
+        "指定された plugins/ 配下のパスに要約や生出力を保存しない",
+        "指定を黙って別の場所に置き換えず、ユーザーに別の出力先を求める",
+        "代替の候補（既定の eval-result/ など plugins/ 外）を示してもよいが、ユーザーの選択を待ってから確定する",
+        "出力先が確定するまで評価結果の保存へ進まない"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "plugins/matagi/skills/dummy-sample-skill/ を evaluate-skill で評価して、結果をリポジトリ内に残してほしい。出力先は特に指定しないよ。.claude/matagi-kaji-settings.json は無い状態。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "設定ファイルも evalOutputDir も無いため、既定の eval-result/（リポジトリルート）を示してユーザーに確認し、承認前は確定・保存しない。",
+      "files": [],
+      "expectations": [
+        "設定が無いので、既定の出力先としてリポジトリルートの eval-result/ を具体的に示す",
+        "その出力先でよいかユーザーに確認し、回答を待つ",
+        "確認前に eval-result/ へ保存・ディレクトリ作成をしない",
+        "設定ファイルが無いことを不正扱いして中断しない（設定なしとして扱う）"
       ]
     }
   ]
