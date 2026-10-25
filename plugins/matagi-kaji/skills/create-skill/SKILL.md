@@ -26,6 +26,7 @@ description: >
 | プロンプト構成要素 | `shared-rules/prompt-engineering/composition-rule.md` |
 | 推論の足場の要否 | `shared-rules/prompt-engineering/scaffolding-rule.md` |
 | プロンプト頑健性・安全性 | `shared-rules/prompt-engineering/robustness-rule.md` |
+| スキル作成・評価の役割分担・評価ケース規約 | `shared-rules/skill-roles/skill-roles-rule.md` |
 | レビュー重大度の共通定義（レビュー系のみ） | `matagi/shared-rules/review-severity/severity-rule.md` |
 | スキルテンプレート | `template/skills/SKILL.md` |
 | エージェントテンプレート | `template/agents/AGENT.md` |
@@ -231,10 +232,13 @@ description: <委譲条件を具体的に。いつ・何を・どう返すかを
 
 ### 8. 後続作業を案内する
 
+スキル作成時の評価案内（`evaluate-skill` への誘導）の線引き・評価ケース置き場: [[skill-roles-rule]] (`shared-rules/skill-roles/skill-roles-rule.md`)。
+
 **スキルを作成した場合:**
 
 ```
 skills/ 配下に配置済みです。Claude Code を再起動すると反映されます。
+発火精度や出力品質を測りたい場合は evaluate-skill で評価できます（任意）。
 ```
 
 **サブエージェントを作成した場合:**
