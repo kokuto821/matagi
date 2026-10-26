@@ -1,0 +1,62 @@
+[
+  {
+    "query": "matagi-kaji の create-skill で作った github-issue-resolve スキル、ちゃんと「issue #123 やって」で発火してるか心配。スキルを評価して、発火精度を数字で見たい",
+    "should_trigger": true
+  },
+  {
+    "query": "plugins/matagi/skills/tdd/SKILL.md のベンチマーク取ってほしい。スキルあり/なしで出力がどれだけ変わるか比べたいんだけど",
+    "should_trigger": true
+  },
+  {
+    "query": "このスキルの発火精度を測って。対象は plugins/matagi/skills/coding-review。should-trigger と should-not-trigger のクエリでどのくらい当たるか知りたい",
+    "should_trigger": true
+  },
+  {
+    "query": "commit-message-simple の description のトリガーを検証して。他のスキルとかぶって誤発火してないか確認したい",
+    "should_trigger": true
+  },
+  {
+    "query": "先週 test-coding スキルを直したんだけど、改善されたのか劣化したのか分からん。evals 回して結果と改善案を報告してくれる？",
+    "should_trigger": true
+  },
+  {
+    "query": "hikitsugi スキルが本当に役に立ってるのか定量的に知りたい。with_skill と without_skill で比較するベンチマークをお願い",
+    "should_trigger": true
+  },
+  {
+    "query": "スキルの品質を測定したい。evals/evals.json に書いたテストケースを実行して、pass rate をまとめて",
+    "should_trigger": true
+  },
+  {
+    "query": "lint-sync って頼んだときにちゃんと起動するのか不安。description のトリガー評価だけ先にやっといて（直すのはまだいい、結果だけ見たい）",
+    "should_trigger": true
+  },
+  {
+    "query": "evaluate-skill で ui-review を評価してみて。eval-result に要約も残してほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "うちのスキル群、description が長すぎて他のスキルと取り合いになってる気がする。実際どれが誤発火してるか測定してレポートほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "新しく「PR の説明文を整える」スキルを作りたい。命名規則とテンプレートに従って SKILL.md を生成して",
+    "should_trigger": false
+  },
+  {
+    "query": "tdd スキルの SKILL.md の指示文をレビューして。prompt-* ルールに違反してないか指摘してほしい",
+    "should_trigger": false
+  },
+  {
+    "query": "このスキルの description を書き直して。「issue 作って」で発火しやすいようにキーワードを足してほしい",
+    "should_trigger": false
+  },
+  {
+    "query": "このエージェント定義の評価基準を考えて。スキルじゃなくて prompt-reviewer エージェントの指摘の精度を上げるプロンプト改善案がほしい",
+    "should_trigger": false
+  },
+  {
+    "query": "モデルの出力品質を測るための LLM-as-a-judge を自分のアプリ(src/judge.ts)に実装したい。採点ルーブリックの設計から手伝って",
+    "should_trigger": false
+  }
+]

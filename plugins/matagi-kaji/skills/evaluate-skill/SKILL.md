@@ -2,7 +2,8 @@
 name: evaluate-skill
 description: >
   「スキルを評価して」「このスキルの発火精度を測って」「スキルのベンチマークを取って」
-  「description のトリガーを検証して」と言われたとき、既存スキルの品質を skill-creator の
+  「description のトリガーを検証して」「スキルの evals を回して」「スキルあり・なしを比較して」
+  「スキルが誤発火していないか測って」と言われたとき、既存スキルの品質を skill-creator の
   評価機能（eval 実行・ベンチマーク・description の trigger 評価）で測定し、結果と改善案を
   報告する。スキルの新規作成は create-skill、description・本文の書き換えもこのスキルでは行わない。
 # when_to_use: 作成済みスキルが意図どおり発火し、スキルなしより出力が良くなるかを測りたいとき
