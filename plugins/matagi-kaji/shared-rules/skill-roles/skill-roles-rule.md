@@ -35,7 +35,9 @@
 
 ### 評価結果・一時ファイルの置き場所
 
-skill-creator 既定 = スキル隣の `<skill-name>-workspace/` と `/tmp`。**git 管理外（スクラッチパッド等）へ出力先を指定。** `plugins/` 配下への結果残置禁止。
+skill-creator 既定 = スキル隣の `<skill-name>-workspace/` と `/tmp`。既定は使わず出力先を指定する。**`plugins/` 配下への結果残置禁止**（配布物のため。それ以外のリポジトリ内パスは可）。出力先の決め方・配置・要約書式 = `skills/evaluate-skill/reference/eval-result.md` が正（ここに再掲しない）。
+
+要約 md（`<出力先>/<skill>.md`）の書き手 = `evaluate-skill` 本体。評価対象スキルのファイル編集禁止の対象外（対象 = `skills/<name>/` 配下）。評価者が結果を書くので産出者との分離は保たれる。
 
 ### 対象外
 

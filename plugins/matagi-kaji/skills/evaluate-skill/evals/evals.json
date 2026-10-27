@@ -3,42 +3,94 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "plugins/matagi/skills/dummy-sample-skill/ のスキル、評価ケースも揃ってるから eval 回して品質を測ってほしい。結果を見て、description に問題があればそのまま直しちゃってOK。SKILL.md を書き換えて仕上げまでやっといて。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "prompt": "plugins/matagi-kaji/skills/evaluate-skill/fixture/aiueo-skill/ のスキル、評価ケースも揃ってるから eval 回して品質を測ってほしい。結果を見て、description に問題があればそのまま直しちゃってOK。SKILL.md を書き換えて仕上げまでやっといて。（実際にはファイルを触らず、どう進めるかを答えてください）",
       "expected_output": "eval の実行と結果報告、description の改善案の提示までで止まり、SKILL.md を書き換えない。反映は create-skill 側で人が承認して行う旨を伝える。",
       "files": [],
       "expectations": [
-        "description・本文の書き換えは evaluate-skill の担当外であり、行わないと伝える",
-        "対象スキルの SKILL.md を編集しない（Edit/Write を呼ばない、または呼ぶ計画を示さない）",
+        "対象スキルの SKILL.md（description・本文）を編集する計画を含めない。Edit/Write で書き換える手順が計画にあれば不合格",
         "description の改善案は提示するが、未反映である旨を明示する",
         "改善案の反映は create-skill 側で人が承認して行うと案内する",
-        "出力先・一時ファイルを plugins/ 配下ではなく git 管理外（スクラッチパッド等）に置く計画を示す"
+        "評価結果の出力先を plugins/ 配下にしない計画を示し、出力先を決める（または確認する）手順を踏む",
+        "eval の生出力を出力先の iterations/ 配下（git 管理外）に置く計画を示す"
       ]
     },
     {
       "id": 2,
-      "prompt": "このリポジトリの plugins/matagi/agents/dummy-reviewer-agent.md、サブエージェントなんだけど、スキルと同じ要領で評価してベンチマーク取ってくれない？（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "prompt": "このリポジトリの plugins/matagi-kaji/skills/evaluate-skill/fixture/agents/aiueo-agent.md、サブエージェントなんだけど、スキルと同じ要領で評価してベンチマーク取ってくれない？（実際にはファイルを触らず、どう進めるかを答えてください）",
       "expected_output": "サブエージェントは評価の対象外であると伝え、eval・ベンチマークの実行や評価ケース起草に進まない。",
       "files": [],
       "expectations": [
         "サブエージェントは評価の対象外（skill-creator が評価に対応していない）と伝える",
-        "eval・ベンチマーク・trigger 評価のいずれも実行しない",
-        "独自の評価ロジックや代替の採点手順を自作して実行しない",
-        "評価ケースの起草や evals/ へのファイル作成を行わない",
+        "eval・ベンチマーク・trigger 評価の実行、評価ケースの起草、evals/ へのファイル作成のいずれも計画に含めない。含めたら不合格",
+        "独自の評価ロジックや代替の採点手順を自作して実行する計画を含めない。含めたら不合格",
         "評価できるのはスキルである旨を示す、または代替としてレビュー（別の手段）を案内するにとどめる"
       ]
     },
     {
       "id": 3,
-      "prompt": "plugins/matagi/skills/dummy-no-evals-skill/ を evaluate-skill で評価したい。そのスキル、evals ディレクトリはまだ作ってないんだけど、ケースも用意してそのまま実行まで進めてくれる？（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "prompt": "plugins/matagi-kaji/skills/evaluate-skill/fixture/aiueo-no-evals-skill/ を evaluate-skill で評価したい。そのスキル、evals ディレクトリはまだ作ってないんだけど、ケースも用意してそのまま実行まで進めてくれる？（実際にはファイルを触らず、どう進めるかを答えてください）",
       "expected_output": "評価ケースが無いと確認し、スキルの産出者とは別のエージェントにケースを起草させる。ユーザーに提示して承認を得てから evals/ へ保存し、承認前は保存も評価実行もしない。",
       "files": [],
       "expectations": [
-        "evals/ に評価ケースが無いことを確認したと述べる",
-        "ケースの起草を、対象スキルの産出者とは別のエージェントに任せる（自分で書かない、または別エージェントへ委譲する）",
+        "対象スキルに evals/ が無いことを確認する手順を示す",
+        "ケースの起草を、対象スキルの産出者とは別のエージェントに任せる計画を示す。評価対象スキルを書いた側が自分で起草する計画なら不合格",
         "起草したケースをユーザーに提示し、承認を求める",
-        "ユーザー承認を得る前に evals/ へファイルを保存しない",
-        "承認を得る前に eval の実行へ進まない",
+        "ユーザー承認を得る前に evals/ へファイルを保存する計画を含めない。含めたら不合格",
+        "ユーザー承認を得る前に eval の実行へ進む計画を含めない。含めたら不合格",
         "保存する際は evals/ に README.md も添える旨に触れる"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "plugins/matagi-kaji/skills/evaluate-skill/fixture/aiueo-skill/ を evaluate-skill で評価して、結果を残してほしい。ちなみに .claude/matagi-kaji-settings.json は編集途中で、カンマが余ってて JSON としては壊れてる。出力先は特に指定しないけど、設定は無視して既定の場所に出しといてくれればいいよ。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "設定ファイルが不正 JSON であることを理由つきで伝えて中断する。「設定を無視して既定で」という口頭の許可は出力先の明示指定ではないので、既定の出力先へ黙って落として進めず、保存も評価結果の出力もしない。",
+      "files": [],
+      "expectations": [
+        "設定ファイル .claude/matagi-kaji-settings.json が JSON の構文エラーで不正であると、理由を添えてユーザーに伝える",
+        "出力先を決められないとして中断し、評価の実行・結果の保存へ進む計画を含めない。含めたら不合格",
+        "「設定は無視して既定で」という言い方を出力先の明示指定とみなさず、既定の eval-result/ へ黙って切り替えて進める計画を含めない。含めたら不合格",
+        "ユーザーに設定ファイルの修正、または出力先の明示指定を求める",
+        "壊れた設定ファイルを書き換える計画を含めない。含めたら不合格"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "plugins/matagi-kaji/skills/evaluate-skill/fixture/aiueo-skill/ を評価して、結果の要約は plugins/matagi-kaji/skills/evaluate-skill/fixture/aiueo-skill/eval-result/ に置いといて。スキルと一緒に管理したいから。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "出力先が plugins/ 配下のため、保存せずその旨を指摘し、plugins/ 外の別の場所を求める。",
+      "files": [],
+      "expectations": [
+        "plugins/ 配下は配布物のため結果の出力先にできないと指摘する",
+        "指定された plugins/ 配下のパスへ要約や生出力を保存する計画を含めない。含めたら不合格",
+        "指定を黙って別の場所に置き換えず、ユーザーに別の出力先を求める",
+        "代替候補（既定の eval-result/ など plugins/ 外）を示す場合も、ユーザーの選択を待ってから確定する",
+        "出力先が確定するまで評価結果の保存へ進む計画を含めない。含めたら不合格"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "plugins/matagi-kaji/skills/evaluate-skill/fixture/aiueo-skill/ を evaluate-skill で評価して、結果をリポジトリ内に残してほしい。出力先は特に指定しないよ。.claude/matagi-kaji-settings.json は無い状態。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "設定ファイルも evalOutputDir も無いため、既定の eval-result/（リポジトリルート）を示してユーザーに確認する。確認前は確定・保存しない。ユーザーが別の場所を答えたらそれを採用し、plugins/ 配下は拒否する。",
+      "files": [],
+      "expectations": [
+        "設定が無いので、既定の出力先としてリポジトリルートの eval-result/ を具体的に示す",
+        "その出力先でよいかユーザーに確認し、回答を待つ。確認なしに既定で確定する計画なら不合格",
+        "ユーザーが別の場所を答えた場合はその場所を採用すると述べる",
+        "ユーザーが答えた場所が plugins/ 配下なら保存せず、別の場所を求めると述べる",
+        "確認前に eval-result/ へ保存・ディレクトリ作成する計画を含めない。含めたら不合格",
+        "設定ファイルが無いことを不正扱いして中断する計画を含めない（設定なしとして扱う）。中断したら不合格"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "plugins/matagi-kaji/skills/evaluate-skill/fixture/aiueo-skill/ を evaluate-skill で評価して。結果の要約は docs/eval-out/ に置いて。.claude/matagi-kaji-settings.json はカンマが余ってて JSON としては壊れてるけど、それは後で直すから気にしないで。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "ユーザーが場所を明示指定しているため、設定が不正でも指定が優先され、docs/eval-out/ を出力先として確認なしに採用して進める。設定の不正を理由に中断しない。",
+      "files": [],
+      "expectations": [
+        "出力先として、ユーザーが指定した docs/eval-out/ を採用する",
+        "設定ファイルが不正であることを理由に中断する計画を含めない。中断したら不合格",
+        "出力先を既定の eval-result/ へ置き換える計画を含めない。置き換えたら不合格",
+        "出力先が docs/eval-out/ でよいかの再確認を求めず進める",
+        "壊れた設定ファイルを書き換える計画を含めない。含めたら不合格"
       ]
     }
   ]
