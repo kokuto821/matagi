@@ -12,7 +12,7 @@
     "should_trigger": true
   },
   {
-    "query": "commit-message-simple の description のトリガーを検証して。他のスキルとかぶって誤発火してないか確認したい",
+    "query": "commit の description のトリガーを検証して。他のスキルとかぶって誤発火してないか確認したい",
     "should_trigger": true
   },
   {

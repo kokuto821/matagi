@@ -74,8 +74,8 @@ AI 向けのプロジェクト指示は `AGENTS.md` を参照。Claude Code は 
 | `prompt-review` | オキテ | プロンプト・SKILL.md・エージェント定義をレビュー |
 | `context-engineering-review` | オキテ | コンテキスト設計（注意予算・長時間軸戦略）をレビュー |
 | `evaluate-skill` | オキテ | skill-creator の評価機能でスキルの eval・ベンチマーク・trigger 評価を実施（手動起動） |
-| `branch-and-push` | - | 未コミット変更のコミット単位提案からブランチ作成・push まで一気通貫 |
-| `commit-message-simple` | - | issue 番号・プレフィックス付きコミットメッセージ生成 |
+| `branch` | - | 命名規則に沿った作業ブランチの作成 |
+| `commit` | - | issue 番号・プレフィックス付きメッセージ生成とコミット単位の提案、承認後のコミット実行 |
 | `create-skill` | - | スキル・サブエージェントの新規作成 |
 | `openspec-setup` | - | 作業リポジトリへの OpenSpec 導入 |
 | `strict-mode` | - | 忖度なく正直な高レベルアドバイザーとして応答するモード |

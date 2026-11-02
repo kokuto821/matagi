@@ -38,8 +38,8 @@
 - マーケットプレイス配布前提 → kebab-case 必須（非準拠は弾かれる）
 
 ```
-✅ commit-message-simple, create-skill, tdd
-❌ tdd_expert, MySkill, commitMessageSimple
+✅ commit, create-skill, tdd
+❌ tdd_expert, MySkill, createSkill
 ```
 
 ### SKILL.md フロントマター
