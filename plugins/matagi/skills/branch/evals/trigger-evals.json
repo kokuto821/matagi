@@ -1,0 +1,22 @@
+[
+  {"query": "新しいブランチ切って。issue #142 のやつ、検索フィルタの不具合を直す", "should_trigger": true},
+  {"query": "issue #77 用の作業ブランチを用意して。実装はまだしなくていい", "should_trigger": true},
+  {"query": "feat/#60_search-filter でブランチ作って", "should_trigger": true},
+  {"query": "main のまま編集しちゃってた。issue #31 のブランチ切って、変更もそっちに持っていきたい", "should_trigger": true},
+  {"query": "ぶらんちきって〜 #204 README の誤字直すだけ", "should_trigger": true},
+  {"query": "issue 立てるほどじゃないから issue なしで、#x のブランチ切って。docs の誤字修正", "should_trigger": true},
+  {"query": "issue #15 のブランチ、main を最新にしてから切っといて", "should_trigger": true},
+  {"query": "wip/login-tweak ってブランチで作業したい。いま未コミットの変更があるから、退避も含めてよろしく", "should_trigger": true},
+  {"query": "作業始める前に issue 98 の作業場所を git で分けときたい", "should_trigger": true},
+  {"query": "ブランチ作りたいんだけど名前決めて。issue #66 はログ出力のリファクタ", "should_trigger": true},
+  {"query": "このブランチの変更をコミットして。分割もお願い", "should_trigger": false},
+  {"query": "issue #123 やって。ブランチ切るとこから PR まで全部", "should_trigger": false},
+  {"query": "refactor/#88_split-skills を origin に push して", "should_trigger": false},
+  {"query": "feat/issue33-lint-sync-skill って名前、今の命名規則だとアウト？ルールを教えて", "should_trigger": false},
+  {"query": "マージ済みのブランチを掃除したい。feat/#50_pr-merge-guard とか消しといて", "should_trigger": false},
+  {"query": "今のブランチを main に rebase して、コンフリクトも解消しといて", "should_trigger": false},
+  {"query": "保護ブランチに staging も足したいから CLAUDE_PROTECTED_BRANCHES の設定を settings.json に入れて", "should_trigger": false},
+  {"query": "ログインのバリデーションがおかしいので issue 作って。ブランチはまだいい", "should_trigger": false},
+  {"query": "feat/#51_login-form と main の差分を見せて。何コミット先行してる？", "should_trigger": false},
+  {"query": "次のチャットへの引き継ぎメモ作って。今どのブランチで何やってたかも書いて", "should_trigger": false}
+]

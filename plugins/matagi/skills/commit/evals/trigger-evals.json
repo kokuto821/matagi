@@ -1,0 +1,22 @@
+[
+  {"query": "feat/#51_login-form で作業してた分、キリがいいのでコミットして。src/auth/login.ts と src/auth/session.ts をいじってる", "should_trigger": true},
+  {"query": "これまでの変更まとめてコミットしといて。メッセージはいつもの issue 番号付きの日本語のやつで", "should_trigger": true},
+  {"query": "ボタン色の修正とログインの機能追加が混ざっちゃった。コミットを分けて", "should_trigger": true},
+  {"query": "src/api/client.ts の分だけコミットお願い、他のファイルはまだ途中だから触らないで", "should_trigger": true},
+  {"query": "こみっとして〜 さっきの tests/date.test.ts 直したぶんね", "should_trigger": true},
+  {"query": "今の差分、いくつかのコミットに分割して積んでほしい。push はまだしないで、あとで自分でやる", "should_trigger": true},
+  {"query": "ここまでの作業いったん履歴に残しときたい。git に積んどいて、リモートには上げなくていいよ", "should_trigger": true},
+  {"query": "issue なしのブランチだから #x でいいよ、README の修正コミットして", "should_trigger": true},
+  {"query": "git add した分としてない分が混ざってる気がする。中身確認して、ちゃんと整理してからコミットしてくれない？", "should_trigger": true},
+  {"query": "リファクタ終わった。src/utils/date.ts を datetime.ts にリネームしたやつ、rename のプレフィックスでコミットして", "should_trigger": true},
+  {"query": "この diff のコミットメッセージだけ考えて。コミットは自分でやるから実行しないで", "should_trigger": false},
+  {"query": "/genshijin-commit 50文字以内で、英語の Conventional Commits でコミットメッセージ作って", "should_trigger": false},
+  {"query": "新しいブランチ切って。issue #88 の続きをやるから、コミットはまだ先", "should_trigger": false},
+  {"query": "さっき作ったコミット、origin に push しといて。feat/#51_login-form のやつ", "should_trigger": false},
+  {"query": "issue #123 やって。ブランチ切って実装してコミットして PR まで全部", "should_trigger": false},
+  {"query": "今日はもう終わる。未コミットの変更がどこまでかも書いて、次のチャット用の引き継ぎメモ作って", "should_trigger": false},
+  {"query": "直前のコミットメッセージ typo してた。amend で「バリデーション」に直してほしい", "should_trigger": false},
+  {"query": "git log 見て、先週の #51 のコミットで何が入ったか教えて", "should_trigger": false},
+  {"query": "HEAD~3 のコミットがバグの原因っぽいから revert したい", "should_trigger": false},
+  {"query": "この PR のコード変更をレビューして。コミットの粒度がおかしくないかも見てほしい", "should_trigger": false}
+]
