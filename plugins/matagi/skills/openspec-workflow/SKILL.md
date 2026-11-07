@@ -20,7 +20,7 @@ OpenSpec フェーズ（explore/propose/apply/archive）統括。CLI 生成の `
 ## ルール
 
 - OpenSpec フェーズ・既存フェーズ・skill 役割分担 = [[openspec-rule]]（`shared-rules/openspec-integration/openspec-rule.md`）を唯一の正とする。
-- レビュー・産出者分離 = [[review-independence-rule]]（`matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md`）従う。apply 産出者と archive 前レビューは常に別エージェント。
+- レビュー・産出者分離 = [[review-independence-rule]]（`matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md`）従う。apply 産出者と archive 前レビューは常に別エージェント。産出者へ指摘を戻す前の承認は同ルール §指摘適用の承認 に従う（REVIEW 開始時に同節を Read。基準・省略条件・ノート退避は同節が唯一の正、再掲しない）。退避先 = git 管理外のスクラッチパッド `openspec-<change名>-notes.md`。前回実行の別ノートは取り込まない。
 - 実装委譲先判定 = [[issue-driven-workflow]]（`skills/issue-driven-workflow/SKILL.md`）手順4 IMPLEMENT 表と同基準。委譲先スキル in-context 起動（スキル起動／エージェント委譲定義 = [[selection-rule]] 参照）。domain 判定・具象サブエージェントへの隔離委譲 = 各委譲先スキル責務。
 - `openspec/` 未導入 → [[openspec-setup]]（`skills/openspec-setup/SKILL.md`）に委ねる。本スキルでは導入作業しない。
 
@@ -83,18 +83,31 @@ flowchart TD
 
     subgraph L4["4 REVIEW"]
         S4a["変更の性質に応じて coding-review と ai-engineering-review の該当する方を起動する 両方にまたがる場合は両方を起動する"]
-        S4b{"指摘があるか？"}
-        S4c["指摘を手順3で委譲した産出者へ戻して適用する"]
+        S4b{"ノートの不承認一覧と照合し 不承認済みを除く指摘があるか？"}
+        S4j{"確認省略の明示指示があるか？"}
+        S4h["指摘を重大度順に提示し 適用する指摘をユーザーに確認する"]
+        S4i{"承認された指摘があるか？"}
+        S4c["承認された指摘のみ 確認省略時は不承認済みを除く全件を 手順3で委譲した産出者へ戻して適用する"]
+        S4k["ラウンドの承認結果と適用状況をノートに退避する"]
+        S4l{"このラウンドで適用した指摘があるか？"}
         S4d["レビューを再実行して解消を確認する"]
-        S4e{"指摘が解消したか？"}
+        S4e{"ノートの不承認一覧と照合し 不承認済みを除く指摘が解消したか？"}
         S4f{"ラウンド上限に達したか？"}
         S4g["残るものを残課題として報告する"]
         S4a --> S4b
-        S4b -->|YES| S4c
-        S4c --> S4d
+        S4b -->|YES| S4j
+        S4j -->|YES| S4c
+        S4j -->|NO| S4h
+        S4h --> S4i
+        S4i -->|YES| S4c
+        S4i -->|NO| S4k
+        S4c --> S4k
+        S4k --> S4l
+        S4l -->|YES| S4d
+        S4l -->|NO| S4g
         S4d --> S4e
         S4e -->|NO| S4f
-        S4f -->|NO| S4c
+        S4f -->|NO| S4j
         S4f -->|YES| S4g
     end
 
@@ -117,7 +130,7 @@ flowchart TD
 
     classDef user fill:#fff3bf,stroke:#f08c00,color:#000
     classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
-    class S2c,S3d,S3k user
+    class S2c,S3d,S3k,S4h,S4i user
     class S1b,S2a,S2d,S3h,S4a,S5a,S4c,S4d delegate
 ```
 
@@ -141,7 +154,7 @@ flowchart TD
    - タスク曖昧、実装がタスク・spec 範囲を超える、エラー発生の場合 = その場で範囲を広げず一旦止めてユーザーに確認（黙って narrow/defer しない）。
    - 全タスク完了、またはブロックされるまで繰り返す。
 
-4. **REVIEW**（新規ゲート。CLI 生成ワークフローには無い工程） — 実装コード中心の変更 → `coding-review`、md 資産（rules/skills/AGENTS.md/CLAUDE.md 等）中心 → `ai-engineering-review` を in-context 起動。両方にまたがる変更 = 両方起動。指摘適用 = 手順3で委譲した産出者へ戻す。**適用後、修正した産出者自身に確認させず、レビュー再実行して解消確認**（[[review-independence-rule]]: 修正後再検証も修正した本人に委ねない）。指摘残る場合 = ラウンド繰り返す(最大2ラウンド。それでも残るもの = 残課題として報告)。**このレビューを経ずに手順5（ARCHIVE）へ進まない。**
+4. **REVIEW**（新規ゲート。CLI 生成ワークフローには無い工程） — 実装コード中心の変更 → `coding-review`、md 資産（rules/skills/AGENTS.md/CLAUDE.md 等）中心 → `ai-engineering-review` を in-context 起動。両方にまたがる変更 = 両方起動。指摘 = [[review-independence-rule]] §指摘適用の承認 に従い承認を得て、承認分を手順3で委譲した産出者へ戻して適用。ラウンドで適用した指摘なし→残るものを残課題として報告し手順5へ。**適用後、修正した産出者自身に確認させず、レビュー再実行して解消確認**（[[review-independence-rule]]: 修正後再検証も修正した本人に委ねない）。指摘残る場合 = ラウンド繰り返す(最大2ラウンド。それでも残るもの = 残課題として報告)。**このレビューを経ずに手順5（ARCHIVE）へ進まない。**
 
 5. **ARCHIVE** — レビュー完了後、CLI 生成の `openspec-archive-change` スキルを in-context 起動（この時点ではファイル移動・spec 統合のみ→CLI 生成のままで問題なし）。
 
@@ -151,5 +164,5 @@ flowchart TD
 
 - 現フェーズ、委譲先（入口スキル＋判明していれば具象サブエージェント）、進捗（N/M タスク完了）
 - APPLY: タスクごと委譲先・結果
-- REVIEW: レビュー結果・指摘適用状況
+- REVIEW: レビュー結果・指摘の承認結果・適用状況（不承認指摘 = 残課題）
 - ARCHIVE: アーカイブ結果、specs 同期有無
