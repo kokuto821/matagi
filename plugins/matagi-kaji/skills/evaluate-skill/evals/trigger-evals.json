@@ -1,10 +1,10 @@
 [
   {
-    "query": "matagi-kaji の create-skill で作った github-issue-resolve スキル、ちゃんと「issue #123 やって」で発火してるか心配。スキルを評価して、発火精度を数字で見たい",
+    "query": "matagi-kaji の create-skill で作った issue-driven-workflow スキル、ちゃんと「issue #123 やって」で発火してるか心配。スキルを評価して、発火精度を数字で見たい",
     "should_trigger": true
   },
   {
-    "query": "plugins/matagi/skills/tdd/SKILL.md のベンチマーク取ってほしい。スキルあり/なしで出力がどれだけ変わるか比べたいんだけど",
+    "query": "plugins/matagi/skills/tdd-workflow/SKILL.md のベンチマーク取ってほしい。スキルあり/なしで出力がどれだけ変わるか比べたいんだけど",
     "should_trigger": true
   },
   {
@@ -44,7 +44,7 @@
     "should_trigger": false
   },
   {
-    "query": "tdd スキルの SKILL.md の指示文をレビューして。prompt-* ルールに違反してないか指摘してほしい",
+    "query": "tdd-workflow スキルの SKILL.md の指示文をレビューして。prompt-* ルールに違反してないか指摘してほしい",
     "should_trigger": false
   },
   {

@@ -4,7 +4,7 @@ description: >
   「OpenSpecで進めて」「仕様駆動で実装して」「openspec-proposeして」
   「この変更をOpenSpecで合意形成してから実装して」と言われたとき、
   OpenSpec の explore/propose/apply/archive フェーズを統括するオーケストレーター。
-  apply の各タスクは既存の産出 skill（tdd/coding/test-coding）へ委譲し、
+  apply の各タスクは既存の産出 skill（tdd-workflow/coding/test-coding）へ委譲し、
   archive の前に別エージェントによるレビューを必須で挟む。
   導入がまだの場合は openspec-setup へ誘導する。
 ---
@@ -21,7 +21,7 @@ OpenSpec フェーズ（explore/propose/apply/archive）統括。CLI 生成の `
 
 - OpenSpec フェーズ・既存フェーズ・skill 役割分担 = [[openspec-rule]]（`shared-rules/openspec-integration/openspec-rule.md`）を唯一の正とする。
 - レビュー・産出者分離 = [[review-independence-rule]]（`matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md`）従う。apply 産出者と archive 前レビューは常に別エージェント。
-- 実装委譲先判定 = [[github-issue-resolve]]（`skills/github-issue-resolve/SKILL.md`）手順4 IMPLEMENT 表と同基準。委譲先スキル in-context 起動（スキル起動／エージェント委譲定義 = [[selection-rule]] 参照）。domain 判定・具象サブエージェントへの隔離委譲 = 各委譲先スキル責務。
+- 実装委譲先判定 = [[issue-driven-workflow]]（`skills/issue-driven-workflow/SKILL.md`）手順4 IMPLEMENT 表と同基準。委譲先スキル in-context 起動（スキル起動／エージェント委譲定義 = [[selection-rule]] 参照）。domain 判定・具象サブエージェントへの隔離委譲 = 各委譲先スキル責務。
 - `openspec/` 未導入 → [[openspec-setup]]（`skills/openspec-setup/SKILL.md`）に委ねる。本スキルでは導入作業しない。
 
 ## 手順
@@ -62,7 +62,7 @@ flowchart TD
         S3e["openspec status と openspec instructions apply で進捗 contextFiles タスク一覧を取得する"]
         S3f["contextFiles に列挙された各ファイルを読む"]
         S3g{"未完了タスクがあるか？"}
-        S3h["未完了タスクを1件 IMPLEMENT 表に従い tdd coding test-coding へ委譲する 範囲を明示する"]
+        S3h["未完了タスクを1件 IMPLEMENT 表に従い tdd-workflow coding test-coding へ委譲する 範囲を明示する"]
         S3i{"タスクが曖昧 範囲超過 エラーのいずれかでブロックされたか？"}
         S3j["委譲先の結果を受け取り tasks.md の該当タスクをチェック済みにする"]
         S3k["その場で止めてユーザーに確認する"]
@@ -136,7 +136,7 @@ flowchart TD
    - `openspec status --change "<name>" --json` で進捗・スキーマ・パス取得。
    - `openspec instructions apply --change "<name>" --json` で `contextFiles`（proposal/specs/design/tasks 等）・タスク一覧取得。
    - `contextFiles` 列挙の各ファイルを読む。
-   - tasks.md 未完了タスク（`- [ ]`）を1件ずつ、[[github-issue-resolve]] IMPLEMENT 表従い `tdd`/`coding`/`test-coding` へ委譲（テスト伴う実装 = `tdd`、伴わない実装 = `coding`、テストのみ = `test-coding`）。委譲先に「このタスクの範囲のみ実装する」ことを明示。
+   - tasks.md 未完了タスク（`- [ ]`）を1件ずつ、[[issue-driven-workflow]] IMPLEMENT 表従い `tdd-workflow`/`coding`/`test-coding` へ委譲（テスト伴う実装 = `tdd-workflow`、伴わない実装 = `coding`、テストのみ = `test-coding`）。委譲先に「このタスクの範囲のみ実装する」ことを明示。
    - 委譲先から実装結果受領後、本スキル自身が該当タスクの `- [ ]` を `- [x]` に更新。
    - タスク曖昧、実装がタスク・spec 範囲を超える、エラー発生の場合 = その場で範囲を広げず一旦止めてユーザーに確認（黙って narrow/defer しない）。
    - 全タスク完了、またはブロックされるまで繰り返す。

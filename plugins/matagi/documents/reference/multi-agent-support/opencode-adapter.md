@@ -52,7 +52,7 @@ node --experimental-strip-types plugins/matagi/adapters/opencode/link-source-dir
 node --experimental-strip-types plugins/matagi/adapters/opencode/generate-agents-md.ts .opencode
 ```
 
-- `.opencode/skills/*` と `.opencode/plugins/matagi-hooks.ts` は `plugins/matagi/` への**相対** symlink（例: `../../plugins/matagi/skills/tdd`）で、マシン固有のパスを含まないため git 管理する。clone しただけで skills とフックが有効になり、skills の増減時のみ `link-source-dirs.ts` を再実行してコミットする。
+- `.opencode/skills/*` と `.opencode/plugins/matagi-hooks.ts` は `plugins/matagi/` への**相対** symlink（例: `../../plugins/matagi/skills/tdd-workflow`）で、マシン固有のパスを含まないため git 管理する。clone しただけで skills とフックが有効になり、skills の増減時のみ `link-source-dirs.ts` を再実行してコミットする。
 - `.opencode/agents/` は source から変換して作る生成物（symlink ではない）のため git 管理外。clone 後に `generate-agents-md.ts` を実行して生成する。再生成時の上書き・削除の扱いは `adapters/opencode/README.md` を参照。
 - `link-source-dirs.ts` は、出力先が `plugins/matagi/` 配下（またはそこへ落ちる symlink）なら中止する。symlink 以外の既存物は削除せずエラーにする。
 - 設定は起動時に一度だけ読まれ再読み込みされない。生成後は OpenCode を再起動する。

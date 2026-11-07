@@ -11,7 +11,7 @@
 | 状況（該当する具体的シグナル） | どうする |
 |------|---------|
 | 実装方針候補が複数で比較・トレードオフ整理必要／設計判断やり直しが高コスト（後戻りしにくい）／複数 capability（`openspec/specs/` 配下）にまたがる | [[openspec-workflow]]（`skills/openspec-workflow/SKILL.md`）で進める |
-| 実装方針が一択で、対話中に完了条件がその場で1〜3行にまとまる | 使わない。従来どおり `github-issue-resolve` の PLAN フェーズで進める |
+| 実装方針が一択で、対話中に完了条件がその場で1〜3行にまとまる | 使わない。従来どおり `issue-driven-workflow` の PLAN フェーズで進める |
 | 何から手をつけるか自体が固まっていない | 先に [[openspec-workflow]] の explore フェーズで壁打ち→判断 |
 
 `openspec/` 未導入の場合 = 先に [[openspec-setup]]（`skills/openspec-setup/SKILL.md`）で導入（§導入 参照）。
@@ -31,7 +31,7 @@ issue 化すべきか判断（issue 粒度）自体 = [[issue-driven-rule]] の�
 | `config.yaml` の `context` | この作業ディレクトリの規約は matagi のルール（`plugins/matagi/shared-rules/`）を参照し、矛盾しないこと |
 | `config.yaml` の `rules.proposal` | 対象 issue 番号を明記すること（[[issue-driven-rule]]） |
 | `config.yaml` の `rules.design` | [[design-rule]] の観点で代替案と比較すること |
-| `config.yaml` の `rules.tasks` | 各タスクの実装委譲先（tdd/coding/test-coding）を明記すること |
+| `config.yaml` の `rules.tasks` | 各タスクの実装委譲先（tdd-workflow/coding/test-coding）を明記すること |
 | `config.yaml` の `operations.apply.guidance` | [[openspec-workflow]] スキル経由で進める旨、既存の産出 skill へ委譲する旨 |
 | `config.yaml` の `operations.archive.guidance` | archive 前に [[review-independence-rule]] に従ったレビューを済ませる旨 |
 | `templates/proposal.md`（HTML コメント） | 対象 issue 番号の明記を促すポインタ（[[issue-driven-rule]]）、[[openspec-workflow]] への参照 |
@@ -46,7 +46,7 @@ issue 化すべきか判断（issue 粒度）自体 = [[issue-driven-rule]] の�
 |---|---|---|
 | `explore`（任意） | CLI 生成 `openspec-explore` スキルをそのまま使う（コードを書かないため委譲問題なし） | PLAN フェーズ壁打ちの代替・補助 |
 | `propose` | CLI 生成 `openspec-propose`/`openspec-update-change` スキルをそのまま使う（同上） | PLAN フェーズ合意形成手段。proposal/design/specs delta/tasks.md 生成 |
-| `apply` | **[[openspec-workflow]] スキル経由。CLI 生成 `openspec-apply-change` は直接使わない**（実装コードを自分で書き、既存委譲表を無視するため） | IMPLEMENT フェーズの上位ループにすぎない。tasks.md 各項目 = 既存委譲表（[[github-issue-resolve]] 手順4: テストを伴う実装は [[tdd]]、伴わない実装は [[coding]]、テストのみは [[test-coding]] 等）にそのまま従って実装。**OpenSpec 自身はコードを書かない**。 |
+| `apply` | **[[openspec-workflow]] スキル経由。CLI 生成 `openspec-apply-change` は直接使わない**（実装コードを自分で書き、既存委譲表を無視するため） | IMPLEMENT フェーズの上位ループにすぎない。tasks.md 各項目 = 既存委譲表（[[issue-driven-workflow]] 手順4: テストを伴う実装は [[tdd-workflow]]、伴わない実装は [[coding]]、テストのみは [[test-coding]] 等）にそのまま従って実装。**OpenSpec 自身はコードを書かない**。 |
 | `archive` / `sync-specs` | **[[openspec-workflow]] スキル経由**（レビューゲートを通してから CLI 生成 `openspec-archive-change`/`openspec-sync-specs` を起動） | REVIEW〜COMMIT フェーズ内、または PR 作成前に実施、`openspec/specs/` 確定 |
 
 ### レビュー独立性
@@ -85,5 +85,5 @@ OpenSpec の事実（`openspec init` の実際の挙動、コマンド一覧、c
 - [[design-rule]]（`shared-rules/design-principles/design-rule.md`） — design.md で比較する設計原則
 - [[openspec-setup]]（`skills/openspec-setup/SKILL.md`） — 作業ディレクトリへの導入
 - [[openspec-workflow]]（`skills/openspec-workflow/SKILL.md`） — フェーズ進行・実装委譲・レビューゲート
-- [[github-issue-resolve]]（`skills/github-issue-resolve/SKILL.md`） — apply の実装委譲基準（IMPLEMENT 表）
+- [[issue-driven-workflow]]（`skills/issue-driven-workflow/SKILL.md`） — apply の実装委譲基準（IMPLEMENT 表）
 - [[openspec-overview]]（`documents/reference/spec-driven-development/openspec-overview.md`） — OpenSpec 自体の事実整理
