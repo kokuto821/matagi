@@ -32,7 +32,7 @@
 | 承認されなかった指摘 | 適用しない。以降ラウンドで再確認せず、**残課題として最終報告に残す**。同一指摘の判定 = 同一箇所かつ同一根拠ルール。迷う場合は新規扱いで確認 |
 | 各ラウンドの承認・適用を終えた | 承認結果（承認／不承認の指摘要旨）を git 管理外のノートに退避。次ラウンド冒頭でノートを読み戻し、不承認済みとの照合に使う（[[long-horizon-rule]]（`shared-rules/context-engineering/long-horizon-rule.md`））。会話記憶だけに頼らない |
 | 承認された指摘が1件もない | 適用せず次工程へ進む（不承認分は上段どおり残課題） |
-| ユーザーが「確認なしで進めて」等を明示 | 確認省略可。適用対象 = 不承認済みを除く全件（[[issue-driven-rule]]（`matagi/shared-rules/issue-driven-development/issue-driven-rule.md`）§副作用を伴う git / GitHub 操作 の明示指示と同じ扱い）。エージェントから省略を持ちかけない |
+| ユーザーが「確認なしで進めて」「全自動でやって」等を明示 | 確認省略可。適用対象 = 不承認済みを除く全件（[[issue-driven-rule]]（`matagi/shared-rules/issue-driven-development/issue-driven-rule.md`）§副作用を伴う git / GitHub 操作 の明示指示と同じ扱い）。エージェントから省略を持ちかけない |
 | 起動したレビュースキル自身が承認ゲートと適用委譲を持つ（ui-review / prompt-review / context-engineering-review 等） | そのスキル内の承認・適用で完結。呼出側で同じ指摘を再確認せず、産出者へ再委譲もしない（二重承認・二重適用回避） |
 
 ## 適用外（単一エージェントで良いケース）
