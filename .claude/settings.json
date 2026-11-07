@@ -1,13 +1,14 @@
 {
-  "enabledPlugins": {
-    "matagi@matagi": true,
-    "genshijin@genshijin": true,
-    "skill-creator@claude-plugins-official": true
-  },
   "permissions": {
     "deny": [
       "Skill(openspec-apply-change *)",
       "Skill(openspec-archive-change *)"
     ]
+  },
+  "enabledPlugins": {
+    "matagi@matagi": true,
+    "matagi-kaji@matagi": true,
+    "genshijin@genshijin": true,
+    "skill-creator@claude-plugins-official": true
   }
 }

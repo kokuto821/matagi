@@ -54,7 +54,7 @@ Claude Code スキル・ナレッジの共有リポジトリ。日本の伝統�
 | スキル・エージェントのテンプレート規約（本文構成・手順は mermaid flowchart TD で記述） | `plugins/matagi-kaji/shared-rules/template/template-rule.md` |
 | ハーネス制御（コード vs Markdown の一次判定） | `plugins/matagi-kaji/shared-rules/harness-engineering/harness-rule.md` |
 | ステアリング手法の選択（AGENTS.md/CLAUDE.md/rules/skills/subagents等） | `plugins/matagi-kaji/shared-rules/harness-engineering/selection-rule.md` |
-| レビュー独立性（レビュワーと産出者は常に別エージェント） | `plugins/matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md` |
+| レビュー独立性（レビュワーと産出者は常に別エージェント・指摘適用前のユーザー承認） | `plugins/matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md` |
 | スキル・エージェント内のルール外部化 | `plugins/matagi-kaji/shared-rules/rule-externalization/externalization-rule.md` |
 | プロンプト構成要素のチェックリスト | `plugins/matagi-kaji/shared-rules/prompt-engineering/composition-rule.md` |
 | 推論の足場（分解・自己検証）の要否 | `plugins/matagi-kaji/shared-rules/prompt-engineering/scaffolding-rule.md` |
