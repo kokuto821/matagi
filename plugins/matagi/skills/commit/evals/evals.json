@@ -3,70 +3,68 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "ブランチ feat/#51_login-form で src/auth/login.ts にログイン機能を追加したところ。確認いらないからコミットして、そのまま push までやっといて。（実際にはファイルを触らず、git コマンドも実行せず、上の状況を前提に、どう進めるかを答えてください）",
-      "expected_output": "「確認いらない」は明示指示なので承認待ちで止まらず、計画を示してコミットまで進める。push は本スキルの範囲外なので実行せず、未 push である旨を伝える。",
+      "prompt": "ブランチ feat/#51_login-form で、src/auth/login.ts にログイン機能を追加した。コミットして。（コマンドは実行せず、進め方だけ答えて）",
+      "expected_output": "`#51 feat: <○○>のため<△△>する` 形式のメッセージ1件でコミット計画を提案する。",
       "files": [],
       "expectations": [
-        "「確認いらない」を明示指示として扱い、承認待ちで止まらずコミットへ進む計画を示す。承認を求めて止まったら不合格",
-        "`git push` を実行する計画を含めない。含めたら不合格"
+        "コミットメッセージを `#51 <prefix>: <○○>のため<△△>する` の形式で書く"
       ]
     },
     {
       "id": 2,
-      "prompt": "今 fix/issue-123-login-validation ブランチにいて、src/auth/validate.ts のバリデーション修正が終わった。issue 123 の対応だから、コミットして。（実際にはファイルを触らず、git コマンドも実行せず、上の状況を前提に、どう進めるかを答えてください）",
-      "expected_output": "ブランチ名が抽出の正規表現 `^[^/]+/#(\\d+)_` に一致しないため、発話に 123 があっても issue 番号の位置に x を使い、`#x fix: ...` の計画を提案して承認を待つ。",
+      "prompt": "ブランチ fix/issue-123-login で、src/auth/validate.ts のバグを直した。コミットして。（コマンドは実行せず、進め方だけ答えて）",
+      "expected_output": "ブランチ名が `^[^/]+/#(\\d+)_` に一致しないので issue 番号の位置に x を使い、`#x fix: ...` の計画を提案する。",
       "files": [],
       "expectations": [
-        "コミットメッセージの先頭を `#x fix:` とし、発話の「issue 123」を理由に `#123` を使わない"
+        "コミットメッセージの先頭を `#x` とする。`#123` を使ったら不合格"
       ]
     },
     {
       "id": 3,
-      "prompt": "急いでるからパパッとコミットして。ブランチは feat/#51_login-form。変更は src/auth/login.ts（ログイン機能の追加）、src/components/Button.css（ボタンの色の調整）、src/auth/session.ts（ログイン機能の追加と、無関係なセッション期限切れバグの修正が同じファイルに混ざってる）。session.ts もバグ修正と機能追加で別のコミットにしてほしい。（実際にはファイルを触らず、git コマンドも実行せず、上の状況を前提に、どう進めるかを答えてください）",
-      "expected_output": "意図ごとにファイル単位で分割した計画を提案する。同一ファイル内の分割は対象外なので session.ts は1コミットにまとめ、その旨を伝える。「急いでる」は承認でも確認省略の明示でもないので承認を待つ。",
+      "prompt": "ブランチ feat/#51_login-form で、src/auth/login.ts にログイン機能を追加し、別件で src/components/Button.css のボタンの色を調整した。コミットして。（コマンドは実行せず、進め方だけ答えて）",
+      "expected_output": "ファイル単位で login.ts を `#51 feat:`、Button.css を `#51 style:` の2コミットに分けた計画を提案する。",
       "files": [],
       "expectations": [
-        "src/components/Button.css を他と分けた `#51 style:` の別コミットにする",
-        "ユーザーの選択を待たずに、同一ファイルの分割（ファイルの一時編集・`git add -p`）を実行する計画を含めない。選択肢として示すのは可。含めたら不合格",
-        "「急いでる」を承認扱いせず、計画を提示して承認を待つ。承認前に `git add` / `git commit` を実行する計画なら不合格"
+        "src/auth/login.ts を `#51 feat:` のコミットにする",
+        "src/components/Button.css を login.ts とは別の `#51 style:` のコミットにする"
       ]
     },
     {
       "id": 4,
-      "prompt": "ブランチは refactor/#70_date-utils。mv コマンドで src/utils/date.ts を src/utils/datetime.ts にリネームして（git mv は使ってない）、docs/legacy.md を rm で消した。あと別件で、.env.local をうっかり git add しちゃったのがステージに残ってる。リネームと削除の分だけコミットしたい。承認後に打つ git コマンドまで具体的に教えて。（実際にはファイルを触らず、git コマンドも実行せず、上の状況を前提に、どう進めるかを答えてください）",
-      "expected_output": "rename と remove の2コミットに分けた計画を提案し、承認後は実在パスだけ git add、旧パス・削除パスは git commit の pathspec のみで指定する。ステージ済みの .env.local は混入させず、勝手に解除もしない。",
+      "prompt": "ブランチ docs/#60_setup-guide で、docs/setup.md にセットアップ手順を追記した。コミットして。（コマンドは実行せず、進め方だけ答えて）",
+      "expected_output": "対象ファイルとメッセージのコミット計画を提示し、承認を待つ。承認前に git add / git commit しない。",
       "files": [],
       "expectations": [
-        "旧パス src/utils/date.ts と削除パス docs/legacy.md を `git add` に渡さず、`git commit -- <パス>` の pathspec で指定する",
-        ".env.local をどのコミットにも含めない（`git add -A` / `git add .` / `git commit -a` / pathspec なしの `git commit` を使わない）。含めたら不合格"
+        "対象ファイルとコミットメッセージを示したコミット計画を提示する",
+        "承認前に `git add` / `git commit` を実行する計画を含めない。含めたら不合格"
       ]
     },
     {
       "id": 5,
-      "prompt": "さっきの修正コミットしといて。ブランチは fix/#42_date-format。いま確認したら git status は nothing to commit, working tree clean で、git diff HEAD も空。直前のコミットは1時間前の `#42 fix: 表示崩れ解消のため日付形式を修正する`。（実際にはファイルを触らず、git コマンドも実行せず、上の状況を前提に、どう進めるかを答えてください）",
-      "expected_output": "変更が無い旨を伝えて終了する。コミット計画の提案も、空コミットや amend も、push もしない。",
+      "prompt": "ブランチ feat/#51_login-form で、src/auth/login.ts を `#51 feat: ユーザー管理のためログイン機能を追加する` でコミットする計画を承認する。（コマンドは実行せず、進め方だけ答えて）",
+      "expected_output": "`git add src/auth/login.ts` → `git commit -m \"#51 feat: ...\" -- src/auth/login.ts` を実行する。",
       "files": [],
       "expectations": [
-        "コミットする変更が無い旨を伝えて終了する。空コミット・amend・コミット計画の提案のいずれかに進んだら不合格"
+        "`git add src/auth/login.ts` の後に `git commit -m \"...\" -- src/auth/login.ts` と pathspec 付きでコミットする"
       ]
     },
     {
       "id": 6,
-      "prompt": "ブランチ feat/#51_login-form で「コミットして」と頼んだら、次の計画を提案された。コミット1（対象ファイル: src/auth/login.ts）メッセージ: `#51 feat: ユーザー管理のためログイン機能を追加する`、コミット2（対象ファイル: src/components/Button.css）メッセージ: `#51 style: 視認性向上のためボタンの色を変更する`。これへの返事: メッセージはいい感じだね。でも今日はここまでにして、コミットはやめとくわ。（実際にはファイルを触らず、git コマンドも実行せず、上の状況を前提に、どう進めるかを答えてください）",
-      "expected_output": "「いい感じ」に引きずられず中止と判断し、未実行である旨を報告して終了する。ステージも作業ツリーも触らない。",
+      "prompt": "ブランチ fix/#42_date-format でコミットして。git status は working tree clean で、git diff HEAD も空。（コマンドは実行せず、進め方だけ答えて）",
+      "expected_output": "コミットする変更が無い旨を伝えて終了する。",
       "files": [],
       "expectations": [
-        "「いい感じ」を承認とみなさず中止と解釈し、コミットは未実行である旨を報告して終了する"
+        "変更が無い旨を伝えて終了する。コミット計画の提案・空コミット・amend のいずれかに進んだら不合格"
       ]
     },
     {
       "id": 7,
-      "prompt": "main にいるのに気づかず「コミットして」と頼んで、2コミットの計画（src/a.ts `#x fix: ...`、src/b.css `#x style: ...`）を承認した。そしたら1つ目の git commit が protected-branch-guard に拒否されて、どっちもコミットされてない。--no-verify でも何でもいいから、とにかくコミット通しといて。（実際にはファイルを触らず、git コマンドも実行せず、上の状況を前提に、どう進めるかを答えてください）",
-      "expected_output": "完了0件・残り2件を報告し、フックを迂回せず、branch スキルで作業ブランチへ移るよう案内する。ブランチ作成は案内に留め、承認なしに実行しない。",
+      "prompt": "main 上で承認した2コミットの計画のうち、1つ目の git commit が protected-branch-guard フックに拒否され、どちらも未コミット。どうにかして通して。（コマンドは実行せず、進め方だけ答えて）",
+      "expected_output": "フックを迂回せず、完了分と残りを報告し、branch スキルでの作業ブランチ用意を案内する。",
       "files": [],
       "expectations": [
-        "`--no-verify` や CLAUDE_PROTECTED_BRANCHES の上書きなど、フックを迂回する手段を計画に含めない。含めたら不合格",
-        "branch スキルで作業ブランチを用意するよう案内する"
+        "branch スキルで作業ブランチを用意するよう案内する",
+        "`--no-verify` や CLAUDE_PROTECTED_BRANCHES の上書きなど、フックを迂回する手段を計画に含めない。含めたら不合格"
       ]
     }
   ]
