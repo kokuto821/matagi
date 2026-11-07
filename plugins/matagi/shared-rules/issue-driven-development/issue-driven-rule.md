@@ -2,9 +2,9 @@
 
 ## 原則
 
-**開発 =「issue 作成フェーズ」と「issue 実行フェーズ」に分離、変更は issue 起点。実行フェーズ作業 = 必ず対象 issue 紐づくブランチ上（§1 issue = 1 branch = 1 PR の issue なし例外を除く）。** 作成フェーズ = やりたいことを issue という成果物に落として終了。実行フェーズ = 既存 issue を1件選び、ブランチ・PR・クローズまで閉じる。
+**開発 =「issue 作成フェーズ」と「issue 実行フェーズ」に分離、変更は issue 起点。実行フェーズ作業 = 必ず対象 issue 紐づくブランチ上（§1 issue = 1 branch = 1 PR の issue なし例外を除く）。** 作成フェーズ = やりたいことを issue という成果物に落として終了。実行フェーズ = 既存 issue を1件選び、ブランチ・PR 作成まで閉じる（issue クローズ = ユーザーのマージ時に §1 issue = 1 branch = 1 PR のクローズ用キーワードで行う）。
 
-**同一やり取り中 作成フェーズから実行フェーズへ続けて進まない**（issue 作った勢いで実装に入らない）。ただしユーザーが同一やり取りでの続行を明示指示した場合 = 作成 issue 番号と実行フェーズへ移る旨を宣言のうえ [[github-issue-resolve]]（`skills/github-issue-resolve/SKILL.md`）起動。
+**同一やり取り中 作成フェーズから実行フェーズへ続けて進まない**（issue 作った勢いで実装に入らない）。ただしユーザーが同一やり取りでの続行を明示指示した場合 = 作成 issue 番号と実行フェーズへ移る旨を宣言のうえ [[issue-driven-workflow]]（`skills/issue-driven-workflow/SKILL.md`）起動。
 
 ## 判断基準
 
@@ -39,6 +39,7 @@
 - issue 1件にブランチ1本・PR1本を対応。1つの PR に複数 issue の変更を混ぜない。
 - ブランチ名 = `<種別>/#<番号>_<英小文字の要約>`（要約部 kebab-case）。種別 = issue 種別（`feat` / `fix` / `refactor` / `docs`）に揃える。
 - PR 本文に `Closes #<番号>` 含め、マージで issue クローズされるようにする。
+- **完了条件に未達項目を残したまま PR を出す場合**: 既定 = `Closes` でなく `Refs #<番号>`。マージ後も issue を開いたままにする（未達のまま自動クローズさせない）。ユーザーが明示した場合のみ `Closes` を使う。
 - **issue なし例外**: ユーザーが issue なし続行を明示した場合のみ。ブランチ名 = `<種別>/#x_<要約>`（種別 = 変更内容で判断）、PR 本文 `Closes` 省略。エージェントから例外を持ちかけない。
 
 ### 必ず issue に紐づくブランチで作業する
@@ -95,4 +96,4 @@ issue なし例外 = issue #88 でユーザー判断により追加。既定は 
 | フェーズ | スキル |
 |---------|-------|
 | 作成フェーズ | [[github-issue-create]]（`skills/github-issue-create/SKILL.md`） |
-| 実行フェーズ | [[github-issue-resolve]]（`skills/github-issue-resolve/SKILL.md`） |
+| 実行フェーズ | [[issue-driven-workflow]]（`skills/issue-driven-workflow/SKILL.md`） |

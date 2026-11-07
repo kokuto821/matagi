@@ -58,10 +58,10 @@ AI 向けのプロジェクト指示は `AGENTS.md` を参照。Claude Code は 
 
 | スキル | 役職 | 内容 |
 |--------|------|------|
-| `github-issue-resolve` | シカリ | issue の実行フェーズ（ブランチ作成〜PR〜クローズ）を統括 |
+| `issue-driven-workflow` | シカリ | issue の実行フェーズ（ブランチ作成〜PR 作成）を統括 |
 | `github-issue-create` | シカリ | issue 化の判断から issue 本文作成までを統括 |
 | `openspec-workflow` | シカリ | OpenSpec の explore/propose/apply/archive を統括 |
-| `tdd` | シカリ | List→Red→Green→Refactor→Commit の TDD サイクルを統括 |
+| `tdd-workflow` | シカリ | List→Red→Green→Refactor→Commit の TDD サイクルを統括 |
 | `hikitsugi` | セコ | 会話内容を再現性ある引き継ぎメモに整理 |
 | `coding` | ブッパ | frontend/backend を判定し実装を委譲する単一入口 |
 | `test-coding` | ブッパ | テスト観点洗い出しから失敗するテスト（TDD Red）を実装 |
@@ -89,17 +89,17 @@ flowchart TD
     A[やりたいことが生まれる] --> B{issue 化すべきか}
     B -->|該当| C[github-issue-create<br/>作成フェーズ]
     B -->|該当しない| Z[対話で終える]
-    C --> D[github-issue-resolve<br/>実行フェーズ起動]
+    C --> D[issue-driven-workflow<br/>実行フェーズ起動]
     D --> E[入山: issue 紐づきブランチへ]
     E --> F{規模が大きい/<br/>合意形成が要る}
     F -->|該当| G[openspec-workflow<br/>propose→apply]
     F -->|該当しない| H[PLAN: 実装方針合意]
     G --> H
-    H --> I[tdd or coding<br/>ブッパが実装]
+    H --> I[tdd-workflow or coding<br/>ブッパが実装]
     I --> J[coding-review / ui-review<br/>オキテがレビュー]
     J --> K{指摘あり}
     K -->|該当| I
     K -->|該当しない| L[下山: commit → push → PR]
     L --> M[マージはユーザーが実施]
-    M --> N[issue クローズ]
+    M --> N[Closes で issue 自動クローズ]
 ```

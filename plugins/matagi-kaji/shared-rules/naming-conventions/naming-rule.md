@@ -38,7 +38,7 @@
 - マーケットプレイス配布前提 → kebab-case 必須（非準拠は弾かれる）
 
 ```
-✅ commit, create-skill, tdd
+✅ commit, create-skill, tdd-workflow
 ❌ tdd_expert, MySkill, createSkill
 ```
 

@@ -6,4 +6,4 @@ issue 駆動開発（issue 起点に実装・PR・マージまで進める進め
 
 うち保護ブランチ上の変更・コミット・push = `hooks/protected-branch-guard.ts` が実際にブロック。ルールが散文で担う = 「どの issue に紐づけるか」「いつブランチへ移動するか」判断。
 
-フェーズ別実際手順 = `skills/github-issue-create/` と `skills/github-issue-resolve/`。
+フェーズ別実際手順 = `skills/github-issue-create/` と `skills/issue-driven-workflow/`。

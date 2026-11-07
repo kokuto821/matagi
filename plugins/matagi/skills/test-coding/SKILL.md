@@ -23,7 +23,7 @@ TDD **List（テストリスト洗い出し）・Red（失敗するテストを�
 - domain 判定基準・対応サブエージェント・専用サブエージェント不在時委譲方針 = [[domain-classification-rule]] (`shared-rules/coding-conventions/domain-classification-rule.md`) を唯一の正とする。本スキルに再掲しない。
 - テストコード実装 = [[design-rule]] (`shared-rules/design-principles/design-rule.md`) 設計原則（DRY/SRP/SoC等）従う。
 - 対象物 = テストコード。テスト仕様書（ドキュメント）作成は行わない。
-- 本スキル = List/Red フェーズ産出に専念、レビューは行わない。TDD サイクル中レビュー = tdd スキル Refactor フェーズ（`coding-review` 経由コーディング規約・テスト規約レビュー）に一本化（[[tdd-rule]] Phase 3、issue #39）。`test-design-reviewer`（テスト観点・ケース抜け漏れ）・`design-principles-reviewer`（設計原則）= 本スキルからの委譲を廃止。両者 エージェントとして独立起動可能なまま残すが、TDD サイクルからは呼ばれない。
+- 本スキル = List/Red フェーズ産出に専念、レビューは行わない。TDD サイクル中レビュー = tdd-workflow スキル Refactor フェーズ（`coding-review` 経由コーディング規約・テスト規約レビュー）に一本化（[[tdd-rule]] Phase 3、issue #39）。`test-design-reviewer`（テスト観点・ケース抜け漏れ）・`design-principles-reviewer`（設計原則）= 本スキルからの委譲を廃止。両者 エージェントとして独立起動可能なまま残すが、TDD サイクルからは呼ばれない。
 
 ## 手順
 

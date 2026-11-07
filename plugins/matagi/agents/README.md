@@ -22,7 +22,7 @@
 |------------|------|
 | `frontend-coder` | フロントエンド 本番コード実装（`coding-rule` 準拠。`coding` スキル frontend 判定時委譲） |
 | `backend-coder` | バックエンド 本番コード実装（backend専用規約は未整備のため design-rule・一般イディオム基準。`coding` スキル backend 判定時委譲） |
-| `frontend-tester` | フロントエンド テスト実装（`test-rule` 準拠。TDD サイクル統括 = `tdd` スキル） |
+| `frontend-tester` | フロントエンド テスト実装（`test-rule` 準拠。TDD サイクル統括 = `tdd-workflow` スキル） |
 | `backend-tester` | バックエンド テスト実装（backend専用規約は未整備のため design-rule・一般作法基準） |
 | `ui-designer` | ui-design ルール準拠 UI 実装 修正適用 |
 

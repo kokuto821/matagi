@@ -57,7 +57,7 @@
 ## `openspec-setup` / `openspec-workflow`（matagi 側スキル）
 
 - `openspec-setup`: `plugins/matagi/skills/openspec-setup/SKILL.md`。上記の `npm install` → `openspec init --tools claude --profile core` → `openspec schema fork spec-driven spec-driven` → テンプレート・config.yaml へのポインタ埋め込み → `openspec schema validate spec-driven` を、作業ディレクトリごとに再現可能な形でラップする。
-- `openspec-workflow`: `plugins/matagi/skills/openspec-workflow/SKILL.md`。explore/propose/update-change/sync-specs は CLI 生成スキルをそのまま使い、apply は `openspec status --change <name> --json` と `openspec instructions apply --change <name> --json` を直接叩いて進捗・`contextFiles`・タスク一覧を取得し、タスクごとの実装は既存の産出 skill（tdd/coding/test-coding）へ委譲する。archive はレビュー完了後にのみ CLI 生成の `openspec-archive-change` を起動する。
+- `openspec-workflow`: `plugins/matagi/skills/openspec-workflow/SKILL.md`。explore/propose/update-change/sync-specs は CLI 生成スキルをそのまま使い、apply は `openspec status --change <name> --json` と `openspec instructions apply --change <name> --json` を直接叩いて進捗・`contextFiles`・タスク一覧を取得し、タスクごとの実装は既存の産出 skill（tdd-workflow/coding/test-coding）へ委譲する。archive はレビュー完了後にのみ CLI 生成の `openspec-archive-change` を起動する。
 
 ## フェーズワークフロー
 
