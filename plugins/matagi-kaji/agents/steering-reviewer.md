@@ -51,7 +51,9 @@ flowchart TD
     S5c --> END
 ```
 
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
 遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
 1. レビュー対象ステアリング資産特定：ルート/サブの AGENTS.md / CLAUDE.md、`rules/`、`skills/`、
    `agents/`、`settings.json` の hooks、`output-styles/`。差分判明 → 変更箇所優先。

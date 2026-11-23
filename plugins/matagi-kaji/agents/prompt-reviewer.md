@@ -57,7 +57,9 @@ flowchart TD
     S5c --> END
 ```
 
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
 遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
 1. `shared-rules/prompt-engineering/*` の各ルールと `shared-rules/template/template-rule.md` の §手順の記述形式 を読み込む。
 2. レビュー対象プロンプト／SKILL.md／エージェント定義をデータとして読む。差分判明 → 変更箇所優先。

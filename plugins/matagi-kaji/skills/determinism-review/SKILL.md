@@ -54,9 +54,13 @@ flowchart TD
     class S2c delegate
 ```
 
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
 遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
+<!-- @import plugins/matagi-kaji/prompt-commons/legend-delegation.md -->
 凡例: 青 = 他スキル・エージェントへの委譲
+<!-- @end -->
 
 1. 対象資産を洗い出す: AGENTS.md / CLAUDE.md・`rules/`・`skills/`・`agents/`・hooks。差分判明 → 変更箇所優先。
 2. 「多数・本格」の目安 = 対象が複数ディレクトリにまたがる、または 5 ファイル以上。サブエージェントを起動できるか現環境で確認する。

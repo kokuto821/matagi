@@ -68,9 +68,13 @@ flowchart TD
     class S2b,S4a delegate
 ```
 
-遷移は図、判定基準・詳細は下の本文に従う。
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
+<!-- @import plugins/matagi-kaji/prompt-commons/legend-user-and-delegation.md -->
 凡例: 黄 = ユーザーの確認・承認、青 = 他スキル・エージェントへの委譲
+<!-- @end -->
 
 ### 1. レビュー範囲を決める
 
@@ -85,12 +89,16 @@ flowchart TD
   `shared-rules/prompt-engineering/*`（[[composition-rule]] / [[scaffolding-rule]] / [[robustness-rule]] /
   [[improvement-rule]]）。
 
+<!-- @import plugins/matagi-kaji/prompt-commons/review-agent-handoff.md -->
 エージェントへ「レビュー対象ファイル／差分」と「指摘のみ・修正は適用しない」旨を渡す。
+<!-- @end -->
 
 ### 3. 指摘を提示し、承認を得る
 
+<!-- @import plugins/matagi-kaji/prompt-commons/approval-before-apply.md -->
 返った指摘 優先度順に提示。修正まで望むか（どの指摘を適用するか）ユーザーに確認。
 承認が得られなければ指摘のみで終える。
+<!-- @end -->
 
 ### 4. 承認された修正を委譲する
 

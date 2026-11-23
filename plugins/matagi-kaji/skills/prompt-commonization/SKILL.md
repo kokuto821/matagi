@@ -150,7 +150,9 @@ flowchart TD
     class S1c,S4b,S4c user
 ```
 
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
 遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
 凡例: 黄 = ユーザーの確認・承認
 
