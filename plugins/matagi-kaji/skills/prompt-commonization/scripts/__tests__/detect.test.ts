@@ -7,21 +7,20 @@ import { describe, expect, test } from "vitest";
 import {
   bigramJaccard,
   DEFAULT_MIN_CHARS,
-  DEFAULT_THRESHOLD,
   detectCandidates,
   normalizeText,
 } from "../prompt-commons.ts";
 import {
   BACKTICK_FENCE,
-  COMMON_PATH,
+  CRLF,
   END_LINE_TEXT,
   FRONTMATTER_DELIMITER,
-  startLineTextOf,
+  LONG_BASE,
+  LONG_CLOSE,
+  START_LINE_TEXT,
   TILDE_FENCE,
   toText,
 } from "./helpers.ts";
-
-const START_LINE_TEXT = startLineTextOf(COMMON_PATH);
 
 // 値に依存しないよう、境界を調べるテスト以外ではオプションを明示する。
 const TEST_THRESHOLD = 0.8;
@@ -48,9 +47,7 @@ const CHAIN_THIRD = "cdefghij";
 const CHAIN_ENDS_SIMILARITY = 5 / 9;
 const SIMILARITY_PRECISION = 10;
 
-// 既定値のテスト用: 20 文字（bigram 19）。末尾 1 文字違いは 18/20 = 0.9、末尾 4 文字違いは 15/23。
-const LONG_BASE = "abcdefghijklmnopqrst";
-const LONG_CLOSE = "abcdefghijklmnopqrsu";
+// LONG_BASE（helpers）との末尾 4 文字違いは 15/23。
 const LONG_FAR = "abcdefghijklmnopuvwx";
 const LONG_CLOSE_SIMILARITY = 0.9;
 
@@ -58,7 +55,7 @@ function fileOf(file: string, lines: string[]): { file: string; text: string } {
   return { file, text: toText(lines) };
 }
 
-function occurrenceOf(
+function detectedOccurrenceOf(
   file: string,
   startLine: number,
   endLine: number,
@@ -278,8 +275,8 @@ describe("detectCandidates: 完全一致", () => {
         unit: "paragraph",
         similarity: 1,
         occurrences: [
-          occurrenceOf("a.md", 3, 3, SENTENCE_1),
-          occurrenceOf("b.md", 1, 1, SENTENCE_1),
+          detectedOccurrenceOf("a.md", 3, 3, SENTENCE_1),
+          detectedOccurrenceOf("b.md", 1, 1, SENTENCE_1),
         ],
       },
     ]);
@@ -302,8 +299,8 @@ describe("detectCandidates: 完全一致", () => {
         unit: "paragraph",
         similarity: 1,
         occurrences: [
-          occurrenceOf("a.md", 1, 1, markdownLine),
-          occurrenceOf("b.md", 1, 1, plainLine),
+          detectedOccurrenceOf("a.md", 1, 1, markdownLine),
+          detectedOccurrenceOf("b.md", 1, 1, plainLine),
         ],
       },
     ]);
@@ -329,8 +326,8 @@ describe("detectCandidates: 完全一致", () => {
         unit: "paragraph",
         similarity: 1,
         occurrences: [
-          occurrenceOf("a.md", 3, 4, toText([firstLine, secondLine])),
-          occurrenceOf("b.md", 1, 2, toText([firstLine, secondLine])),
+          detectedOccurrenceOf("a.md", 3, 4, toText([firstLine, secondLine])),
+          detectedOccurrenceOf("b.md", 1, 2, toText([firstLine, secondLine])),
         ],
       },
     ]);
@@ -389,8 +386,8 @@ describe("detectCandidates: 近似一致", () => {
         unit: "paragraph",
         similarity: NEAR_PAIR_SIMILARITY,
         occurrences: [
-          occurrenceOf("a.md", 1, 1, NEAR_BASE),
-          occurrenceOf("b.md", 1, 1, NEAR_VARIANT),
+          detectedOccurrenceOf("a.md", 1, 1, NEAR_BASE),
+          detectedOccurrenceOf("b.md", 1, 1, NEAR_VARIANT),
         ],
       },
     ]);
@@ -447,9 +444,9 @@ describe("detectCandidates: 近似一致", () => {
     expect(result).toHaveLength(1);
     expect(result[0]?.kind).toBe("near");
     expect(result[0]?.occurrences).toStrictEqual([
-      occurrenceOf("a.md", 1, 1, CHAIN_FIRST),
-      occurrenceOf("b.md", 1, 1, CHAIN_SECOND),
-      occurrenceOf("c.md", 1, 1, CHAIN_THIRD),
+      detectedOccurrenceOf("a.md", 1, 1, CHAIN_FIRST),
+      detectedOccurrenceOf("b.md", 1, 1, CHAIN_SECOND),
+      detectedOccurrenceOf("c.md", 1, 1, CHAIN_THIRD),
     ]);
     expect(result[0]?.similarity).toBeCloseTo(
       CHAIN_ENDS_SIMILARITY,
@@ -481,12 +478,6 @@ describe("detectCandidates: 近似一致", () => {
 });
 
 describe("detectCandidates: 既定値", () => {
-  test("既定の閾値は 0.8、最小文字数は 20", () => {
-    // Assert
-    expect(DEFAULT_THRESHOLD).toBe(0.8);
-    expect(DEFAULT_MIN_CHARS).toBe(20);
-  });
-
   test("options を省略すると既定の閾値を使い、それ以上の近似一致を near にする", () => {
     // Arrange
     const files = [fileOf("a.md", [LONG_BASE]), fileOf("b.md", [LONG_CLOSE])];
@@ -606,8 +597,8 @@ describe("detectCandidates: 段落優先", () => {
         unit: "paragraph",
         similarity: 1,
         occurrences: [
-          occurrenceOf("a.md", 1, 2, toText([SENTENCE_1, SENTENCE_2])),
-          occurrenceOf("b.md", 1, 2, toText([SENTENCE_1, SENTENCE_2])),
+          detectedOccurrenceOf("a.md", 1, 2, toText([SENTENCE_1, SENTENCE_2])),
+          detectedOccurrenceOf("b.md", 1, 2, toText([SENTENCE_1, SENTENCE_2])),
         ],
       },
     ]);
@@ -631,8 +622,8 @@ describe("detectCandidates: 段落優先", () => {
         unit: "sentence",
         similarity: 1,
         occurrences: [
-          occurrenceOf("a.md", 1, 1, SENTENCE_1),
-          occurrenceOf("b.md", 1, 1, SENTENCE_1),
+          detectedOccurrenceOf("a.md", 1, 1, SENTENCE_1),
+          detectedOccurrenceOf("b.md", 1, 1, SENTENCE_1),
         ],
       },
     ]);
@@ -648,6 +639,43 @@ describe("detectCandidates: 段落優先", () => {
     // Assert
     expect(result).toHaveLength(1);
     expect(result[0]?.unit).toBe("paragraph");
+  });
+
+  test("文候補の一部の出現だけが段落候補に収まるときは、文候補を全出現のまま残す", () => {
+    // Arrange
+    const files = [
+      fileOf("a.md", [SENTENCE_1, SENTENCE_2]),
+      fileOf("b.md", [SENTENCE_1, SENTENCE_2]),
+      fileOf("c.md", [SENTENCE_1, SENTENCE_3]),
+    ];
+
+    // Act
+    const result = detectCandidates(files, BASE_OPTIONS);
+
+    // Assert
+    expect(result).toStrictEqual([
+      {
+        id: "c1",
+        kind: "exact",
+        unit: "paragraph",
+        similarity: 1,
+        occurrences: [
+          detectedOccurrenceOf("a.md", 1, 2, toText([SENTENCE_1, SENTENCE_2])),
+          detectedOccurrenceOf("b.md", 1, 2, toText([SENTENCE_1, SENTENCE_2])),
+        ],
+      },
+      {
+        id: "c2",
+        kind: "exact",
+        unit: "sentence",
+        similarity: 1,
+        occurrences: [
+          detectedOccurrenceOf("a.md", 1, 1, SENTENCE_1),
+          detectedOccurrenceOf("b.md", 1, 1, SENTENCE_1),
+          detectedOccurrenceOf("c.md", 1, 1, SENTENCE_1),
+        ],
+      },
+    ]);
   });
 });
 
@@ -691,8 +719,8 @@ describe("detectCandidates: 対象外の領域", () => {
     // Assert
     expect(result).toHaveLength(1);
     expect(result[0]?.occurrences).toStrictEqual([
-      occurrenceOf("a.md", 5, 5, SENTENCE_1),
-      occurrenceOf("b.md", 1, 1, SENTENCE_1),
+      detectedOccurrenceOf("a.md", 5, 5, SENTENCE_1),
+      detectedOccurrenceOf("b.md", 1, 1, SENTENCE_1),
     ]);
   });
 
@@ -733,8 +761,8 @@ describe("detectCandidates: 対象外の領域", () => {
     // Assert
     expect(result).toHaveLength(1);
     expect(result[0]?.occurrences).toStrictEqual([
-      occurrenceOf("a.md", 5, 5, SENTENCE_1),
-      occurrenceOf("b.md", 1, 1, SENTENCE_1),
+      detectedOccurrenceOf("a.md", 5, 5, SENTENCE_1),
+      detectedOccurrenceOf("b.md", 1, 1, SENTENCE_1),
     ]);
   });
 
@@ -787,8 +815,8 @@ describe("detectCandidates: 対象外の領域", () => {
         unit: "paragraph",
         similarity: 1,
         occurrences: [
-          occurrenceOf("a.md", 2, 2, SENTENCE_1),
-          occurrenceOf("b.md", 2, 2, SENTENCE_1),
+          detectedOccurrenceOf("a.md", 2, 2, SENTENCE_1),
+          detectedOccurrenceOf("b.md", 2, 2, SENTENCE_1),
         ],
       },
     ]);
@@ -819,8 +847,8 @@ describe("detectCandidates: 文の分割", () => {
           unit: "sentence",
           similarity: 1,
           occurrences: [
-            occurrenceOf("a.md", 1, 1, sharedSentence),
-            occurrenceOf("b.md", 1, 1, sharedSentence),
+            detectedOccurrenceOf("a.md", 1, 1, sharedSentence),
+            detectedOccurrenceOf("b.md", 1, 1, sharedSentence),
           ],
         },
       ]);
@@ -843,12 +871,12 @@ describe("detectCandidates: 文の分割", () => {
       "sentence",
     ]);
     expect(result[0]?.occurrences).toStrictEqual([
-      occurrenceOf("a.md", 1, 1, SENTENCE_1),
-      occurrenceOf("b.md", 5, 5, SENTENCE_1),
+      detectedOccurrenceOf("a.md", 1, 1, SENTENCE_1),
+      detectedOccurrenceOf("b.md", 5, 5, SENTENCE_1),
     ]);
     expect(result[1]?.occurrences).toStrictEqual([
-      occurrenceOf("a.md", 2, 2, SENTENCE_2),
-      occurrenceOf("b.md", 4, 4, SENTENCE_2),
+      detectedOccurrenceOf("a.md", 2, 2, SENTENCE_2),
+      detectedOccurrenceOf("b.md", 4, 4, SENTENCE_2),
     ]);
   });
 
@@ -873,8 +901,8 @@ describe("detectCandidates: 文の分割", () => {
         unit: "sentence",
         similarity: 1,
         occurrences: [
-          occurrenceOf("a.md", 1, 1, sharedSentence),
-          occurrenceOf("b.md", 1, 1, sharedSentence),
+          detectedOccurrenceOf("a.md", 1, 1, sharedSentence),
+          detectedOccurrenceOf("b.md", 1, 1, sharedSentence),
         ],
       },
     ]);
@@ -894,8 +922,35 @@ describe("detectCandidates: 文の分割", () => {
     // Assert
     expect(result).toHaveLength(1);
     expect(result[0]?.occurrences).toStrictEqual([
-      occurrenceOf("a.md", 1, 1, sharedSentence),
-      occurrenceOf("b.md", 1, 1, sharedSentence),
+      detectedOccurrenceOf("a.md", 1, 1, sharedSentence),
+      detectedOccurrenceOf("b.md", 1, 1, sharedSentence),
+    ]);
+  });
+
+  test("複数行にまたがる文は、開始行から終了行までの範囲を endLine に持つ", () => {
+    // Arrange
+    const firstHalf = "あいうえお";
+    const secondHalf = "かきくけこ。";
+    const files = [
+      fileOf("a.md", [firstHalf, secondHalf, SENTENCE_2]),
+      fileOf("b.md", ["# 見出し", "", firstHalf, secondHalf, SENTENCE_3]),
+    ];
+
+    // Act
+    const result = detectCandidates(files, BASE_OPTIONS);
+
+    // Assert
+    expect(result).toStrictEqual([
+      {
+        id: "c1",
+        kind: "exact",
+        unit: "sentence",
+        similarity: 1,
+        occurrences: [
+          detectedOccurrenceOf("a.md", 1, 2, `${firstHalf}\n${secondHalf}`),
+          detectedOccurrenceOf("b.md", 3, 4, `${firstHalf}\n${secondHalf}`),
+        ],
+      },
     ]);
   });
 });
@@ -918,8 +973,8 @@ describe("detectCandidates: 同一ファイル内の重複", () => {
         unit: "paragraph",
         similarity: 1,
         occurrences: [
-          occurrenceOf("a.md", 1, 1, SENTENCE_1),
-          occurrenceOf("a.md", 5, 5, SENTENCE_1),
+          detectedOccurrenceOf("a.md", 1, 1, SENTENCE_1),
+          detectedOccurrenceOf("a.md", 5, 5, SENTENCE_1),
         ],
       },
     ]);
@@ -963,9 +1018,52 @@ describe("detectCandidates: 並びと id", () => {
     // Assert
     expect(result).toHaveLength(1);
     expect(result[0]?.occurrences).toStrictEqual([
-      occurrenceOf("z.md", 3, 3, SENTENCE_1),
-      occurrenceOf("a.md", 1, 1, SENTENCE_1),
-      occurrenceOf("m.md", 3, 3, SENTENCE_1),
+      detectedOccurrenceOf("z.md", 3, 3, SENTENCE_1),
+      detectedOccurrenceOf("a.md", 1, 1, SENTENCE_1),
+      detectedOccurrenceOf("m.md", 3, 3, SENTENCE_1),
     ]);
+  });
+});
+
+describe("detectCandidates: 入力の形", () => {
+  test("空のファイルだけの入力は候補を返さない", () => {
+    // Arrange
+    const files = [
+      { file: "a.md", text: "" },
+      { file: "b.md", text: "" },
+    ];
+
+    // Act
+    const result = detectCandidates(files, BASE_OPTIONS);
+
+    // Assert
+    expect(result).toStrictEqual([]);
+  });
+
+  test("CRLF 改行の入力でも、候補の text に CR が残らず LF 入力と同じ行番号になる", () => {
+    // Arrange
+    const lines = ["# 見出し", "", SENTENCE_1, SENTENCE_2];
+    const files = [
+      { file: "a.md", text: toText(lines, CRLF) },
+      { file: "b.md", text: toText([SENTENCE_1, SENTENCE_2], CRLF) },
+    ];
+
+    // Act
+    const result = detectCandidates(files, BASE_OPTIONS);
+
+    // Assert
+    expect(result).toStrictEqual([
+      {
+        id: "c1",
+        kind: "exact",
+        unit: "paragraph",
+        similarity: 1,
+        occurrences: [
+          detectedOccurrenceOf("a.md", 3, 4, toText([SENTENCE_1, SENTENCE_2])),
+          detectedOccurrenceOf("b.md", 1, 2, toText([SENTENCE_1, SENTENCE_2])),
+        ],
+      },
+    ]);
+    expect(JSON.stringify(result)).not.toContain("\\r");
   });
 });

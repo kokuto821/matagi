@@ -6,15 +6,18 @@ export const IMPORT_START_PATTERN = /^\s*<!--\s+@import\s+(\S+)\s+-->\s*$/;
 export const IMPORT_END_PATTERN = /^\s*<!--\s+@end\s+-->\s*$/;
 const FENCE_PATTERN = /^\s*(`{3,}|~{3,})/;
 const FRONTMATTER_DELIMITER = "---";
-const PARENT_SEGMENT = "..";
+export const IMPORT_END_LINE = "<!-- @end -->";
 const PATH_SEGMENT_PATTERN = /[\\/]/;
 const ABSOLUTE_PATH_PATTERN = /^(?:[\\/]|[A-Za-z]:)/;
-export const BODY_JOINER = "\n";
 const TRAILING_LINE_BREAK_PATTERN = /\r?\n$/;
 const CRLF = "\r\n";
-const LF = "\n";
 
-export type ReadPhrase = (path: string) => string | undefined;
+export const LINE_FEED = "\n";
+export const PATH_SEPARATOR = "/";
+export const PARENT_SEGMENT = "..";
+export const MARKDOWN_EXTENSION = ".md";
+
+export type ReadFile = (path: string) => string | undefined;
 
 export type ImportBlock = {
   path: string;
@@ -115,6 +118,11 @@ export function isRootRelativePath(path: string): boolean {
   return !isAbsolute && !hasParentSegment;
 }
 
+// @import ブロックの開始行・終了行（走査用の正規表現と対になる生成側）。
+export function importStartLineOf(path: string): string {
+  return `<!-- @import ${path} -->`;
+}
+
 export function parseImportBlocks(text: string): ParseResult {
   const lines = text.split(LINE_BREAK_PATTERN);
   const blocks: ImportBlock[] = [];
@@ -144,7 +152,7 @@ export function parseImportBlocks(text: string): ParseResult {
       path: openBlock.path,
       startLine: openBlock.startLine,
       endLine: lineNumber,
-      body: lines.slice(openBlock.startLine, lineNumber - 1).join(BODY_JOINER),
+      body: lines.slice(openBlock.startLine, lineNumber - 1).join(LINE_FEED),
     });
     openBlock = null;
   }
@@ -157,7 +165,7 @@ export function parseImportBlocks(text: string): ParseResult {
 
 // 入力の改行コードを保つため、CRLF を含む入力は CRLF、それ以外は LF とみなす。
 export function eolOf(text: string): string {
-  return text.includes(CRLF) ? CRLF : LF;
+  return text.includes(CRLF) ? CRLF : LINE_FEED;
 }
 
 // 共通文言ファイルの内容を本文行へ。末尾の改行 1 つは本文に含めない。
@@ -169,5 +177,27 @@ export function phraseLinesOf(phrase: string): string[] {
 
 // 展開本文が共通文言の内容と一致するか。末尾改行・改行コードの差は無視する。
 export function isInSync(body: string, phrase: string): boolean {
-  return phraseLinesOf(phrase).join(BODY_JOINER) === body;
+  return phraseLinesOf(phrase).join(LINE_FEED) === body;
+}
+
+export type LineRangeReplacement = {
+  startLine: number;
+  endLine: number;
+  lines: string[];
+};
+
+// 行範囲（1 始まり・両端含む）を置き換える。後ろの範囲から置換し、前方の行番号がずれないようにする。
+// 範囲どうしは重ならないこと。endLine = startLine - 1 の範囲は空範囲（挿入）。改行コードは入力のものを保つ。
+export function replaceLineRanges(
+  source: string,
+  replacements: LineRangeReplacement[],
+): string {
+  const lines = source.split(LINE_BREAK_PATTERN);
+  const fromBottom = [...replacements].sort(
+    (a, b) => b.startLine - a.startLine,
+  );
+  for (const { startLine, endLine, lines: replacementLines } of fromBottom) {
+    lines.splice(startLine - 1, endLine - startLine + 1, ...replacementLines);
+  }
+  return lines.join(eolOf(source));
 }

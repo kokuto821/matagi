@@ -3,7 +3,7 @@
 
 import type { ImportBlock, ScannableLine } from "./markdown-scan.ts";
 import {
-  BODY_JOINER,
+  LINE_FEED,
   LINE_BREAK_PATTERN,
   parseImportBlocks,
   scannableLinesOf,
@@ -114,7 +114,7 @@ export function bigramJaccard(first: string, second: string): number {
 }
 
 function countLineBreaks(text: string): number {
-  return text.split(BODY_JOINER).length - 1;
+  return text.split(LINE_FEED).length - 1;
 }
 
 function isInImportBlock(lineNumber: number, blocks: ImportBlock[]): boolean {
@@ -132,7 +132,7 @@ function segmentOfLines(lines: ScannableLine[]): Segment {
   return {
     startLine: lines[0]?.lineNumber ?? 0,
     endLine: lines.at(-1)?.lineNumber ?? 0,
-    text: lines.map(({ text }) => text).join(BODY_JOINER),
+    text: lines.map(({ text }) => text).join(LINE_FEED),
   };
 }
 

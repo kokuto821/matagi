@@ -3,26 +3,24 @@
 
 import { posix } from "node:path";
 import { checkPhraseFile } from "./check.ts";
-import type { ReadPhrase } from "./markdown-scan.ts";
+import type { ReadFile } from "./markdown-scan.ts";
 import {
-  BODY_JOINER,
-  eolOf,
+  IMPORT_END_LINE,
+  importStartLineOf,
   isInSync,
   isRootRelativePath,
   LINE_BREAK_PATTERN,
+  LINE_FEED,
+  MARKDOWN_EXTENSION,
+  PARENT_SEGMENT,
+  PATH_SEPARATOR,
   parseImportBlocks,
   phraseLinesOf,
+  replaceLineRanges,
   scannableLinesOf,
 } from "./markdown-scan.ts";
 
 const KEBAB_CASE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const PHRASE_FILE_EXTENSION = ".md";
-const PATH_SEPARATOR = "/";
-const PARENT_SEGMENT = "..";
-const PHRASE_FILE_TRAILER = "\n";
-const IMPORT_END_LINE = "<!-- @end -->";
-
-export type ReadFile = ReadPhrase;
 
 export type PlanOccurrence = {
   file: string;
@@ -92,16 +90,12 @@ function planError(
   return { kind, message, ...subject };
 }
 
-function importStartLineOf(path: string): string {
-  return `<!-- @import ${path} -->`;
-}
-
 function phrasePathOf(dir: string, name: string): string {
-  return `${dir}${PATH_SEPARATOR}${name}${PHRASE_FILE_EXTENSION}`;
+  return `${dir}${PATH_SEPARATOR}${name}${MARKDOWN_EXTENSION}`;
 }
 
 function phraseFileContentOf(phrase: PlanPhrase): string {
-  return phrase.text + PHRASE_FILE_TRAILER;
+  return phrase.text + LINE_FEED;
 }
 
 function isValidDir(dir: string): boolean {
@@ -325,7 +319,7 @@ function occurrenceErrorsOf(
     }
     const current = lines
       .slice(occurrence.startLine - 1, occurrence.endLine)
-      .join(BODY_JOINER);
+      .join(LINE_FEED);
     if (current !== occurrence.expectedText) {
       errors.push(
         planError(
@@ -349,17 +343,15 @@ function occurrenceErrorsOf(
   return [...errors, ...overlapErrorsOf(file, inRange)];
 }
 
-// 後ろの範囲から置換し、前方の行番号がずれないようにする。
 function replacedTextOf(source: string, replacements: Replacement[]): string {
-  const lines = source.split(LINE_BREAK_PATTERN);
-  const fromBottom = [...replacements].sort(
-    (a, b) => b.occurrence.startLine - a.occurrence.startLine,
+  return replaceLineRanges(
+    source,
+    replacements.map(({ occurrence, blockLines }) => ({
+      startLine: occurrence.startLine,
+      endLine: occurrence.endLine,
+      lines: blockLines,
+    })),
   );
-  for (const { occurrence, blockLines } of fromBottom) {
-    const rangeLength = occurrence.endLine - occurrence.startLine + 1;
-    lines.splice(occurrence.startLine - 1, rangeLength, ...blockLines);
-  }
-  return lines.join(eolOf(source));
 }
 
 // 計画から書き込み内容を計算する。1 件でも不整合があれば writes は空。

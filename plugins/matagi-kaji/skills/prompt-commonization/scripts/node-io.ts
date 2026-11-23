@@ -13,12 +13,11 @@ import {
 import type { Stats } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import type { CliIo } from "./cli.ts";
+import { MARKDOWN_EXTENSION, PATH_SEPARATOR } from "./markdown-scan.ts";
 
 const NOT_FOUND_CODE = "ENOENT";
 const TEXT_ENCODING = "utf8";
 const TEMPORARY_SUFFIX = ".tmp";
-const MARKDOWN_EXTENSION = ".md";
-const RELATIVE_PATH_SEPARATOR = "/";
 const EXCLUDED_DIRECTORIES = new Set(["node_modules", ".git"]);
 
 function isNotFoundError(error: unknown): boolean {
@@ -75,7 +74,7 @@ function markdownFilesUnder(directory: string, prefix = ""): string[] {
         ? []
         : markdownFilesUnder(
             join(directory, entry.name),
-            `${relativePath}${RELATIVE_PATH_SEPARATOR}`,
+            `${relativePath}${PATH_SEPARATOR}`,
           );
     }
     return entry.isFile() && entry.name.endsWith(MARKDOWN_EXTENSION)

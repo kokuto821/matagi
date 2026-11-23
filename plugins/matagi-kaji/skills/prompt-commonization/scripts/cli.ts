@@ -4,21 +4,28 @@
 import { join, relative, resolve, sep } from "node:path";
 import type { ParseArgsOptionsConfig } from "node:util";
 import { parseArgs } from "node:util";
-import type { Plan, PlanOccurrence, PlanPhrase } from "./apply.ts";
 import { planApply } from "./apply.ts";
-import { checkBlocks, checkPhraseFile, formatFinding } from "./check.ts";
+import { checkBlocks, checkPhraseFile } from "./check.ts";
 import type { DetectOptions, SourceFile } from "./detect.ts";
 import { detectCandidates } from "./detect.ts";
 import { expandBlocks, findingOfExpandError } from "./expand.ts";
-import type { ReadPhrase } from "./markdown-scan.ts";
-import { isRootRelativePath, parseImportBlocks } from "./markdown-scan.ts";
+import { formatFinding } from "./findings.ts";
+import type { ReadFile } from "./markdown-scan.ts";
+import {
+  isRootRelativePath,
+  LINE_FEED,
+  PATH_SEPARATOR,
+  parseImportBlocks,
+} from "./markdown-scan.ts";
+import { parsePlan } from "./plan-schema.ts";
+
+export type { PlanParseResult } from "./plan-schema.ts";
+export { parsePlan } from "./plan-schema.ts";
 
 const STATUS_OK = 0;
 const STATUS_FINDINGS = 1;
 const STATUS_ERROR = 2;
 
-const OUTPUT_LINE_BREAK = "\n";
-const PATH_SEPARATOR = "/";
 const CURRENT_DIRECTORY = ".";
 const JSON_INDENT = 2;
 const ERROR_PREFIX = "error: ";
@@ -32,7 +39,7 @@ const USAGE = [
   "  apply --plan <file> [--root <dir>]",
   "  expand <path...> [--root <dir>]",
   "  check <path...> [--root <dir>]",
-].join(OUTPUT_LINE_BREAK);
+].join(LINE_FEED);
 
 export type CliIo = {
   cwd: string;
@@ -43,175 +50,11 @@ export type CliIo = {
   stderr: (text: string) => void;
 };
 
-export type PlanParseResult = { plan: Plan } | { errors: string[] };
-
-// ---- 計画 JSON の検証 ----
-
-type JsonObject = Record<string, unknown>;
-
-const PLAN_NOT_OBJECT_MESSAGE =
-  "計画のトップレベルはオブジェクトである必要があります";
-const INVALID_JSON_MESSAGE = "計画が JSON として読めません";
-
-function isJsonObject(value: unknown): value is JsonObject {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function childPath(parent: string, key: string): string {
-  return parent === "" ? key : `${parent}.${key}`;
-}
-
-function objectAt(
-  value: unknown,
-  path: string,
-  errors: string[],
-): JsonObject | undefined {
-  if (isJsonObject(value)) {
-    return value;
-  }
-  errors.push(`${path}: オブジェクトである必要があります`);
-  return undefined;
-}
-
-function stringAt(
-  source: JsonObject,
-  key: string,
-  parent: string,
-  errors: string[],
-): string | undefined {
-  const value = source[key];
-  if (typeof value === "string") {
-    return value;
-  }
-  errors.push(`${childPath(parent, key)}: 文字列である必要があります`);
-  return undefined;
-}
-
-function integerAt(
-  source: JsonObject,
-  key: string,
-  parent: string,
-  errors: string[],
-): number | undefined {
-  const value = source[key];
-  if (typeof value === "number" && Number.isInteger(value)) {
-    return value;
-  }
-  errors.push(`${childPath(parent, key)}: 整数である必要があります`);
-  return undefined;
-}
-
-function arrayAt(
-  source: JsonObject,
-  key: string,
-  parent: string,
-  errors: string[],
-): unknown[] | undefined {
-  const value = source[key];
-  if (Array.isArray(value)) {
-    return value;
-  }
-  errors.push(`${childPath(parent, key)}: 配列である必要があります`);
-  return undefined;
-}
-
-// 要素ごとに検証し、不正な要素は errors に積んで結果から除く。
-function parseItems<T>(
-  items: unknown[],
-  path: string,
-  parseItem: (
-    item: unknown,
-    itemPath: string,
-    errors: string[],
-  ) => T | undefined,
-  errors: string[],
-): T[] {
-  return items.flatMap((item, index) => {
-    const parsed = parseItem(item, `${path}[${index}]`, errors);
-    return parsed === undefined ? [] : [parsed];
-  });
-}
-
-function parseOccurrence(
-  item: unknown,
-  path: string,
-  errors: string[],
-): PlanOccurrence | undefined {
-  const source = objectAt(item, path, errors);
-  if (source === undefined) {
-    return undefined;
-  }
-  const file = stringAt(source, "file", path, errors);
-  const startLine = integerAt(source, "startLine", path, errors);
-  const endLine = integerAt(source, "endLine", path, errors);
-  const expectedText = stringAt(source, "expectedText", path, errors);
-  if (
-    file === undefined ||
-    startLine === undefined ||
-    endLine === undefined ||
-    expectedText === undefined
-  ) {
-    return undefined;
-  }
-  return { file, startLine, endLine, expectedText };
-}
-
-function parsePhrase(
-  item: unknown,
-  path: string,
-  errors: string[],
-): PlanPhrase | undefined {
-  const source = objectAt(item, path, errors);
-  if (source === undefined) {
-    return undefined;
-  }
-  const name = stringAt(source, "name", path, errors);
-  const text = stringAt(source, "text", path, errors);
-  const occurrenceItems = arrayAt(source, "occurrences", path, errors);
-  if (
-    name === undefined ||
-    text === undefined ||
-    occurrenceItems === undefined
-  ) {
-    return undefined;
-  }
-  const occurrences = parseItems(
-    occurrenceItems,
-    childPath(path, "occurrences"),
-    parseOccurrence,
-    errors,
-  );
-  return { name, text, occurrences };
-}
-
-// 計画 JSON を検証して Plan にする。形の違反は該当箇所のパスつきで全て返す。
-export function parsePlan(text: string): PlanParseResult {
-  let json: unknown;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    return { errors: [INVALID_JSON_MESSAGE] };
-  }
-  if (!isJsonObject(json)) {
-    return { errors: [PLAN_NOT_OBJECT_MESSAGE] };
-  }
-
-  const errors: string[] = [];
-  const dir = stringAt(json, "dir", "", errors);
-  const phraseItems = arrayAt(json, "phrases", "", errors);
-  const phrases =
-    phraseItems === undefined
-      ? []
-      : parseItems(phraseItems, "phrases", parsePhrase, errors);
-  if (errors.length > 0 || dir === undefined) {
-    return { errors };
-  }
-  return { plan: { dir, phrases } };
-}
-
 // ---- コマンドライン解析 ----
 
 class UsageError extends Error {}
+
+type OptionValues = Record<string, unknown>;
 
 const COMMANDS = ["detect", "apply", "expand", "check"] as const;
 type Command = (typeof COMMANDS)[number];
@@ -250,13 +93,13 @@ function isCommand(value: string | undefined): value is Command {
   return COMMANDS.some((command) => command === value);
 }
 
-function stringValue(values: JsonObject, name: string): string | undefined {
+function stringValue(values: OptionValues, name: string): string | undefined {
   const value = values[name];
   return typeof value === "string" ? value : undefined;
 }
 
 function numberValue(
-  values: JsonObject,
+  values: OptionValues,
   name: string,
   isValid: (value: number) => boolean,
 ): number | undefined {
@@ -348,7 +191,7 @@ function writeLines(write: (text: string) => void, lines: string[]): void {
   if (lines.length === 0) {
     return;
   }
-  write(lines.join(OUTPUT_LINE_BREAK) + OUTPUT_LINE_BREAK);
+  write(lines.join(LINE_FEED) + LINE_FEED);
 }
 
 function absoluteOf(context: Context, rootRelativePath: string): string {
@@ -361,7 +204,7 @@ function rootRelativeOf(context: Context, absolutePath: string): string {
     .join(PATH_SEPARATOR);
 }
 
-function readPhraseOf(context: Context): ReadPhrase {
+function readPhraseOf(context: Context): ReadFile {
   return (path) => context.io.readFile(absoluteOf(context, path));
 }
 
@@ -417,7 +260,7 @@ function runDetect(
 ): number {
   const candidates = detectCandidates(sources, options);
   context.io.stdout(
-    JSON.stringify({ candidates }, null, JSON_INDENT) + OUTPUT_LINE_BREAK,
+    JSON.stringify({ candidates }, null, JSON_INDENT) + LINE_FEED,
   );
   return STATUS_OK;
 }

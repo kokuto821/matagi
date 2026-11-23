@@ -11,11 +11,13 @@ export * from "./check.ts";
 export * from "./cli.ts";
 export * from "./detect.ts";
 export * from "./expand.ts";
+export * from "./findings.ts";
 export type {
   ImportBlock,
   ParseError,
   ParseResult,
-  ReadPhrase,
+  ReadFile,
+  ReadFile as ReadPhrase,
 } from "./markdown-scan.ts";
 export { parseImportBlocks } from "./markdown-scan.ts";
 
