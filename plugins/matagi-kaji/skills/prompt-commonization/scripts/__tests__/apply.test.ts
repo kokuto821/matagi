@@ -30,8 +30,8 @@ import {
   SECOND_TARGET,
   START_LINE_TEXT,
   TARGET,
-  toText,
   TRAILING_NEWLINE,
+  toText,
 } from "./helpers.ts";
 
 const SECOND_NAME = "output-format";

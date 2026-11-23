@@ -1,6 +1,7 @@
 // CLI の実 I/O（fs・process）。cli.ts へ注入する CliIo を組み立てる。
 // 記法の正: shared-rules/prompt-commonization/commonization-rule.md
 
+import type { Stats } from "node:fs";
 import {
   mkdirSync,
   readdirSync,
@@ -10,7 +11,6 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import type { Stats } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import type { CliIo } from "./cli.ts";
 import { MARKDOWN_EXTENSION, PATH_SEPARATOR } from "./markdown-scan.ts";

@@ -23,10 +23,10 @@ import {
   PLAN_FILE,
   SECOND_TARGET,
   SHARED_LINE,
-  startLineTextOf,
   STATUS_ERROR,
   STATUS_FINDINGS,
   STATUS_OK,
+  startLineTextOf,
   TARGET,
   toText,
 } from "./helpers.ts";

@@ -3,8 +3,8 @@
 
 import type { ImportBlock, ScannableLine } from "./markdown-scan.ts";
 import {
-  LINE_FEED,
   LINE_BREAK_PATTERN,
+  LINE_FEED,
   parseImportBlocks,
   scannableLinesOf,
 } from "./markdown-scan.ts";

@@ -19,13 +19,13 @@ import {
   SECOND_COMMON_PATH,
   SECOND_TARGET,
   SHARED_LINE,
-  startLineTextOf,
   STATUS_ERROR,
   STATUS_FINDINGS,
   STATUS_OK,
+  startLineTextOf,
   TARGET,
-  toText,
   TRAILING_NEWLINE,
+  toText,
 } from "./helpers.ts";
 
 const CWD = "/work";

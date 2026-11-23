@@ -20,8 +20,8 @@ import {
   SECOND_START_LINE_TEXT,
   START_LINE_TEXT,
   startLineTextOf,
-  toText,
   TRAILING_NEWLINE,
+  toText,
 } from "./helpers.ts";
 
 const OLD_BODY_LINE = "古い本文。";
