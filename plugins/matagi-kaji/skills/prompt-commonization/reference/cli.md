@@ -22,7 +22,7 @@
 | `--limit <n>` | `detect` | 要約に載せる候補数の上限。`--out` 指定時のみ有効。既定値 = スクリプト側が正 |
 | `--threshold <n>` | `detect` | 近似一致の類似度の閾値。既定値 = スクリプト側が正 |
 | `--min-chars <n>` | `detect` | 候補とする最小文字数。既定値 = スクリプト側が正 |
-| `--plan <file>` | `apply` | 計画 JSON のパス。形式 = `plan-format.md` |
+| `--plan <file>` | `apply` | 計画 JSON のパス（相対パスは `--root` でなく現在のディレクトリ基準）。形式 = `plan-format.md` |
 
 ## `detect --out` の要約
 
@@ -37,6 +37,12 @@
 | `candidates[]` | `id` / `kind` / `unit` / `similarity` / `occurrenceCount` / `locations`（`file:開始行-終了行`）/ `preview` |
 
 out ファイルの構造 = `--out` なしの標準出力と同じ。
+
+## `apply` の出力
+
+- 成功 = 書き込んだパス（`--root` 相対）を標準出力へ1行ずつ
+- 検証エラー = 何も書かない。`error: <種別>: <内容>` を標準エラーへ
+- 書き込み失敗 = 途中まで書かれうる。失敗したパス・理由（`error:` 行）と書き込み済みのパス（`written: <path>` 行）を標準エラーへ。`expand` も同じ
 
 ## 終了コード
 

@@ -21,7 +21,7 @@
 共通文言ファイル:
 
 - 1ファイル = 1文言。ファイル全体 = 展開される本文。ファイル名（kebab-case）= 識別子。キー・見出し指定なし
-- frontmatter・`@import` ブロックを含めない
+- 含めない = 先頭の frontmatter・`@import` / `@end` の単独行・閉じていないコードフェンス（コードフェンス内の記法例は可）。検査の正 = `skills/prompt-commonization/scripts/check.ts`、適用時 = `scripts/apply.ts` の `invalid-phrase-content`
 - 置き場ディレクトリ = 実行時にユーザーが決定。スキルから読める場所を推奨。既定の推奨 = 対象リポジトリ直下 `prompt-commons/`
 
 参照ブロック（プロンプト本文中）:
