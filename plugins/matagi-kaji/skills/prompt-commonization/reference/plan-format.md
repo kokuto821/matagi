@@ -28,17 +28,7 @@
 |-----------|------|
 | `dir` | 共通文言ファイルの置き場（ルート相対）。ファイルは `<dir>/<name>.md` |
 | `phrases[].name` | 共通文言の識別子。kebab-case |
-| `phrases[].text` | 共通文言の本文（ファイル全体になる）。`@import` ブロック・frontmatter・閉じていないコードフェンスを含めない |
+| `phrases[].text` | 共通文言の本文（ファイル全体になる）。含められない要素・置換後の `@import` ブロックの形 = [[commonization-rule]] §記法 |
 | `occurrences[].file` | 置換する対象ファイル（ルート相対） |
 | `occurrences[].startLine` / `endLine` | 置換する行範囲（1始まり、両端を含む。行全体） |
 | `occurrences[].expectedText` | 範囲の現在の内容（改行は `\n`）。一致しなければ適用されない |
-
-## 適用結果
-
-各出現箇所が次の形に置き換わる。
-
-```
-<!-- @import prompt-commons/injection-guard.md -->
-（本文）
-<!-- @end -->
-```
