@@ -13,6 +13,7 @@
 | 種類 | 正しい配置先 |
 |------|------------|
 | スキル | `plugins/matagi/skills/<skill-name>/SKILL.md` |
+| スキル同梱スクリプト（スキルが呼ぶ決定論的処理とそのテスト） | `plugins/matagi-kaji/skills/<skill-name>/scripts/`（テストは `scripts/__tests__/`） |
 | ルール（任意タイミング参照） | `plugins/matagi/shared-rules/<topic>/<category-rule>.md` |
 | 調査・経緯ドキュメント（判断に至る過程・未確定事項） | `plugins/matagi/documents/research/<file>.md` |
 | 参照ドキュメント（確定事実・外部仕様まとめ） | `plugins/matagi/documents/reference/<topic>/<file>.md` |

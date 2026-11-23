@@ -36,15 +36,17 @@
 - 開始行・終了行 = 各々単独行。ネスト禁止
 - frontmatter・コードフェンス内 = 走査対象外
 - 展開本文 = 手編集禁止。変更 = 共通文言ファイルを編集 → `expand`
-- 裸の `@path` で書かない。理由 = Claude Code が `@path` をファイル添付と解釈し、共通文言ファイル全体が文脈へ二重に載る（[[at-reference-behavior]]）。`@` 直後は必ず `import`
+- 裸の `@path` で書かない。理由 = Claude Code が `@path` をファイル添付と解釈し、共通文言ファイル全体が文脈へ二重に載る（[[at-reference-behavior]]、実パス `plugins/matagi-kaji/documents/reference/harness-engineering/at-reference-behavior.md`）。`@` 直後は必ず `import`
 
-### 不変条件
+### 満たすべき条件
 
 | 条件 | 内容 |
 |------|------|
 | 冪等 | `expand` 再実行で差分なし |
-| 同期 | 展開本文 = 共通文言ファイルの内容。食い違い = `check` が検出 |
+| 同期 | 展開本文 = 共通文言ファイルの内容。食い違い = `check` 実行時に検出 |
 | 単一の正 | 文言の改訂 = 共通文言ファイル1箇所のみ |
+
+`check` の起動 = スキルまたは利用者の実行に依存。自動では強制されない。導入先で CI 等から `check` を呼ぶのは任意。
 
 ### 検出と承認
 
@@ -72,10 +74,11 @@
 
 issue #106。スキル・エージェント間の定型文複製 → 改訂時の黙ったドリフト防止。
 
-Claude Code の実機検証で、SKILL.md / エージェント本文の `@path` は文言として差し込まれないと判明（[[at-reference-behavior]]）。文言を各プロンプトへ実際に埋め込む工程が必須 → スクリプト展開 + 同期検証の設計。
+設計判断 = スクリプト展開 + 同期検証。根拠 = [[at-reference-behavior]]。
 
 ## 関連ルール
 
 - [[externalization-rule]]（matagi-kaji/shared-rules/rule-externalization/externalization-rule.md）— ルール相当の文言は `[[link]]`
 - [[review-independence-rule]]（matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md）— 適用前の承認
 - [[directory-rule]]（matagi-kaji/shared-rules/rules-directory/directory-rule.md）— 配置・記法
+- [[at-reference-behavior]]（matagi-kaji/documents/reference/harness-engineering/at-reference-behavior.md）— `@path` の実機検証メモ
