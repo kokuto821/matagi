@@ -21,6 +21,7 @@ import {
 } from "./markdown-scan.ts";
 
 const KEBAB_CASE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const TRAILING_SEPARATORS_PATTERN = /\/+$/;
 
 export type PlanOccurrence = {
   file: string;
@@ -186,7 +187,15 @@ function planLevelErrorsOf(plan: Plan, readFile: ReadFile): PlanError[] {
   return errors;
 }
 
-// 置換範囲の file を正規化する（./d.md と d.md を同一視）。ルート外を指すものは invalid-file にして除く。
+// 共通文言の置き場の表記ゆれ（末尾の /・重複 /・先頭の ./）を正す。不正な dir は検証でエラーにするため触らない。
+function normalizedDirOf(dir: string): string {
+  if (!isValidDir(dir)) {
+    return dir;
+  }
+  return posix.normalize(dir).replace(TRAILING_SEPARATORS_PATTERN, "");
+}
+
+// 共通文言の置き場と置換範囲の file を正規化する（./d.md と d.md を同一視）。ルート外を指す file は invalid-file にして除く。
 function normalizedPlanOf(plan: Plan): { plan: Plan; errors: PlanError[] } {
   const errors: PlanError[] = [];
   const phrases = plan.phrases.map((phrase) => ({
@@ -205,7 +214,7 @@ function normalizedPlanOf(plan: Plan): { plan: Plan; errors: PlanError[] } {
       return [{ ...occurrence, file: posix.normalize(occurrence.file) }];
     }),
   }));
-  return { plan: { ...plan, phrases }, errors };
+  return { plan: { dir: normalizedDirOf(plan.dir), phrases }, errors };
 }
 
 // 対象ファイルごとの置換（ファイルの初出順、ファイル内は計画の記載順）。

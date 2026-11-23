@@ -164,6 +164,34 @@ describe("planApply: 正常系", () => {
     ]);
   });
 
+  test.each([
+    { label: "末尾スラッシュ", dir: "prompt-commons/" },
+    { label: "`./` 先頭", dir: "./prompt-commons" },
+    { label: "二重スラッシュ", dir: "prompt-commons//" },
+    { label: "`./` 先頭と末尾スラッシュ", dir: "./prompt-commons/" },
+  ])(
+    "dir の表記ゆれ（$label）は正規化し、書込パスと @import 行を prompt-commons/ の正規形にする",
+    ({ dir }) => {
+      // Arrange
+      const plan = planOf(
+        [
+          phraseOf(PHRASE_NAME, BODY_LINES, [
+            plannedOccurrenceOf(TARGET, 2, 3, OLD_LINES),
+          ]),
+        ],
+        dir,
+      );
+
+      // Act
+      const result = applyPlan(plan, { [TARGET]: toText(TARGET_LINES) });
+
+      // Assert
+      expect(result.errors).toStrictEqual([]);
+      expect(pathsOf(result.writes)).toStrictEqual([COMMON_PATH, TARGET]);
+      expect(result.writes[1].content).toContain(START_LINE_TEXT);
+    },
+  );
+
   test("範囲の行数と text の行数が異なっても、範囲外の前後の行を保って置換する", () => {
     // Arrange
     const targetLines = ["# 見出し", "旧1", "旧2", "旧3", "末尾"];
