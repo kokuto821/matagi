@@ -7,6 +7,9 @@ const IMPORT_END_PATTERN = /^\s*<!--\s+@end\s+-->\s*$/;
 const FENCE_PATTERN = /^\s*(`{3,}|~{3,})/;
 const FRONTMATTER_DELIMITER = "---";
 const BODY_JOINER = "\n";
+const TRAILING_LINE_BREAK_PATTERN = /\r?\n$/;
+const CRLF = "\r\n";
+const LF = "\n";
 
 export type ImportBlock = {
   path: string;
@@ -24,6 +27,17 @@ export type ParseResult = {
   blocks: ImportBlock[];
   errors: ParseError[];
 };
+
+export type ExpandError =
+  | ParseError
+  | { kind: "missing-phrase"; line: number; path: string };
+
+export type ExpandResult = {
+  text: string;
+  errors: ExpandError[];
+};
+
+export type ReadPhrase = (path: string) => string | undefined;
 
 type ScannableLine = {
   lineNumber: number;
@@ -114,4 +128,48 @@ export function parseImportBlocks(text: string): ParseResult {
     errors.push({ kind: "unclosed", line: openBlock.startLine });
   }
   return { blocks, errors };
+}
+
+// 入力の改行コードを保つため、CRLF を含む入力は CRLF、それ以外は LF とみなす。
+function eolOf(text: string): string {
+  return text.includes(CRLF) ? CRLF : LF;
+}
+
+// 共通文言ファイルの内容を本文行へ。末尾の改行 1 つは本文に含めない。
+function phraseLinesOf(phrase: string): string[] {
+  return phrase
+    .replace(TRAILING_LINE_BREAK_PATTERN, "")
+    .split(LINE_BREAK_PATTERN);
+}
+
+// 各 @import ブロックの本文を共通文言の最新内容へ置き換える。
+// 構文不正の入力は書き換えず、共通文言ファイルが無いブロックは未変更のままエラーにする。
+export function expandBlocks(
+  text: string,
+  readPhrase: ReadPhrase,
+): ExpandResult {
+  const { blocks, errors: parseErrors } = parseImportBlocks(text);
+  if (parseErrors.length > 0) {
+    return { text, errors: parseErrors };
+  }
+
+  const lines = text.split(LINE_BREAK_PATTERN);
+  const errors: ExpandError[] = [];
+
+  // 後ろのブロックから置換し、前方の行番号がずれないようにする。
+  for (const block of [...blocks].reverse()) {
+    const phrase = readPhrase(block.path);
+    if (phrase === undefined) {
+      errors.push({
+        kind: "missing-phrase",
+        line: block.startLine,
+        path: block.path,
+      });
+      continue;
+    }
+    const bodyLength = block.endLine - 1 - block.startLine;
+    lines.splice(block.startLine, bodyLength, ...phraseLinesOf(phrase));
+  }
+
+  return { text: lines.join(eolOf(text)), errors: errors.reverse() };
 }
