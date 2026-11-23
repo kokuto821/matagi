@@ -18,6 +18,7 @@ import {
   parseImportBlocks,
 } from "./markdown-scan.ts";
 import { parsePlan } from "./plan-schema.ts";
+import { DEFAULT_SUMMARY_LIMIT, summarizeCandidates } from "./summary.ts";
 
 export type { PlanParseResult } from "./plan-schema.ts";
 export { parsePlan } from "./plan-schema.ts";
@@ -35,7 +36,7 @@ const MAX_THRESHOLD = 1;
 
 const USAGE = [
   "usage: prompt-commons <command> [options]",
-  "  detect <path...> [--root <dir>] [--threshold <number>] [--min-chars <number>]",
+  "  detect <path...> [--root <dir>] [--threshold <number>] [--min-chars <number>] [--out <file> [--limit <number>]]",
   "  apply --plan <file> [--root <dir>]",
   "  expand <path...> [--root <dir>]",
   "  check <path...> [--root <dir>]",
@@ -65,6 +66,8 @@ const OPTIONS_OF: Record<Command, ParseArgsOptionsConfig> = {
     ...ROOT_OPTIONS,
     threshold: { type: "string" },
     "min-chars": { type: "string" },
+    out: { type: "string" },
+    limit: { type: "string" },
   },
   apply: { ...ROOT_OPTIONS, plan: { type: "string" } },
   expand: ROOT_OPTIONS,
@@ -77,6 +80,8 @@ type RawRequest = {
   root: string | undefined;
   plan: string | undefined;
   detectOptions: DetectOptions;
+  out: string | undefined;
+  limit: number | undefined;
 };
 
 type Request =
@@ -138,6 +143,12 @@ function parseOptions(command: Command, args: string[]) {
 
 function validateRequest(raw: RawRequest): Request {
   const { command, paths, plan, ...rest } = raw;
+  if (rest.out === "") {
+    throw new UsageError("--out にはファイルパスが必要です");
+  }
+  if (rest.limit !== undefined && rest.out === undefined) {
+    throw new UsageError("--limit は --out と併用してください");
+  }
   if (command === "apply") {
     if (paths.length > 0) {
       throw new UsageError("apply は path を受け取りません");
@@ -173,6 +184,8 @@ function parseRequest(argv: readonly string[]): Request {
       threshold: numberValue(values, "threshold", isThreshold),
       minChars: numberValue(values, "min-chars", isNonNegativeInteger),
     },
+    out: stringValue(values, "out"),
+    limit: numberValue(values, "limit", isNonNegativeInteger),
   });
 }
 
@@ -253,15 +266,33 @@ function withSources(
   return run(sources);
 }
 
+// --out なしは全量を stdout へ。あれば全量をファイルへ書き、stdout には 1 行の要約だけを出す。
 function runDetect(
   context: Context,
   sources: SourceFile[],
-  options: DetectOptions,
+  request: Pick<RawRequest, "detectOptions" | "out" | "limit">,
 ): number {
-  const candidates = detectCandidates(sources, options);
-  context.io.stdout(
-    JSON.stringify({ candidates }, null, JSON_INDENT) + LINE_FEED,
-  );
+  const candidates = detectCandidates(sources, request.detectOptions);
+  const full = JSON.stringify({ candidates }, null, JSON_INDENT) + LINE_FEED;
+  const { out } = request;
+  if (out === undefined) {
+    context.io.stdout(full);
+    return STATUS_OK;
+  }
+
+  try {
+    context.io.writeFile(resolve(context.io.cwd, out), full);
+  } catch (error) {
+    writeLines(context.io.stderr, [
+      errorLine(`書き込みに失敗しました: ${out}: ${messageOf(error)}`),
+    ]);
+    return STATUS_ERROR;
+  }
+  const summary = summarizeCandidates(candidates, {
+    limit: request.limit ?? DEFAULT_SUMMARY_LIMIT,
+    outFile: out,
+  });
+  context.io.stdout(JSON.stringify(summary) + LINE_FEED);
   return STATUS_OK;
 }
 
@@ -389,7 +420,7 @@ function execute(request: Request, io: CliIo): number {
   switch (request.command) {
     case "detect":
       return withSources(context, request.paths, (sources) =>
-        runDetect(context, sources, request.detectOptions),
+        runDetect(context, sources, request),
       );
     case "check":
       return withSources(context, request.paths, (sources) =>

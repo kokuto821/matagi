@@ -20,6 +20,7 @@ export type {
   ReadFile as ReadPhrase,
 } from "./markdown-scan.ts";
 export { parseImportBlocks } from "./markdown-scan.ts";
+export * from "./summary.ts";
 
 const CLI_ARGV_START_INDEX = 2;
 

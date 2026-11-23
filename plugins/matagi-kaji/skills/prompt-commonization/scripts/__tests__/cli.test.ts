@@ -33,6 +33,7 @@ const ROOT = "/repo";
 const RELATIVE_ROOT = "repo";
 const THIRD_TARGET = "skills/c/SKILL.md";
 const MISSING_PATH = "missing.md";
+const OUT_FILE = "tmp/candidates.json";
 
 const USAGE_PATTERN = /usage|使用法/i;
 
@@ -531,6 +532,30 @@ describe("使用法エラー", () => {
     ["detect の不正な --min-chars", ["detect", TARGET, "--min-chars", "abc"]],
     ["detect の負の --min-chars", ["detect", TARGET, "--min-chars", "-1"]],
     ["detect の小数の --min-chars", ["detect", TARGET, "--min-chars", "1.5"]],
+    ["detect の --out に値なし", ["detect", TARGET, "--out"]],
+    ["detect の --out が空文字", ["detect", TARGET, "--out", ""]],
+    ["detect の --out なしの --limit", ["detect", TARGET, "--limit", "5"]],
+    [
+      "detect の不正な --limit",
+      ["detect", TARGET, "--out", OUT_FILE, "--limit", "abc"],
+    ],
+    [
+      "detect の負の --limit",
+      ["detect", TARGET, "--out", OUT_FILE, "--limit", "-1"],
+    ],
+    [
+      "detect の小数の --limit",
+      ["detect", TARGET, "--out", OUT_FILE, "--limit", "1.5"],
+    ],
+    [
+      "detect の空の --limit",
+      ["detect", TARGET, "--out", OUT_FILE, "--limit", ""],
+    ],
+    [
+      "detect の値なし --limit",
+      ["detect", TARGET, "--out", OUT_FILE, "--limit"],
+    ],
+    ["check の --out", ["check", TARGET, "--out", OUT_FILE]],
     ["apply に位置引数", ["apply", "--plan", PLAN_FILE, TARGET]],
     ["check の --root に値なし", ["check", TARGET, "--root"]],
   ])("%s は 2 で使用法を stderr に出す", (_label, argv) => {
@@ -728,6 +753,214 @@ describe("detect", () => {
 
     // Assert
     expect(JSON.parse(stdoutTextOf(result))).toEqual({ candidates: [] });
+  });
+});
+
+describe("detect --out / --limit", () => {
+  // 互いに共通の bigram を持たない 3 つの段落（既定の最小文字数 20 を超える）。
+  const PARAGRAPHS = [
+    SHARED_LINE,
+    "あいうえおかきくけこさしすせそたちつてと。",
+    "abcdefghijklmnopqrstuvwxyz0123456789",
+  ];
+  const DEFAULT_OUT_LIMIT_FILES = filesOf(CWD, {
+    [TARGET]: toText(PARAGRAPHS.flatMap((line) => [line, ""])),
+    [SECOND_TARGET]: toText(PARAGRAPHS.flatMap((line) => [line, ""])),
+  });
+  const OUT_PATH = absoluteOf(CWD, OUT_FILE);
+  const DETECT_ARGS = ["detect", TARGET, SECOND_TARGET];
+
+  function summaryOf(result: RunResult) {
+    return JSON.parse(stdoutTextOf(result));
+  }
+
+  test("--out なしは従来どおり全量を indent 2 で stdout に出す（要約にならない）", () => {
+    // Act
+    const result = runIn(DETECT_ARGS, DEFAULT_OUT_LIMIT_FILES);
+
+    // Assert
+    const text = result.stdoutChunks.join("");
+    const parsed = JSON.parse(text);
+    expect(Object.keys(parsed)).toEqual(["candidates"]);
+    expect(parsed.candidates).toHaveLength(PARAGRAPHS.length);
+    expect(text).toBe(`${JSON.stringify(parsed, null, 2)}\n`);
+    expect(result.writes).toEqual([]);
+  });
+
+  test("--out: 全量 JSON（従来の stdout と同一内容）を cwd 基準のファイルへ書く", () => {
+    // Arrange
+    const plain = runIn(DETECT_ARGS, DEFAULT_OUT_LIMIT_FILES);
+
+    // Act
+    const result = runIn(
+      [...DETECT_ARGS, "--out", OUT_FILE],
+      DEFAULT_OUT_LIMIT_FILES,
+    );
+
+    // Assert
+    expect(result.status).toBe(STATUS_OK);
+    expect(result.writes.map(({ path }) => path)).toEqual([OUT_PATH]);
+    expect(contentAt(result, OUT_PATH)).toBe(plain.stdoutChunks.join(""));
+  });
+
+  test("--out の相対パスは --root ではなく cwd 基準で解決する", () => {
+    // Arrange
+    const files = filesOf(ROOT, {
+      [TARGET]: toText(PARAGRAPHS.flatMap((line) => [line, ""])),
+      [SECOND_TARGET]: toText(PARAGRAPHS.flatMap((line) => [line, ""])),
+    });
+
+    // Act
+    const result = runIn(
+      [...DETECT_ARGS, "--root", ROOT, "--out", OUT_FILE],
+      files,
+    );
+
+    // Assert
+    expect(result.status).toBe(STATUS_OK);
+    expect(result.writes.map(({ path }) => path)).toEqual([OUT_PATH]);
+  });
+
+  test("--out: stdout は改行を含まない 1 行の JSON 要約（末尾の改行のみ）", () => {
+    // Act
+    const result = runIn(
+      [...DETECT_ARGS, "--out", OUT_FILE],
+      DEFAULT_OUT_LIMIT_FILES,
+    );
+
+    // Assert
+    const text = result.stdoutChunks.join("");
+    expect(text.endsWith("\n")).toBe(true);
+    expect(text.slice(0, -1)).not.toContain("\n");
+    expect(Object.keys(JSON.parse(text))).toEqual([
+      "total",
+      "shown",
+      "truncated",
+      "outFile",
+      "candidates",
+    ]);
+  });
+
+  test("--out: 要約は全量 JSON の先頭から limit 件（既定 30）を載せる", () => {
+    // Act
+    const result = runIn(
+      [...DETECT_ARGS, "--out", OUT_FILE],
+      DEFAULT_OUT_LIMIT_FILES,
+    );
+
+    // Assert
+    const summary = summaryOf(result);
+    const full = JSON.parse(contentAt(result, OUT_PATH) ?? "");
+    expect(summary.total).toBe(PARAGRAPHS.length);
+    expect(summary.shown).toBe(PARAGRAPHS.length);
+    expect(summary.truncated).toBe(false);
+    expect(summary.outFile).toBe(OUT_FILE);
+    expect(
+      summary.candidates.map((candidate: { id: string }) => candidate.id),
+    ).toEqual(full.candidates.map((candidate: { id: string }) => candidate.id));
+    expect(summary.candidates[0].locations).toEqual([
+      `${TARGET}:1-1`,
+      `${SECOND_TARGET}:1-1`,
+    ]);
+    expect(summary.candidates[0].occurrenceCount).toBe(2);
+    expect(summary.candidates[0].preview).toBe(SHARED_LINE);
+  });
+
+  test("--limit: 件数を絞り truncated が true になる（ファイルは全量のまま）", () => {
+    // Act
+    const result = runIn(
+      [...DETECT_ARGS, "--out", OUT_FILE, "--limit", "2"],
+      DEFAULT_OUT_LIMIT_FILES,
+    );
+
+    // Assert
+    const summary = summaryOf(result);
+    expect(summary.total).toBe(PARAGRAPHS.length);
+    expect(summary.shown).toBe(2);
+    expect(summary.truncated).toBe(true);
+    expect(summary.candidates).toHaveLength(2);
+    expect(
+      JSON.parse(contentAt(result, OUT_PATH) ?? "").candidates,
+    ).toHaveLength(PARAGRAPHS.length);
+  });
+
+  test("--limit が候補数と等しければ truncated は false", () => {
+    // Act
+    const result = runIn(
+      [...DETECT_ARGS, "--out", OUT_FILE, "--limit", `${PARAGRAPHS.length}`],
+      DEFAULT_OUT_LIMIT_FILES,
+    );
+
+    // Assert
+    expect(summaryOf(result).truncated).toBe(false);
+  });
+
+  test("--limit 0: 候補を載せず truncated は true", () => {
+    // Act
+    const result = runIn(
+      [...DETECT_ARGS, "--out", OUT_FILE, "--limit", "0"],
+      DEFAULT_OUT_LIMIT_FILES,
+    );
+
+    // Assert
+    expect(result.status).toBe(STATUS_OK);
+    expect(summaryOf(result)).toMatchObject({
+      total: PARAGRAPHS.length,
+      shown: 0,
+      truncated: true,
+      candidates: [],
+    });
+  });
+
+  test("候補が 0 件でも --out は空の candidates を書き、要約は truncated false", () => {
+    // Arrange
+    const files = filesOf(CWD, {
+      [TARGET]: SHARED_LINE,
+      [SECOND_TARGET]: "全く別の内容の文章です。",
+    });
+
+    // Act
+    const result = runIn([...DETECT_ARGS, "--out", OUT_FILE], files);
+
+    // Assert
+    expect(summaryOf(result)).toEqual({
+      total: 0,
+      shown: 0,
+      truncated: false,
+      outFile: OUT_FILE,
+      candidates: [],
+    });
+    expect(JSON.parse(contentAt(result, OUT_PATH) ?? "")).toEqual({
+      candidates: [],
+    });
+  });
+
+  test("--out の書き込みに失敗したら 2 で理由を stderr に出し、stdout は空", () => {
+    // Arrange
+    const fake = createIo(DEFAULT_OUT_LIMIT_FILES);
+    fake.io.writeFile = () => {
+      throw new Error("disk full");
+    };
+
+    // Act
+    const status = runCli([...DETECT_ARGS, "--out", OUT_FILE], fake.io);
+
+    // Assert
+    expect(status).toBe(STATUS_ERROR);
+    expect(stderrLinesOf(fake).join("\n")).toContain("disk full");
+    expect(stdoutLinesOf(fake)).toEqual([]);
+  });
+
+  test("入力エラー（存在しない path）では --out を書かない", () => {
+    // Act
+    const result = runIn(
+      ["detect", MISSING_PATH, "--out", OUT_FILE],
+      DEFAULT_OUT_LIMIT_FILES,
+    );
+
+    // Assert
+    expect(result.status).toBe(STATUS_ERROR);
+    expect(result.writes).toEqual([]);
   });
 });
 

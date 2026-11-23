@@ -38,6 +38,7 @@ const TMP_PREFIX = "prompt-commons-cli-";
 // 子プロセスが固まったときにテスト全体が止まらないようにする上限。
 const SPAWN_TIMEOUT_MS = 10000;
 const USAGE_TEXT = "usage";
+const OUT_FILE = "out/nested/candidates.json";
 const NODE_MODULES_FILE = "node_modules/pkg/README.md";
 const GIT_FILE = ".git/notes.md";
 
@@ -203,6 +204,63 @@ describe("prompt-commons.ts を node で起動した各コマンド", () => {
         },
       ],
     });
+  });
+
+  test("detect --out: 全量 JSON を実ファイル（親ディレクトリも作成）に書き、stdout は 1 行の要約だけ", () => {
+    // Arrange
+    writeSources();
+    const plain = runPrompt(["detect", TARGET, SECOND_TARGET, ...rootArgs()]);
+
+    // Act
+    const result = runPrompt([
+      "detect",
+      TARGET,
+      SECOND_TARGET,
+      "--out",
+      OUT_FILE,
+      "--limit",
+      "1",
+      ...rootArgs(),
+    ]);
+
+    // Assert
+    expect(result.status).toBe(STATUS_OK);
+    expect(readInRoot(OUT_FILE)).toBe(plain.stdout);
+    expect(result.stdout.endsWith("\n")).toBe(true);
+    expect(result.stdout.slice(0, -1)).not.toContain("\n");
+    expect(JSON.parse(result.stdout)).toEqual({
+      total: 1,
+      shown: 1,
+      truncated: false,
+      outFile: OUT_FILE,
+      candidates: [
+        {
+          id: "c1",
+          kind: "exact",
+          unit: "paragraph",
+          similarity: 1,
+          occurrenceCount: 2,
+          locations: [
+            `${TARGET}:${SHARED_LINE_OF_TARGET}-${SHARED_LINE_OF_TARGET}`,
+            `${SECOND_TARGET}:${SHARED_LINE_OF_SECOND_TARGET}-${SHARED_LINE_OF_SECOND_TARGET}`,
+          ],
+          preview: SHARED_LINE,
+        },
+      ],
+    });
+  });
+
+  test("detect --limit を --out なしで指定すると 2 で usage を stderr に出す", () => {
+    // Arrange
+    writeSources();
+
+    // Act
+    const result = runPrompt(["detect", TARGET, "--limit", "1", ...rootArgs()]);
+
+    // Assert
+    expect(result.status).toBe(STATUS_ERROR);
+    expect(result.stderr).toContain(USAGE_TEXT);
+    expect(result.stdout).toBe("");
   });
 
   test("apply: 計画どおりに共通文言ファイルを作り、対象ファイルを import ブロックへ置換する", () => {
