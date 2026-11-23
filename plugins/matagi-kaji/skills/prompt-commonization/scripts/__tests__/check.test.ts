@@ -379,3 +379,115 @@ describe("checkBlocks: 問題なし", () => {
     },
   );
 });
+
+describe("checkPhraseFile: コードフェンス・frontmatter・閉じ忘れ", () => {
+  const FENCE = "```";
+
+  test("コードフェンス内の @import / @end の記法例は import-in-phrase にしない", () => {
+    // Arrange
+    const content = toText([
+      "記法の例:",
+      FENCE,
+      START_LINE_TEXT,
+      END_LINE_TEXT,
+      FENCE,
+      ...BODY_LINES,
+    ]);
+
+    // Act
+    const findings = checkPhraseFile(content);
+
+    // Assert
+    expect(findings).toStrictEqual([]);
+  });
+
+  test("コードフェンスの外の @import は、フェンスがあっても import-in-phrase にする", () => {
+    // Arrange
+    const content = toText([FENCE, "コード", FENCE, START_LINE_TEXT]);
+
+    // Act
+    const findings = checkPhraseFile(content);
+
+    // Assert
+    expect(findings).toStrictEqual([
+      { kind: "import-in-phrase", line: 4, message: NON_EMPTY_MESSAGE },
+    ]);
+  });
+
+  test("先頭に frontmatter があれば、1 行目の frontmatter-in-phrase にする", () => {
+    // Arrange
+    const content = toText(["---", "title: x", "---", ...BODY_LINES]);
+
+    // Act
+    const findings = checkPhraseFile(content);
+
+    // Assert
+    expect(findings).toStrictEqual([
+      { kind: "frontmatter-in-phrase", line: 1, message: NON_EMPTY_MESSAGE },
+    ]);
+  });
+
+  test("先頭以外の --- は frontmatter と見なさない", () => {
+    // Arrange
+    const content = toText([
+      BODY_LINES[0] ?? "",
+      "---",
+      "区切りの後の文",
+      "---",
+    ]);
+
+    // Act
+    const findings = checkPhraseFile(content);
+
+    // Assert
+    expect(findings).toStrictEqual([]);
+  });
+
+  test("閉じていないコードフェンスは、開始行の unclosed-fence-in-phrase にする", () => {
+    // Arrange
+    const content = toText([BODY_LINES[0] ?? "", FENCE, "コード"]);
+
+    // Act
+    const findings = checkPhraseFile(content);
+
+    // Assert
+    expect(findings).toStrictEqual([
+      { kind: "unclosed-fence-in-phrase", line: 2, message: NON_EMPTY_MESSAGE },
+    ]);
+  });
+});
+
+describe("checkBlocks: ルート外のパス（invalid-path）", () => {
+  test.each([
+    { label: "絶対パス", path: "/etc/passwd" },
+    { label: "先頭が `..`", path: "../outside.md" },
+    {
+      label: "途中に `..` セグメント",
+      path: "prompt-commons/../../outside.md",
+    },
+  ])(
+    "@import のパスが不正（$label）なら共通文言ファイルを読まず invalid-path にする",
+    ({ path }) => {
+      // Arrange
+      const text = toText([
+        "# 見出し",
+        startLineTextOf(path),
+        "本文",
+        END_LINE_TEXT,
+      ]);
+      const readPaths: string[] = [];
+
+      // Act
+      const findings = checkBlocks(text, (target) => {
+        readPaths.push(target);
+        return "本文\n";
+      });
+
+      // Assert
+      expect(findings).toStrictEqual([
+        { kind: "invalid-path", line: 2, message: NON_EMPTY_MESSAGE },
+      ]);
+      expect(readPaths).toStrictEqual([]);
+    },
+  );
+});

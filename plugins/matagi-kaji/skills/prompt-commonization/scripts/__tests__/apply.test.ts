@@ -940,3 +940,279 @@ describe("planApply: 何も変えない計画（37）", () => {
     expect(result).toStrictEqual({ writes: [], errors: [] });
   });
 });
+
+describe("planApply: 除外領域との重なり（excluded-region）", () => {
+  const FENCE = "```";
+  const FRONTMATTER = "---";
+
+  function excludedCaseOf(
+    fileLines: string[],
+    startLine: number,
+    endLine: number,
+  ) {
+    const plan = planOf([
+      phraseOf(NAME, BODY_LINES, [
+        occurrenceIn(TARGET, fileLines, startLine, endLine),
+      ]),
+    ]);
+    return applyPlan(plan, { [TARGET]: toText(fileLines) });
+  }
+
+  test.each([
+    {
+      label: "既存ブロックの本文の内側（ネスト化）",
+      lines: ["# 見出し", START_LINE_TEXT, "旧1", "旧2", END_LINE_TEXT, "末尾"],
+      range: [3, 4],
+    },
+    {
+      label: "既存ブロックの開始行を含む",
+      lines: ["# 見出し", "前置き", START_LINE_TEXT, "旧1", END_LINE_TEXT],
+      range: [2, 3],
+    },
+    {
+      label: "既存ブロックの終了行を含む",
+      lines: ["# 見出し", START_LINE_TEXT, "旧1", END_LINE_TEXT, "末尾"],
+      range: [3, 5],
+    },
+    {
+      label: "既存ブロックを丸ごと含む",
+      lines: ["# 見出し", START_LINE_TEXT, "旧1", END_LINE_TEXT, "末尾"],
+      range: [1, 5],
+    },
+    {
+      label: "コードフェンスの内側",
+      lines: ["# 見出し", FENCE, "旧1", "旧2", FENCE, "末尾"],
+      range: [3, 4],
+    },
+    {
+      label: "コードフェンスの開始行にだけ掛かる",
+      lines: ["# 見出し", "前置き", FENCE, "旧1", FENCE],
+      range: [2, 3],
+    },
+    {
+      label: "frontmatter の内側",
+      lines: [FRONTMATTER, "title: x", FRONTMATTER, "本文1", "本文2"],
+      range: [1, 2],
+    },
+    {
+      label: "frontmatter から本文へまたがる",
+      lines: [FRONTMATTER, "title: x", FRONTMATTER, "本文1", "本文2"],
+      range: [3, 4],
+    },
+  ])(
+    "置換範囲が除外領域（$label）に 1 行でも掛かると excluded-region にし、何も書かない",
+    ({ lines, range }) => {
+      // Arrange・Act
+      const [startLine = 0, endLine = 0] = range;
+      const result = excludedCaseOf(lines, startLine, endLine);
+
+      // Assert
+      expect(result.writes).toStrictEqual([]);
+      expect(result.errors).toContainEqual(
+        errorOf("excluded-region", { file: TARGET }),
+      );
+    },
+  );
+
+  test("除外領域に掛からない範囲は、除外領域を含むファイルでも正常に置換する", () => {
+    // Arrange
+    const lines = [
+      FRONTMATTER,
+      "title: x",
+      FRONTMATTER,
+      "# 見出し",
+      FENCE,
+      "コード例",
+      FENCE,
+      "古い言い回し1。",
+      "古い言い回し2。",
+      START_LINE_TEXT,
+      ...BODY_LINES,
+      END_LINE_TEXT,
+      "末尾",
+    ];
+
+    // Act
+    const result = excludedCaseOf(lines, 8, 9);
+
+    // Assert
+    expect(result.errors).toStrictEqual([]);
+    expect(pathsOf(result.writes)).toStrictEqual([COMMON_PATH, TARGET]);
+  });
+
+  test("既存ブロックの直前・直後の行だけを置換する範囲は掛からないものとして扱う", () => {
+    // Arrange
+    const lines = [
+      "旧前",
+      START_LINE_TEXT,
+      ...BODY_LINES,
+      END_LINE_TEXT,
+      "旧後",
+    ];
+    const plan = planOf([
+      phraseOf(NAME, BODY_LINES, [
+        occurrenceIn(TARGET, lines, 1, 1),
+        occurrenceIn(TARGET, lines, 6, 6),
+      ]),
+    ]);
+
+    // Act
+    const result = applyPlan(plan, { [TARGET]: toText(lines) });
+
+    // Assert
+    expect(result.errors).toStrictEqual([]);
+  });
+});
+
+describe("planApply: 共通文言の内容検証（invalid-phrase-content）", () => {
+  function phraseContentCase(lines: string[]) {
+    const plan = planOf([
+      phraseOf(NAME, lines, [occurrenceOf(TARGET, 2, 3, OLD_LINES)]),
+    ]);
+    return applyPlan(plan, { [TARGET]: toText(TARGET_LINES) });
+  }
+
+  test.each([
+    { label: "@import の単独行", lines: ["前", START_LINE_TEXT, "後"] },
+    { label: "@end の単独行", lines: ["前", END_LINE_TEXT, "後"] },
+    { label: "閉じていないコードフェンス", lines: ["前", "```", "コード"] },
+    {
+      label: "frontmatter",
+      lines: ["---", "title: x", "---", "本文"],
+    },
+  ])(
+    "text に $label を含むと invalid-phrase-content にし、何も書かない",
+    ({ lines }) => {
+      // Act
+      const result = phraseContentCase(lines);
+
+      // Assert
+      expect(result.writes).toStrictEqual([]);
+      expect(result.errors).toContainEqual(
+        errorOf("invalid-phrase-content", { phrase: NAME }),
+      );
+    },
+  );
+
+  test("閉じたコードフェンス内の @import の記法例は拒否しない", () => {
+    // Arrange
+    const lines = ["記法の例:", "```", START_LINE_TEXT, END_LINE_TEXT, "```"];
+
+    // Act
+    const result = phraseContentCase(lines);
+
+    // Assert
+    expect(result.errors).toStrictEqual([]);
+  });
+});
+
+describe("planApply: 対象ファイルのパス（正規化・ルート外）", () => {
+  const FILE = "d.md";
+  const FILE_LINES = ["# 見出し", "旧1", "旧2", "間", "旧3", "旧4", "末尾"];
+
+  test.each(["./d.md", "d.md", "././d.md", ".//d.md"])(
+    "別表記（%s）で指定しても同じファイルとして読み、writes のキーは正規化後のパスにする",
+    (spelling) => {
+      // Arrange
+      const plan = planOf([
+        phraseOf(NAME, BODY_LINES, [occurrenceIn(spelling, FILE_LINES, 2, 3)]),
+      ]);
+
+      // Act
+      const result = applyPlan(plan, { [FILE]: toText(FILE_LINES) });
+
+      // Assert
+      expect(result.errors).toStrictEqual([]);
+      expect(pathsOf(result.writes)).toStrictEqual([COMMON_PATH, FILE]);
+    },
+  );
+
+  test("同一ファイルを別表記で指定した置換は writes を 1 件にまとめて両方適用する", () => {
+    // Arrange
+    const plan = planOf([
+      phraseOf(NAME, BODY_LINES, [
+        occurrenceIn(FILE, FILE_LINES, 2, 3),
+        occurrenceIn(`./${FILE}`, FILE_LINES, 5, 6),
+      ]),
+    ]);
+
+    // Act
+    const result = applyPlan(plan, { [FILE]: toText(FILE_LINES) });
+
+    // Assert
+    expect(result.errors).toStrictEqual([]);
+    expect(pathsOf(result.writes)).toStrictEqual([COMMON_PATH, FILE]);
+    expect(result.writes[1]?.content).toBe(
+      toText([
+        "# 見出し",
+        START_LINE_TEXT,
+        ...BODY_LINES,
+        END_LINE_TEXT,
+        "間",
+        START_LINE_TEXT,
+        ...BODY_LINES,
+        END_LINE_TEXT,
+        "末尾",
+      ]),
+    );
+  });
+
+  test("別表記で指定した範囲どうしの重なりも overlap として検出する", () => {
+    // Arrange
+    const plan = planOf([
+      phraseOf(NAME, BODY_LINES, [
+        occurrenceIn(FILE, FILE_LINES, 2, 3),
+        occurrenceIn(`./${FILE}`, FILE_LINES, 3, 4),
+      ]),
+    ]);
+
+    // Act
+    const result = applyPlan(plan, { [FILE]: toText(FILE_LINES) });
+
+    // Assert
+    expect(result.writes).toStrictEqual([]);
+    expect(kindsOf(result.errors)).toContain("overlap");
+  });
+
+  test("別表記で指定した範囲でも除外領域との重なりを検出する", () => {
+    // Arrange
+    const lines = ["# 見出し", "```", "旧1", "```"];
+    const plan = planOf([
+      phraseOf(NAME, BODY_LINES, [occurrenceIn(`./${FILE}`, lines, 3, 3)]),
+    ]);
+
+    // Act
+    const result = applyPlan(plan, { [FILE]: toText(lines) });
+
+    // Assert
+    expect(result.writes).toStrictEqual([]);
+    expect(kindsOf(result.errors)).toContain("excluded-region");
+  });
+
+  test.each([
+    { label: "絶対パス", file: "/abs/d.md" },
+    { label: "先頭が `..`", file: "../d.md" },
+    { label: "途中に `..` セグメント", file: "sub/../d.md" },
+    { label: "末尾が `..`", file: "sub/.." },
+  ])(
+    "対象ファイルが不正（$label）なら invalid-file にし、そのファイルを読まず何も書かない",
+    ({ file }) => {
+      // Arrange
+      const readPaths: string[] = [];
+      const plan = planOf([
+        phraseOf(NAME, BODY_LINES, [occurrenceIn(file, FILE_LINES, 2, 3)]),
+      ]);
+
+      // Act
+      const result = planApply(plan, (path) => {
+        readPaths.push(path);
+        return toText(FILE_LINES);
+      });
+
+      // Assert
+      expect(result.writes).toStrictEqual([]);
+      expect(result.errors).toContainEqual(errorOf("invalid-file", { file }));
+      expect(readPaths).not.toContain(file);
+    },
+  );
+});

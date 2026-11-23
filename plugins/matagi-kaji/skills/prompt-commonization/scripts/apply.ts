@@ -1,13 +1,18 @@
 // 承認済みの共通化計画から、書き込む内容を計算する（ファイル I/O なし）。
 // 記法の正: shared-rules/prompt-commonization/commonization-rule.md
 
+import { posix } from "node:path";
+import { checkPhraseFile } from "./check.ts";
 import type { ReadPhrase } from "./markdown-scan.ts";
 import {
   BODY_JOINER,
   eolOf,
   isInSync,
+  isRootRelativePath,
   LINE_BREAK_PATTERN,
+  parseImportBlocks,
   phraseLinesOf,
+  scannableLinesOf,
 } from "./markdown-scan.ts";
 
 const KEBAB_CASE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -46,7 +51,10 @@ export type PlanErrorKind =
   | "missing-file"
   | "out-of-range"
   | "stale-plan"
-  | "overlap";
+  | "overlap"
+  | "excluded-region"
+  | "invalid-phrase-content"
+  | "invalid-file";
 
 export type PlanError = {
   kind: PlanErrorKind;
@@ -129,6 +137,15 @@ function phraseErrorsOf(
       planError("empty-text", `共通文言 "${name}" の text が空です`, subject),
     );
   }
+  if (checkPhraseFile(phrase.text).length > 0) {
+    errors.push(
+      planError(
+        "invalid-phrase-content",
+        `共通文言 "${name}" の text に @import / @end の単独行・frontmatter・閉じていないコードフェンスは含められません`,
+        subject,
+      ),
+    );
+  }
   if (!isValidName || !isValidDir(dir)) {
     return errors;
   }
@@ -173,6 +190,28 @@ function planLevelErrorsOf(plan: Plan, readFile: ReadFile): PlanError[] {
     errors.push(...phraseErrorsOf(plan.dir, phrase, readFile));
   }
   return errors;
+}
+
+// 置換範囲の file を正規化する（./d.md と d.md を同一視）。ルート外を指すものは invalid-file にして除く。
+function normalizedPlanOf(plan: Plan): { plan: Plan; errors: PlanError[] } {
+  const errors: PlanError[] = [];
+  const phrases = plan.phrases.map((phrase) => ({
+    ...phrase,
+    occurrences: phrase.occurrences.flatMap((occurrence) => {
+      if (!isRootRelativePath(occurrence.file)) {
+        errors.push(
+          planError(
+            "invalid-file",
+            `対象ファイル "${occurrence.file}" が不正です（絶対パス・.. を含むパスは不可）`,
+            { file: occurrence.file, phrase: phrase.name },
+          ),
+        );
+        return [];
+      }
+      return [{ ...occurrence, file: posix.normalize(occurrence.file) }];
+    }),
+  }));
+  return { plan: { ...plan, phrases }, errors };
 }
 
 // 対象ファイルごとの置換（ファイルの初出順、ファイル内は計画の記載順）。
@@ -225,13 +264,49 @@ function overlapErrorsOf(
   return errors;
 }
 
-// 1 ファイル分の検証（範囲・計画作成後の変更・範囲の重なり）。
+// frontmatter・コードフェンス・既存 @import ブロック（開始行〜終了行）に当たる行番号の集合。
+function excludedLinesOf(source: string, lines: string[]): Set<number> {
+  const scannable = new Set(
+    scannableLinesOf(lines).map(({ lineNumber }) => lineNumber),
+  );
+  const excluded = new Set<number>();
+  for (let lineNumber = 1; lineNumber <= lines.length; lineNumber++) {
+    if (!scannable.has(lineNumber)) {
+      excluded.add(lineNumber);
+    }
+  }
+  for (const { startLine, endLine } of parseImportBlocks(source).blocks) {
+    for (let lineNumber = startLine; lineNumber <= endLine; lineNumber++) {
+      excluded.add(lineNumber);
+    }
+  }
+  return excluded;
+}
+
+function touchesExcluded(
+  occurrence: PlanOccurrence,
+  excluded: Set<number>,
+): boolean {
+  for (
+    let lineNumber = occurrence.startLine;
+    lineNumber <= occurrence.endLine;
+    lineNumber++
+  ) {
+    if (excluded.has(lineNumber)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// 1 ファイル分の検証（範囲・計画作成後の変更・除外領域との重なり・範囲どうしの重なり）。
 function occurrenceErrorsOf(
   file: string,
   source: string,
   replacements: Replacement[],
 ): PlanError[] {
   const lines = source.split(LINE_BREAK_PATTERN);
+  const excluded = excludedLinesOf(source, lines);
   const errors: PlanError[] = [];
   const inRange: Replacement[] = [];
 
@@ -260,6 +335,15 @@ function occurrenceErrorsOf(
         ),
       );
     }
+    if (touchesExcluded(occurrence, excluded)) {
+      errors.push(
+        planError(
+          "excluded-region",
+          `${file} の${range}が frontmatter・コードフェンス・既存の @import ブロックに掛かっています`,
+          { file },
+        ),
+      );
+    }
     inRange.push(replacement);
   }
   return [...errors, ...overlapErrorsOf(file, inRange)];
@@ -280,8 +364,9 @@ function replacedTextOf(source: string, replacements: Replacement[]): string {
 
 // 計画から書き込み内容を計算する。1 件でも不整合があれば writes は空。
 // writes の順序: 共通文言ファイル（計画の phrases 順）→ 対象ファイル（初出順）。
-export function planApply(plan: Plan, readFile: ReadFile): ApplyResult {
-  const errors = planLevelErrorsOf(plan, readFile);
+export function planApply(rawPlan: Plan, readFile: ReadFile): ApplyResult {
+  const { plan, errors: fileErrors } = normalizedPlanOf(rawPlan);
+  const errors = [...fileErrors, ...planLevelErrorsOf(plan, readFile)];
   const loaded: LoadedFile[] = [];
 
   for (const [file, replacements] of replacementsByFileOf(plan)) {

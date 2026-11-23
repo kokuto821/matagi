@@ -229,3 +229,122 @@ describe("expandBlocks", () => {
     expect(result.text).toBe(text);
   });
 });
+
+describe("expandBlocks: 共通文言ファイルの内容検証（invalid-phrase）", () => {
+  const FENCE = "```";
+
+  test.each([
+    { label: "@import の単独行", lines: ["前", SECOND_START_LINE_TEXT, "後"] },
+    { label: "@end の単独行", lines: ["前", END_LINE_TEXT, "後"] },
+    { label: "閉じていないコードフェンス", lines: ["前", FENCE, "コード"] },
+    { label: "frontmatter", lines: ["---", "title: x", "---", "本文"] },
+  ])(
+    "共通文言ファイルが不正（$label）なら、そのブロックを展開せず invalid-phrase を返す",
+    ({ lines }) => {
+      // Arrange
+      const text = toText([
+        "# 見出し",
+        START_LINE_TEXT,
+        OLD_BODY_LINE,
+        END_LINE_TEXT,
+      ]);
+
+      // Act
+      const result = expandBlocks(
+        text,
+        phraseReaderOf({ [COMMON_PATH]: lines }),
+      );
+
+      // Assert
+      expect(result.errors).toStrictEqual([
+        { kind: "invalid-phrase", line: 2, path: COMMON_PATH },
+      ]);
+      expect(result.text).toBe(text);
+    },
+  );
+
+  test("不正な共通文言のブロックだけ未展開のまま残し、他のブロックは展開する", () => {
+    // Arrange
+    const text = toText([
+      START_LINE_TEXT,
+      OLD_BODY_LINE,
+      END_LINE_TEXT,
+      SECOND_START_LINE_TEXT,
+      OLD_BODY_LINE,
+      END_LINE_TEXT,
+    ]);
+    const readPhrase = phraseReaderOf({
+      [COMMON_PATH]: ["前", END_LINE_TEXT],
+      [SECOND_COMMON_PATH]: [SECOND_BODY_LINE],
+    });
+
+    // Act
+    const result = expandBlocks(text, readPhrase);
+
+    // Assert
+    expect(result.errors).toStrictEqual([
+      { kind: "invalid-phrase", line: 1, path: COMMON_PATH },
+    ]);
+    expect(result.text).toBe(
+      toText([
+        START_LINE_TEXT,
+        OLD_BODY_LINE,
+        END_LINE_TEXT,
+        SECOND_START_LINE_TEXT,
+        SECOND_BODY_LINE,
+        END_LINE_TEXT,
+      ]),
+    );
+  });
+
+  test("コードフェンス内の @import の記法例を含む共通文言は展開する", () => {
+    // Arrange
+    const lines = ["例:", FENCE, SECOND_START_LINE_TEXT, END_LINE_TEXT, FENCE];
+    const text = toText([START_LINE_TEXT, OLD_BODY_LINE, END_LINE_TEXT]);
+
+    // Act
+    const result = expandBlocks(text, phraseReaderOf({ [COMMON_PATH]: lines }));
+
+    // Assert
+    expect(result.errors).toStrictEqual([]);
+    expect(result.text).toBe(
+      toText([START_LINE_TEXT, ...lines, END_LINE_TEXT]),
+    );
+  });
+});
+
+describe("expandBlocks: ルート外のパス（invalid-path）", () => {
+  test.each([
+    { label: "絶対パス", path: "/etc/passwd" },
+    { label: "先頭が `..`", path: "../outside.md" },
+    {
+      label: "途中に `..` セグメント",
+      path: "prompt-commons/../../outside.md",
+    },
+  ])(
+    "@import のパスが不正（$label）なら共通文言ファイルを読まず invalid-path を返す",
+    ({ path }) => {
+      // Arrange
+      const text = toText([
+        "# 見出し",
+        startLineTextOf(path),
+        "本文",
+        END_LINE_TEXT,
+      ]);
+      const readPaths: string[] = [];
+
+      // Act
+      const result = expandBlocks(text, (target) => {
+        readPaths.push(target);
+        return BODY_LINES.join("\n");
+      });
+
+      // Assert
+      expect(result.errors).toStrictEqual([
+        { kind: "invalid-path", line: 2, path },
+      ]);
+      expect(result.text).toBe(text);
+      expect(readPaths).toStrictEqual([]);
+    },
+  );
+});

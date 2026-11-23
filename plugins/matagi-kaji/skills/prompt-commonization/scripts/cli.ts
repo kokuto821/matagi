@@ -11,7 +11,7 @@ import type { DetectOptions, SourceFile } from "./detect.ts";
 import { detectCandidates } from "./detect.ts";
 import { expandBlocks, findingOfExpandError } from "./expand.ts";
 import type { ReadPhrase } from "./markdown-scan.ts";
-import { parseImportBlocks } from "./markdown-scan.ts";
+import { isRootRelativePath, parseImportBlocks } from "./markdown-scan.ts";
 
 const STATUS_OK = 0;
 const STATUS_FINDINGS = 1;
@@ -22,6 +22,9 @@ const PATH_SEPARATOR = "/";
 const CURRENT_DIRECTORY = ".";
 const JSON_INDENT = 2;
 const ERROR_PREFIX = "error: ";
+const WRITTEN_PREFIX = "written: ";
+const MIN_THRESHOLD = 0;
+const MAX_THRESHOLD = 1;
 
 const USAGE = [
   "usage: prompt-commons <command> [options]",
@@ -225,13 +228,19 @@ const OPTIONS_OF: Record<Command, ParseArgsOptionsConfig> = {
   check: ROOT_OPTIONS,
 };
 
-type Request = {
+type RawRequest = {
   command: Command;
   paths: string[];
   root: string | undefined;
   plan: string | undefined;
   detectOptions: DetectOptions;
 };
+
+type Request =
+  | (Omit<RawRequest, "command" | "plan"> & {
+      command: Exclude<Command, "apply">;
+    })
+  | (Omit<RawRequest, "command" | "plan"> & { command: "apply"; plan: string });
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -262,6 +271,12 @@ function numberValue(
   return value;
 }
 
+function isThreshold(value: number): boolean {
+  return (
+    Number.isFinite(value) && value >= MIN_THRESHOLD && value <= MAX_THRESHOLD
+  );
+}
+
 function isNonNegativeInteger(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
 }
@@ -278,16 +293,21 @@ function parseOptions(command: Command, args: string[]) {
   }
 }
 
-function validateRequest({ command, paths }: Request): void {
+function validateRequest(raw: RawRequest): Request {
+  const { command, paths, plan, ...rest } = raw;
   if (command === "apply") {
     if (paths.length > 0) {
       throw new UsageError("apply は path を受け取りません");
     }
-    return;
+    if (plan === undefined) {
+      throw new UsageError("apply には --plan が必要です");
+    }
+    return { ...rest, paths, command, plan };
   }
   if (paths.length === 0) {
     throw new UsageError(`${command} には path が必要です`);
   }
+  return { ...rest, paths, command };
 }
 
 function parseRequest(argv: readonly string[]): Request {
@@ -301,18 +321,16 @@ function parseRequest(argv: readonly string[]): Request {
   }
 
   const { values, positionals } = parseOptions(command, args);
-  const request: Request = {
+  return validateRequest({
     command,
     paths: positionals,
     root: stringValue(values, "root"),
     plan: stringValue(values, "plan"),
     detectOptions: {
-      threshold: numberValue(values, "threshold", Number.isFinite),
+      threshold: numberValue(values, "threshold", isThreshold),
       minChars: numberValue(values, "min-chars", isNonNegativeInteger),
     },
-  };
-  validateRequest(request);
-  return request;
+  });
 }
 
 // ---- コマンドの実行 ----
@@ -417,10 +435,12 @@ function runCheck(context: Context, sources: SourceFile[]): number {
   );
   const phrasePaths = uniqueOf(
     sources.flatMap(({ text }) =>
-      parseImportBlocks(text).blocks.map(({ path }) => path),
+      parseImportBlocks(text)
+        .blocks.map(({ path }) => path)
+        .filter(isRootRelativePath),
     ),
   );
-  // 読めない共通文言ファイルは checkBlocks が報告済みなので、ここでは読めたものだけ検査する。
+  // ルート外のパスは読まない。読めない共通文言ファイルは checkBlocks が報告済みなので、ここでは読めたものだけ検査する。
   const phraseLines = phrasePaths.flatMap((path) => {
     const content = readPhrase(path);
     return content === undefined
@@ -431,6 +451,27 @@ function runCheck(context: Context, sources: SourceFile[]): number {
   const lines = [...sourceLines, ...phraseLines];
   writeLines(context.io.stdout, lines);
   return lines.length > 0 ? STATUS_FINDINGS : STATUS_OK;
+}
+
+// root 相対パスの順に書き込む。失敗したら以降は書かず、失敗したパスと理由・書き込み済みのパスを stderr に出す。
+function writeAll(
+  context: Context,
+  writes: Array<{ path: string; content: string }>,
+): number {
+  const written: string[] = [];
+  for (const { path, content } of writes) {
+    try {
+      context.io.writeFile(absoluteOf(context, path), content);
+    } catch (error) {
+      writeLines(context.io.stderr, [
+        errorLine(`書き込みに失敗しました: ${path}: ${messageOf(error)}`),
+        ...written.map((writtenPath) => `${WRITTEN_PREFIX}${writtenPath}`),
+      ]);
+      return STATUS_ERROR;
+    }
+    written.push(path);
+  }
+  return STATUS_OK;
 }
 
 // 全ファイルを検証してから書き込む。1 件でもエラーがあれば何も書かない。
@@ -452,18 +493,15 @@ function runExpand(context: Context, sources: SourceFile[]): number {
     return STATUS_ERROR;
   }
 
-  for (const { file, text, expanded } of results) {
-    if (expanded.text !== text) {
-      context.io.writeFile(absoluteOf(context, file), expanded.text);
-    }
-  }
-  return STATUS_OK;
+  return writeAll(
+    context,
+    results
+      .filter(({ text, expanded }) => expanded.text !== text)
+      .map(({ file, expanded }) => ({ path: file, content: expanded.text })),
+  );
 }
 
-function runApply(context: Context, planPath: string | undefined): number {
-  if (planPath === undefined) {
-    throw new UsageError("apply には --plan が必要です");
-  }
+function runApply(context: Context, planPath: string): number {
   const planText = context.io.readFile(resolve(context.io.cwd, planPath));
   if (planText === undefined) {
     writeLines(context.io.stderr, [
@@ -490,14 +528,14 @@ function runApply(context: Context, planPath: string | undefined): number {
     return STATUS_ERROR;
   }
 
-  for (const { path, content } of writes) {
-    context.io.writeFile(absoluteOf(context, path), content);
+  const status = writeAll(context, writes);
+  if (status === STATUS_OK) {
+    writeLines(
+      context.io.stdout,
+      writes.map(({ path }) => path),
+    );
   }
-  writeLines(
-    context.io.stdout,
-    writes.map(({ path }) => path),
-  );
-  return STATUS_OK;
+  return status;
 }
 
 function execute(request: Request, io: CliIo): number {
@@ -505,22 +543,21 @@ function execute(request: Request, io: CliIo): number {
     io,
     rootDir: resolve(io.cwd, request.root ?? CURRENT_DIRECTORY),
   };
-  const { command, paths, plan, detectOptions } = request;
-  switch (command) {
+  switch (request.command) {
     case "detect":
-      return withSources(context, paths, (sources) =>
-        runDetect(context, sources, detectOptions),
+      return withSources(context, request.paths, (sources) =>
+        runDetect(context, sources, request.detectOptions),
       );
     case "check":
-      return withSources(context, paths, (sources) =>
+      return withSources(context, request.paths, (sources) =>
         runCheck(context, sources),
       );
     case "expand":
-      return withSources(context, paths, (sources) =>
+      return withSources(context, request.paths, (sources) =>
         runExpand(context, sources),
       );
     case "apply":
-      return runApply(context, plan);
+      return runApply(context, request.plan);
   }
 }
 

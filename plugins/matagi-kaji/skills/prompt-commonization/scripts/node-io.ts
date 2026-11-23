@@ -5,15 +5,18 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
+  rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
 import type { Stats } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import type { CliIo } from "./cli.ts";
 
 const NOT_FOUND_CODE = "ENOENT";
 const TEXT_ENCODING = "utf8";
+const TEMPORARY_SUFFIX = ".tmp";
 const MARKDOWN_EXTENSION = ".md";
 const RELATIVE_PATH_SEPARATOR = "/";
 const EXCLUDED_DIRECTORIES = new Set(["node_modules", ".git"]);
@@ -35,9 +38,21 @@ function readFile(path: string): string | undefined {
   }
 }
 
+// 同一ディレクトリの一時ファイルへ書いてから rename し、ファイル単位で原子的に置き換える。
 function writeFile(path: string, content: string): void {
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, content, TEXT_ENCODING);
+  const directory = dirname(path);
+  mkdirSync(directory, { recursive: true });
+  const temporaryPath = join(
+    directory,
+    `.${basename(path)}.${process.pid}${TEMPORARY_SUFFIX}`,
+  );
+  try {
+    writeFileSync(temporaryPath, content, TEXT_ENCODING);
+    renameSync(temporaryPath, path);
+  } catch (error) {
+    rmSync(temporaryPath, { force: true });
+    throw error;
+  }
 }
 
 function statOf(path: string): Stats | undefined {

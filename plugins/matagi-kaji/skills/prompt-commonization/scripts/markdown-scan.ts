@@ -6,6 +6,9 @@ export const IMPORT_START_PATTERN = /^\s*<!--\s+@import\s+(\S+)\s+-->\s*$/;
 export const IMPORT_END_PATTERN = /^\s*<!--\s+@end\s+-->\s*$/;
 const FENCE_PATTERN = /^\s*(`{3,}|~{3,})/;
 const FRONTMATTER_DELIMITER = "---";
+const PARENT_SEGMENT = "..";
+const PATH_SEGMENT_PATTERN = /[\\/]/;
+const ABSOLUTE_PATH_PATTERN = /^(?:[\\/]|[A-Za-z]:)/;
 export const BODY_JOINER = "\n";
 const TRAILING_LINE_BREAK_PATTERN = /\r?\n$/;
 const CRLF = "\r\n";
@@ -56,11 +59,16 @@ function firstBodyIndexOf(lines: string[]): number {
   return closingIndex === -1 ? lines.length : closingIndex + 1;
 }
 
-// frontmatter・コードフェンス（フェンス行を含む）を除いた走査対象行を返す。
-export function scannableLinesOf(lines: string[]): ScannableLine[] {
-  const result: ScannableLine[] = [];
+type BodyScan = {
+  scannable: ScannableLine[];
+  unclosedFenceLine: number | undefined;
+};
+
+function scanBody(lines: string[]): BodyScan {
+  const scannable: ScannableLine[] = [];
   const firstBodyIndex = firstBodyIndexOf(lines);
   let openFence: string | null = null;
+  let openFenceLine: number | undefined;
 
   for (let index = firstBodyIndex; index < lines.length; index++) {
     const text = lines[index] ?? "";
@@ -69,16 +77,42 @@ export function scannableLinesOf(lines: string[]): ScannableLine[] {
     if (openFence !== null) {
       if (marker !== undefined && closesFence(openFence, marker)) {
         openFence = null;
+        openFenceLine = undefined;
       }
       continue;
     }
     if (marker !== undefined) {
       openFence = marker;
+      openFenceLine = index + 1;
       continue;
     }
-    result.push({ lineNumber: index + 1, text });
+    scannable.push({ lineNumber: index + 1, text });
   }
-  return result;
+  return { scannable, unclosedFenceLine: openFenceLine };
+}
+
+// frontmatter・コードフェンス（フェンス行を含む）を除いた走査対象行を返す。
+export function scannableLinesOf(lines: string[]): ScannableLine[] {
+  return scanBody(lines).scannable;
+}
+
+// 閉じていないコードフェンスがあれば、その開始行の行番号（1 始まり）を返す。
+export function unclosedFenceLineOf(lines: string[]): number | undefined {
+  return scanBody(lines).unclosedFenceLine;
+}
+
+// 先頭行が frontmatter の区切り（---）か。閉じていなくても真（本文が走査対象外になるため）。
+export function startsWithFrontmatter(lines: string[]): boolean {
+  return lines[0]?.trimEnd() === FRONTMATTER_DELIMITER;
+}
+
+// 共通文言のパスが対象リポジトリのルート相対か（絶対パス・.. セグメントを含まない）。
+export function isRootRelativePath(path: string): boolean {
+  const isAbsolute = ABSOLUTE_PATH_PATTERN.test(path);
+  const hasParentSegment = path
+    .split(PATH_SEGMENT_PATTERN)
+    .includes(PARENT_SEGMENT);
+  return !isAbsolute && !hasParentSegment;
 }
 
 export function parseImportBlocks(text: string): ParseResult {

@@ -521,6 +521,14 @@ describe("使用法エラー", () => {
     ["apply の未知オプション", ["apply", "--plan", PLAN_FILE, "--bogus"]],
     ["detect の不正な --threshold", ["detect", TARGET, "--threshold", "abc"]],
     ["detect の値なし --threshold", ["detect", TARGET, "--threshold"]],
+    [
+      "detect の下限未満の --threshold",
+      ["detect", TARGET, "--threshold", "-0.1"],
+    ],
+    [
+      "detect の上限超過の --threshold",
+      ["detect", TARGET, "--threshold", "1.5"],
+    ],
     ["detect の不正な --min-chars", ["detect", TARGET, "--min-chars", "abc"]],
   ])("%s は 2 で使用法を stderr に出す", (_label, argv) => {
     // Arrange
@@ -1315,5 +1323,198 @@ describe("import の副作用", () => {
     expect(errorSpy).not.toHaveBeenCalled();
     expect(exitSpy).not.toHaveBeenCalled();
     expect(process.exitCode).toBe(exitCodeBefore);
+  });
+});
+
+describe("--threshold の範囲", () => {
+  test.each(["0", "0.5", "1"])(
+    "--threshold %s は範囲内として受理し 0 で終わる",
+    (value) => {
+      // Arrange
+      const files = filesOf(CWD, { [TARGET]: PLAIN_PROMPT });
+
+      // Act
+      const result = runIn(["detect", TARGET, "--threshold", value], files);
+
+      // Assert
+      expect(result.status).toBe(STATUS_OK);
+    },
+  );
+});
+
+describe("書き込み途中の失敗", () => {
+  const WRITE_FAILURE_REASON = "disk full";
+  const SECOND_CALL = 2;
+
+  // callNumber 回目の writeFile で例外を投げる fake I/O で runCli を実行する。
+  function runWithFailingWrite(
+    argv: string[],
+    initialFiles: Record<string, string>,
+    callNumber: number,
+  ): RunResult {
+    const fake = createIo(initialFiles);
+    const originalWrite = fake.io.writeFile;
+    let calls = 0;
+    fake.io.writeFile = (path, content) => {
+      calls += 1;
+      if (calls === callNumber) {
+        throw new Error(WRITE_FAILURE_REASON);
+      }
+      originalWrite(path, content);
+    };
+    const status = runCli(argv, fake.io);
+    return { ...fake, status };
+  }
+
+  test("apply の 2 件目の書き込みが失敗したら、失敗したパスと理由・書き込み済みのパスを stderr に出して 2 で終わる", () => {
+    // Arrange
+    const files = filesOf(CWD, {
+      [PLAN_FILE]: TWO_FILE_PLAN_TEXT,
+      [TARGET]: PLAIN_PROMPT,
+      [SECOND_TARGET]: PLAIN_PROMPT,
+    });
+
+    // Act
+    const result = runWithFailingWrite(
+      ["apply", "--plan", PLAN_FILE],
+      files,
+      SECOND_CALL,
+    );
+
+    // Assert
+    expect(result.status).toBe(STATUS_ERROR);
+    expect(stderrLinesOf(result)).toEqual([
+      `error: 書き込みに失敗しました: ${TARGET}: ${WRITE_FAILURE_REASON}`,
+      `written: ${COMMON_PATH}`,
+    ]);
+    expect(result.writes.map(({ path }) => path)).toEqual([
+      absoluteOf(CWD, COMMON_PATH),
+    ]);
+  });
+
+  test("expand の 2 件目の書き込みが失敗したら、書き込み済みのパスを 1 行ずつ出して 2 で終わり、以降は書かない", () => {
+    // Arrange
+    const files = filesOf(CWD, {
+      [TARGET]: STALE_PROMPT,
+      [SECOND_TARGET]: STALE_PROMPT,
+      [THIRD_TARGET]: STALE_PROMPT,
+      [COMMON_PATH]: PHRASE_CONTENT,
+    });
+
+    // Act
+    const result = runWithFailingWrite(
+      ["expand", TARGET, SECOND_TARGET, THIRD_TARGET],
+      files,
+      SECOND_CALL,
+    );
+
+    // Assert
+    expect(result.status).toBe(STATUS_ERROR);
+    expect(stderrLinesOf(result)).toEqual([
+      `error: 書き込みに失敗しました: ${SECOND_TARGET}: ${WRITE_FAILURE_REASON}`,
+      `written: ${TARGET}`,
+    ]);
+    expect(result.writes.map(({ path }) => path)).toEqual([
+      absoluteOf(CWD, TARGET),
+    ]);
+  });
+
+  test("最初の書き込みが失敗したら written 行は出さない", () => {
+    // Arrange
+    const files = filesOf(CWD, {
+      [TARGET]: STALE_PROMPT,
+      [COMMON_PATH]: PHRASE_CONTENT,
+    });
+
+    // Act
+    const result = runWithFailingWrite(["expand", TARGET], files, 1);
+
+    // Assert
+    expect(result.status).toBe(STATUS_ERROR);
+    expect(stderrLinesOf(result)).toEqual([
+      `error: 書き込みに失敗しました: ${TARGET}: ${WRITE_FAILURE_REASON}`,
+    ]);
+  });
+});
+
+describe("共通文言の内容・パスの検証（CLI）", () => {
+  test("expand: 共通文言ファイルが不正なら、何も書かず 2 でエラーを stderr に出す", () => {
+    // Arrange
+    const files = filesOf(CWD, {
+      [TARGET]: STALE_PROMPT,
+      [SECOND_TARGET]: STALE_PROMPT,
+      [COMMON_PATH]: toText(["---", "title: x", "---", ...PHRASE_LINES]),
+    });
+
+    // Act
+    const result = runIn(["expand", TARGET, SECOND_TARGET], files);
+
+    // Assert
+    expect(result.status).toBe(STATUS_ERROR);
+    expect(result.writes).toEqual([]);
+    expect(stderrLinesOf(result)).toEqual([
+      expect.stringContaining(`${TARGET}:${BLOCK_START_LINE_NUMBER}:`),
+      expect.stringContaining(`${SECOND_TARGET}:${BLOCK_START_LINE_NUMBER}:`),
+    ]);
+  });
+
+  test("expand: @import のパスがルート外なら、何も書かず 2 で終わる", () => {
+    // Arrange
+    const files = filesOf(CWD, {
+      [TARGET]: promptOf(["古い"], "../outside.md"),
+      [SECOND_TARGET]: STALE_PROMPT,
+      [COMMON_PATH]: PHRASE_CONTENT,
+    });
+
+    // Act
+    const result = runIn(["expand", TARGET, SECOND_TARGET], files);
+
+    // Assert
+    expect(result.status).toBe(STATUS_ERROR);
+    expect(result.writes).toEqual([]);
+  });
+
+  test("check: @import のパスがルート外なら、そのファイルを読まずに 1 で検出する", () => {
+    // Arrange
+    const outsidePath = "../outside.md";
+    const fake = createIo(
+      filesOf(CWD, { [TARGET]: promptOf(["本文"], outsidePath) }),
+    );
+    const readPaths: string[] = [];
+    const originalRead = fake.io.readFile;
+    fake.io.readFile = (path) => {
+      readPaths.push(path);
+      return originalRead(path);
+    };
+
+    // Act
+    const status = runCli(["check", TARGET], fake.io);
+
+    // Assert
+    expect(status).toBe(STATUS_FINDINGS);
+    expect(readPaths.filter((path) => path.includes("outside"))).toEqual([]);
+    expect(stdoutLinesOf(fake)).toEqual([
+      expect.stringContaining(`${TARGET}:${BLOCK_START_LINE_NUMBER}:`),
+    ]);
+  });
+
+  test("apply: 対象ファイルがルート外（..）なら、何も書かず 2 で invalid-file を出す", () => {
+    // Arrange
+    const plan = planTextOf(
+      planJson({
+        phrases: [phraseJson({}, [occurrenceJson({ file: "../outside.md" })])],
+      }),
+    );
+    const files = filesOf(CWD, { [PLAN_FILE]: plan });
+
+    // Act
+    const result = runIn(["apply", "--plan", PLAN_FILE], files);
+
+    // Assert
+    expect(result.status).toBe(STATUS_ERROR);
+    expect(result.writes).toEqual([]);
+    expect(stderrLinesOf(result)).toContainEqual(
+      expect.stringMatching(/^error: invalid-file: /),
+    );
   });
 });
