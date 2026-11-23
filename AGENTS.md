@@ -31,15 +31,15 @@ Claude Code スキル・ナレッジの共有リポジトリ。日本の伝統�
 
 | トピック | ルールファイル |
 |----------|--------------|
-| コード設計の普遍原則（DRY 等） | `plugins/matagi/shared-rules/design-principles/design-rule.md` |
+| コード設計の普遍原則 | `plugins/matagi/shared-rules/design-principles/design-rule.md` |
 | ユーザーフィードバックのルール化 | `plugins/matagi/shared-rules/user-feedback/feedback-rule.md` |
-| issue 駆動開発（フェーズ分離・issue 化の判断・issue 紐づきブランチ必須） | `plugins/matagi/shared-rules/issue-driven-development/issue-driven-rule.md` |
-| コードレビュー共通ルール（目的＝コードの健康状態の改善・承認の閾値・観点） | `plugins/matagi/shared-rules/code-review/review-rule.md` |
-| レビュー重大度（Critical/Warning/Suggestion）の共通定義 | `plugins/matagi/shared-rules/review-severity/severity-rule.md` |
-| README の配置（全ディレクトリに必須） | `plugins/matagi/shared-rules/readme-convention/readme-rule.md` |
-| OpenSpec と既存 skill の役割分担（大規模変更の合意形成） | `plugins/matagi/shared-rules/openspec-integration/openspec-rule.md` |
-| UIデザイン（索引から各ルールへ） | `plugins/matagi/shared-rules/ui-design/README.md` |
-| マタギ用語集・役職規約（シカリ/セコ/ブッパ/オキテ、山詞） | `plugins/matagi/shared-rules/matagi-lore/glossary-rule.md` |
+| issue 駆動開発とブランチ運用 | `plugins/matagi/shared-rules/issue-driven-development/issue-driven-rule.md` |
+| コードレビュー共通ルール | `plugins/matagi/shared-rules/code-review/review-rule.md` |
+| レビュー重大度の共通定義 | `plugins/matagi/shared-rules/review-severity/severity-rule.md` |
+| ディレクトリへの README 配置 | `plugins/matagi/shared-rules/readme-convention/readme-rule.md` |
+| OpenSpec と既存 skill の役割分担 | `plugins/matagi/shared-rules/openspec-integration/openspec-rule.md` |
+| UIデザイン | `plugins/matagi/shared-rules/ui-design/README.md` |
+| マタギ用語集・役職規約 | `plugins/matagi/shared-rules/matagi-lore/glossary-rule.md` |
 
 #### matagi-kaji（ハーネス作成系）
 
@@ -47,17 +47,17 @@ Claude Code スキル・ナレッジの共有リポジトリ。日本の伝統�
 |----------|--------------|
 | ファイル配置・リポジトリ構造 | `plugins/matagi-kaji/shared-rules/repository-structure/structure-rule.md` |
 | 原典の忠実な取り扱い | `plugins/matagi-kaji/shared-rules/content-fidelity/content-fidelity-rule.md` |
-| shared-rules ディレクトリ規約（配置・命名・相互リンク記法 `[[slug]]`） | `plugins/matagi-kaji/shared-rules/rules-directory/directory-rule.md` |
-| 命名規則（スキル・エージェント） | `plugins/matagi-kaji/shared-rules/naming-conventions/naming-rule.md` |
-| ドキュメント文体（genshijin 通常レベルを既定・変換対象外） | `plugins/matagi-kaji/shared-rules/document-writing/writing-rule.md` |
+| shared-rules ディレクトリ規約 | `plugins/matagi-kaji/shared-rules/rules-directory/directory-rule.md` |
+| スキル・エージェント命名規則 | `plugins/matagi-kaji/shared-rules/naming-conventions/naming-rule.md` |
+| ドキュメント文体 | `plugins/matagi-kaji/shared-rules/document-writing/writing-rule.md` |
 | スキル作成・評価の役割分担と評価ケース規約 | `plugins/matagi-kaji/shared-rules/skill-roles/skill-roles-rule.md` |
-| スキル・エージェントのテンプレート規約（本文構成・手順は mermaid flowchart TD で記述） | `plugins/matagi-kaji/shared-rules/template/template-rule.md` |
-| ハーネス制御（コード vs Markdown の一次判定） | `plugins/matagi-kaji/shared-rules/harness-engineering/harness-rule.md` |
-| ステアリング手法の選択（AGENTS.md/CLAUDE.md/rules/skills/subagents等） | `plugins/matagi-kaji/shared-rules/harness-engineering/selection-rule.md` |
-| レビュー独立性（レビュワーと産出者は常に別エージェント・指摘適用前のユーザー承認） | `plugins/matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md` |
+| スキル・エージェントのテンプレート規約 | `plugins/matagi-kaji/shared-rules/template/template-rule.md` |
+| コード強制か Markdown かの判定 | `plugins/matagi-kaji/shared-rules/harness-engineering/harness-rule.md` |
+| ステアリング手法の置き場所選択 | `plugins/matagi-kaji/shared-rules/harness-engineering/selection-rule.md` |
+| レビュー独立性と指摘の適用前承認 | `plugins/matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md` |
 | スキル・エージェント内のルール外部化 | `plugins/matagi-kaji/shared-rules/rule-externalization/externalization-rule.md` |
 | プロンプト構成要素のチェックリスト | `plugins/matagi-kaji/shared-rules/prompt-engineering/composition-rule.md` |
-| 推論の足場（分解・自己検証）の要否 | `plugins/matagi-kaji/shared-rules/prompt-engineering/scaffolding-rule.md` |
+| 推論の足場の要否 | `plugins/matagi-kaji/shared-rules/prompt-engineering/scaffolding-rule.md` |
 | プロンプト・スキル改善の原則 | `plugins/matagi-kaji/shared-rules/prompt-engineering/improvement-rule.md` |
 | プロンプト頑健性・安全性 | `plugins/matagi-kaji/shared-rules/prompt-engineering/robustness-rule.md` |
-| コンテキスト管理（有限な注意予算のキュレーション・長時間軸タスク、索引から各ルールへ） | `plugins/matagi-kaji/shared-rules/context-engineering/README.md` |
+| コンテキスト管理 | `plugins/matagi-kaji/shared-rules/context-engineering/README.md` |
