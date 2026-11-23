@@ -72,6 +72,7 @@ AI 向けのプロジェクト指示は `AGENTS.md` を参照。Claude Code は 
 | `ui-review` | オキテ | UI 実装を ui-design ルールに照らしてレビュー |
 | `ai-engineering-review` | オキテ | ステアリング資産をプロンプト品質・手法選択・コンテキストの3観点でレビュー |
 | `harness-review` | オキテ | ステアリング手法の選択が公式意図通りかレビュー |
+| `determinism-review` | オキテ | スクリプト化できる決定論的処理をレビューで検出 |
 | `prompt-review` | オキテ | プロンプト・SKILL.md・エージェント定義をレビュー |
 | `context-engineering-review` | オキテ | コンテキスト設計（注意予算・長時間軸戦略）をレビュー |
 | `evaluate-skill` | オキテ | skill-creator の評価機能でスキルの eval・ベンチマーク・trigger 評価を実施（手動起動） |

@@ -28,4 +28,4 @@
 
 > コード新規実装（産出）= domain 非依存入口スキル `coding` が domain 判定後 `frontend-coder` / `backend-coder` エージェントへ委譲。frontend/backend 以外 domain で専用サブエージェント無し → `coding` スキル自身フォールバック。
 
-> ハーネス作成系（プロンプト・コンテキスト設計・ステアリング構成のレビュー/修正）エージェント（`prompt-reviewer` / `prompt-engineer` / `context-reviewer` / `context-engineer` / `steering-reviewer`）= `matagi-kaji` プラグイン `agents/` に分割済み。
+> ハーネス作成系（プロンプト・コンテキスト設計・ステアリング構成のレビュー/修正）エージェント（`prompt-reviewer` / `prompt-engineer` / `context-reviewer` / `context-engineer` / `steering-reviewer` / `determinism-reviewer`）= `matagi-kaji` プラグイン `agents/` に分割済み。
