@@ -2,23 +2,23 @@
 name: harness-review
 description: >
   「ステアリング手法の使い分けをチェックして」「AGENTS.md/CLAUDE.md/rules/skills/hooks の手法選択を見て」
-  「この設定が各手法の意図通りか（単一観点で）確認して」と言われたとき、プロジェクトの Claude Code
+  「この設定が各手法の意図通りか確認して」と言われたとき、プロジェクトの Claude Code
   ステアリング構成（AGENTS.md/CLAUDE.md・rules・skills・subagents・hooks・output styles）を
-  selection-rule / harness-rule に照らしてレビューし、手法の誤用・逸脱を指摘する
-  （改善の適用はしない）。プロンプト品質・コンテキスト設計も含めて多観点でまとめて見たい場合は ai-engineering-review。
-# when_to_use: 実装済みのステアリング構成が各手法の公式の意図通りかを、ステアリング手法の単一観点で準拠チェック（指摘のみ）してほしいとき
+  selection-rule / harness-rule に照らしてレビューし、手法の誤用・逸脱と、スクリプト化できる決定論的処理を
+  指摘する（改善の適用はしない）。プロンプト品質・コンテキスト設計も含めて多観点でまとめて見たい場合は ai-engineering-review。
+# when_to_use: 実装済みのステアリング構成が各手法の公式の意図通りかを、ステアリング手法の選択とスクリプト化できる決定論的処理の観点で準拠チェック（指摘のみ）してほしいとき
 ---
 
 # harness-review
 
-役職: **オキテ**（検証者）。手法選択の逸脱見逃さぬ。
+役職: **オキテ**（検証者）。手法選択の逸脱・スクリプト化できる処理の見逃し許さぬ。
 
 ## 概要
 
-ステアリング構成レビュー**入口**タスクスキル。監査→`steering-reviewer` エージェントへ
-委譲。プロジェクトの Claude Code カスタマイズ資産（AGENTS.md/CLAUDE.md・`rules/`・`skills/`・`agents/`・
-hooks・output styles）を各手法の公式の意図に照合、手法の誤用・逸脱を
-Critical / Warning / Suggestion で指摘。**指摘までが責務**。改善適用は行わない。
+ステアリング構成レビュー**入口**タスクスキル。監査→`steering-reviewer`（手法選択）・
+`determinism-reviewer`（スクリプト化できる決定論的処理）エージェントへ並行委譲。プロジェクトの Claude Code カスタマイズ資産（AGENTS.md/CLAUDE.md・`rules/`・`skills/`・`agents/`・
+hooks・output styles）を各手法の公式の意図に照合、手法の誤用・逸脱と
+スクリプト化できる決定論的処理を Critical / Warning / Suggestion で指摘。**指摘までが責務**。改善適用は行わない。
 
 判断の土台=`documents/reference/harness-engineering/steering-claude-code.md`（7手法の意図）。
 
@@ -28,6 +28,7 @@ Critical / Warning / Suggestion で指摘。**指摘までが責務**。改善�
 
 - 使うべき手法=[[selection-rule]] (`shared-rules/harness-engineering/selection-rule.md`) に照らす。
 - コード強制か md でよいか=[[harness-rule]] (`shared-rules/harness-engineering/harness-rule.md`) に照らす。
+- スクリプト化できる決定論的処理=[[determinism-rule]] (`shared-rules/harness-engineering/determinism-rule.md`) に照らす。
 - 手法毎の挙動・事実=[[steering-claude-code]] (`documents/reference/harness-engineering/steering-claude-code.md`) 参照。
 
 ## 手順
@@ -43,10 +44,13 @@ flowchart TD
 
     subgraph L2["2 規模に応じて委譲を判断する"]
         S2a{"多数の資産を横断する または本格的な監査か？"}
-        S2b["steering-reviewer エージェントへ委譲する"]
-        S2c["本スキル内で selection-rule と harness-rule を基準に直接レビューする"]
-        S2a -->|YES| S2b
+        S2d{"サブエージェントへ委譲できる環境か？"}
+        S2b["steering-reviewer と determinism-reviewer を並行で委譲する"]
+        S2c["本スキル内で直接レビューする"]
+        S2a -->|YES| S2d
         S2a -->|NO| S2c
+        S2d -->|YES| S2b
+        S2d -->|NO| S2c
     end
 
     START --> S1a
@@ -70,10 +74,9 @@ flowchart TD
 
 ### 2. 規模に応じて委譲を判断する
 
-- **多数の資産を横断／本格的な監査**: `steering-reviewer` エージェントへ委譲
-  （多資産を読み込み所見を構造化して返す役割）。
-- **単一ファイル・少量の差分**: 本スキル内で直接レビュー。その場合も基準=
-  [[selection-rule]] / [[harness-rule]]、事実=[[steering-claude-code]]。
+- **多数の資産を横断／本格的な監査、かつサブエージェントへ委譲できる環境**: `steering-reviewer`（手法選択）と `determinism-reviewer`（スクリプト化できる決定論的処理。基準=[[determinism-rule]]）を並行で委譲。多資産を読み込み所見を構造化して返す役割。
+- **単一ファイル・少量の差分、または委譲できない環境**: 本スキル内で直接レビュー。手法選択の基準=
+  [[selection-rule]] / [[harness-rule]]、事実=[[steering-claude-code]]。決定論的処理は `agents/determinism-reviewer.md` の定義に従う。
 
 エージェントへ「レビュー対象ファイル／差分」と「指摘のみ・修正は適用しない」旨を渡す。
 
@@ -84,4 +87,5 @@ flowchart TD
 3段階（Critical / Warning / Suggestion）の定義は [[severity-rule]]（`matagi/shared-rules/review-severity/severity-rule.md`）に従う。このドメイン Critical 該当例: 保証されるべき制御が散文頼みなど、破られると困る誤配置。
 
 各項目=箇所 ／ 逸脱した手法選択（根拠ルールのパス）／ 問題点 ／ あるべき置き場所 の形。
-逸脱なし→「各手法の意図に準拠、問題なし」と明記。
+観点ラベル = 「手法選択」「スクリプト化候補」。`determinism-reviewer` の項目形式は同エージェントの出力フォーマットに従う。
+同一箇所に両観点の所見が出た場合 = 併記し、置き場所の判断は人に委ねる。観点ごと、逸脱なし→「各手法の意図に準拠、問題なし」／「スクリプト化候補なし」と明記。

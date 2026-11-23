@@ -11,6 +11,7 @@
 | `prompt-reviewer` | prompt-* ルール照合 プロンプトレビュー | `prompt-engineer` |
 | `context-reviewer` | context-engineering ルール照合 コンテキスト管理レビュー | `context-engineer` |
 | `steering-reviewer` | selection-rule/harness-rule 照合 ステアリング構成レビュー | （産出者なし・指摘のみ） |
+| `determinism-reviewer` | determinism-rule 照合 スクリプト化できる決定論的処理の検出 | （産出者なし・指摘のみ） |
 
 ### 産出者（実装／承認後の修正適用のみ。自作物のレビューはしない）
 
