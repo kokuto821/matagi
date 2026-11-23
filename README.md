@@ -67,6 +67,7 @@ AI 向けのプロジェクト指示は `AGENTS.md` を参照。Claude Code は 
 | `test-coding` | ブッパ | テスト観点洗い出しから失敗するテスト（TDD Red）を実装 |
 | `create-ui-component` | ブッパ | ui-design ルールに沿って新規 UI コンポーネントを生成 |
 | `lint-sync` | ブッパ | linter 対応ルールを既存 ESLint/Stylelint 設定へ反映 |
+| `prompt-commonization` | ブッパ | プロンプトに複製された共通文言を共通文言ファイルへ集約し `@import` 参照へ置換 |
 | `coding-review` | オキテ | コーディング規約・テスト規約の横断レビュー |
 | `ui-review` | オキテ | UI 実装を ui-design ルールに照らしてレビュー |
 | `ai-engineering-review` | オキテ | ステアリング資産をプロンプト品質・手法選択・コンテキストの3観点でレビュー |

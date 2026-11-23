@@ -60,5 +60,6 @@ Claude Code スキル・ナレッジの共有リポジトリ。日本の伝統�
 | プロンプト構成要素のチェックリスト | `plugins/matagi-kaji/shared-rules/prompt-engineering/composition-rule.md` |
 | 推論の足場の要否 | `plugins/matagi-kaji/shared-rules/prompt-engineering/scaffolding-rule.md` |
 | プロンプト・スキル改善の原則 | `plugins/matagi-kaji/shared-rules/prompt-engineering/improvement-rule.md` |
+| プロンプト共通文言の集約と `@import` 参照 | `plugins/matagi-kaji/shared-rules/prompt-commonization/commonization-rule.md` |
 | プロンプト頑健性・安全性 | `plugins/matagi-kaji/shared-rules/prompt-engineering/robustness-rule.md` |
 | コンテキスト管理 | `plugins/matagi-kaji/shared-rules/context-engineering/README.md` |
