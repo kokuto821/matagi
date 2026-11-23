@@ -1,0 +1,15 @@
+{
+  "name": "matagi-kaji-scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "vitest": "^5.0.2"
+  }
+}
