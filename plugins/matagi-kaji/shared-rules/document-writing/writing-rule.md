@@ -16,6 +16,7 @@
 | `[[link]]` | 変換禁止 |
 | 原典・ユーザー発言引用（ユーザー提供原文・ペルソナ定義・発言） | 変換禁止（[[content-fidelity-rule]]） |
 | レベル | 極限固定。丁寧・通常 使用禁止 |
+| ルール参照（索引・`[[link]]` 周辺） | 参照先の規則内容（要約・列挙・条件）を括弧書き等で書く 禁止。書いてよい = トピック名・実パス併記・関連性を示す一言ラベル。理由 = 参照先変更時 参照側の追従不要化（[[externalization-rule]]）。既存記述 遡及せず 当該行を編集する時のみ是正 |
 | 破壊的操作警告・誤読リスク多段手順 | genshijin 本体 Auto-Clarity 従い通常日本語へ切替 |
 
 ## 適用手順
@@ -34,6 +35,10 @@
 
 通常日本語ドキュメント→トークン消費大。genshijin 極限レベル既定→意味不変で効率向上（#73）。
 
+ルール参照時の中身記載禁止（#94）: AGENTS.md 索引・README が「通常レベルを既定」と書いたまま参照先（本ルール）の極限固定と食い違った。参照側へ中身を複製→参照先変更で黙って食い違う。トピック名・パスのみなら追従不要。
+
 ## 関連ルール
 
-- [[content-fidelity-rule]]（matagi-kaji/shared-rules/content-fidelity/content-fidelity-rule.md） — 原典改変禁止
+- [[content-fidelity-rule]]（matagi-kaji/shared-rules/content-fidelity/content-fidelity-rule.md）
+- [[externalization-rule]]（matagi-kaji/shared-rules/rule-externalization/externalization-rule.md）
+- [[directory-rule]]（matagi-kaji/shared-rules/rules-directory/directory-rule.md）
