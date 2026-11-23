@@ -7,6 +7,11 @@ export const IMPORT_END_PATTERN = /^\s*<!--\s+@end\s+-->\s*$/;
 const FENCE_PATTERN = /^\s*(`{3,}|~{3,})/;
 const FRONTMATTER_DELIMITER = "---";
 export const BODY_JOINER = "\n";
+const TRAILING_LINE_BREAK_PATTERN = /\r?\n$/;
+const CRLF = "\r\n";
+const LF = "\n";
+
+export type ReadPhrase = (path: string) => string | undefined;
 
 export type ImportBlock = {
   path: string;
@@ -114,4 +119,21 @@ export function parseImportBlocks(text: string): ParseResult {
     errors.push({ kind: "unclosed", line: openBlock.startLine });
   }
   return { blocks, errors };
+}
+
+// 入力の改行コードを保つため、CRLF を含む入力は CRLF、それ以外は LF とみなす。
+export function eolOf(text: string): string {
+  return text.includes(CRLF) ? CRLF : LF;
+}
+
+// 共通文言ファイルの内容を本文行へ。末尾の改行 1 つは本文に含めない。
+export function phraseLinesOf(phrase: string): string[] {
+  return phrase
+    .replace(TRAILING_LINE_BREAK_PATTERN, "")
+    .split(LINE_BREAK_PATTERN);
+}
+
+// 展開本文が共通文言の内容と一致するか。末尾改行・改行コードの差は無視する。
+export function isInSync(body: string, phrase: string): boolean {
+  return phraseLinesOf(phrase).join(BODY_JOINER) === body;
 }

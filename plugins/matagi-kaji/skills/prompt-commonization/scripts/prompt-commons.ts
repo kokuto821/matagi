@@ -1,26 +1,26 @@
 // プロンプト共通化スクリプト。
 // 記法の正: shared-rules/prompt-commonization/commonization-rule.md
 
-import type { ParseError } from "./markdown-scan.ts";
+import type { ParseError, ReadPhrase } from "./markdown-scan.ts";
 import {
-  BODY_JOINER,
+  eolOf,
   IMPORT_END_PATTERN,
   IMPORT_START_PATTERN,
+  isInSync,
   LINE_BREAK_PATTERN,
   parseImportBlocks,
+  phraseLinesOf,
 } from "./markdown-scan.ts";
 
+export * from "./apply.ts";
 export * from "./detect.ts";
 export type {
   ImportBlock,
   ParseError,
   ParseResult,
+  ReadPhrase,
 } from "./markdown-scan.ts";
 export { parseImportBlocks } from "./markdown-scan.ts";
-
-const TRAILING_LINE_BREAK_PATTERN = /\r?\n$/;
-const CRLF = "\r\n";
-const LF = "\n";
 
 export type ExpandError =
   | ParseError
@@ -30,20 +30,6 @@ export type ExpandResult = {
   text: string;
   errors: ExpandError[];
 };
-
-export type ReadPhrase = (path: string) => string | undefined;
-
-// 入力の改行コードを保つため、CRLF を含む入力は CRLF、それ以外は LF とみなす。
-function eolOf(text: string): string {
-  return text.includes(CRLF) ? CRLF : LF;
-}
-
-// 共通文言ファイルの内容を本文行へ。末尾の改行 1 つは本文に含めない。
-function phraseLinesOf(phrase: string): string[] {
-  return phrase
-    .replace(TRAILING_LINE_BREAK_PATTERN, "")
-    .split(LINE_BREAK_PATTERN);
-}
 
 // 各 @import ブロックの本文を共通文言の最新内容へ置き換える。
 // 構文不正の入力は書き換えず、共通文言ファイルが無いブロックは未変更のままエラーにする。
@@ -103,11 +89,6 @@ function staleMessageOf(path: string): string {
 
 function missingPhraseMessageOf(path: string): string {
   return `共通文言ファイル ${path} が見つかりません`;
-}
-
-// 展開本文が共通文言の内容と一致するか。末尾改行・改行コードの差は無視する。
-function isInSync(body: string, phrase: string): boolean {
-  return phraseLinesOf(phrase).join(BODY_JOINER) === body;
 }
 
 // プロンプト中の @import ブロックを検証する。
