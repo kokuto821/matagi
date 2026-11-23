@@ -1,9 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
   "files": {
-    "includes": [
-      "skills/*/scripts/**/*.ts"
-    ]
+    "includes": ["skills/*/scripts/**/*.ts"]
   },
   "linter": {
     "enabled": true,
@@ -49,9 +47,7 @@
   },
   "overrides": [
     {
-      "includes": [
-        "skills/*/scripts/__tests__/**"
-      ],
+      "includes": ["skills/*/scripts/__tests__/**"],
       "linter": {
         "rules": {
           "style": {
