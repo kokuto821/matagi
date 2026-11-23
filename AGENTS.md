@@ -55,6 +55,7 @@ Claude Code スキル・ナレッジの共有リポジトリ。日本の伝統�
 | コード強制か Markdown かの判定 | `plugins/matagi-kaji/shared-rules/harness-engineering/harness-rule.md` |
 | ステアリング手法の置き場所選択 | `plugins/matagi-kaji/shared-rules/harness-engineering/selection-rule.md` |
 | レビュー独立性と指摘の適用前承認 | `plugins/matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md` |
+| スクリプト化できる決定論的処理の判定 | `plugins/matagi-kaji/shared-rules/harness-engineering/determinism-rule.md` |
 | スキル・エージェント内のルール外部化 | `plugins/matagi-kaji/shared-rules/rule-externalization/externalization-rule.md` |
 | プロンプト構成要素のチェックリスト | `plugins/matagi-kaji/shared-rules/prompt-engineering/composition-rule.md` |
 | 推論の足場の要否 | `plugins/matagi-kaji/shared-rules/prompt-engineering/scaffolding-rule.md` |
