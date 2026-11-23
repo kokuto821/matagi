@@ -1,0 +1,66 @@
+[
+  {
+    "query": "プロンプトを共通化して。skills/ 配下の SKILL.md にコピペされた定型文が多くて、改訂のたびに片方だけ直し忘れてずれるのが困ってる",
+    "should_trigger": true
+  },
+  {
+    "query": "スキルに複製された定型文を1か所にまとめたい。agents/ のサブエージェント定義にも同じ注意書きが何か所も入ってる",
+    "should_trigger": true
+  },
+  {
+    "query": "共通文言を切り出して @import で参照したい。置き場は prompt-commons/ にして、各 SKILL.md からはそこを指す形にしてほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "AGENTS.md と複数の SKILL.md に同じ出力形式の一文が入ってる。重複した文言を検出して、まとめる計画を出してくれる？",
+    "should_trigger": true
+  },
+  {
+    "query": "prompt-commons/output-format.md の文言を直したから、これを参照してる各 SKILL.md の @import ブロックの展開本文を最新に同期してほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "SKILL.md の @import ブロックの中身が prompt-commons/ の共通文言ファイルと食い違ってないか、整合を検証してほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "サブエージェント定義3つに全く同じ「結果は表で返す」って段落が複製されてるんだけど、共通文言ファイルにして各プロンプトから参照する形に直したい",
+    "should_trigger": true
+  },
+  {
+    "query": "重複してるプロンプトの文言を洗い出して、1ファイル1文言の共通文言にまとめて。置換する前に何をどう変えるか見せてほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "tdd-workflow スキルの SKILL.md の指示文をレビューして。prompt-* ルールに違反してないか指摘してほしい",
+    "should_trigger": false
+  },
+  {
+    "query": "新しく「PR の説明文を整える」スキルを作りたい。命名規則とテンプレートに従って SKILL.md を生成して",
+    "should_trigger": false
+  },
+  {
+    "query": "「ブランチを切る前に必ず issue を確認する」っていう規約を、このリポジトリの shared-rules に新しいルールファイルとして追加して",
+    "should_trigger": false
+  },
+  {
+    "query": "AGENTS.md の構成をレビューして。ルールや手順の置き場が rules・skills・hooks で適切に使い分けられてるか見てほしい",
+    "should_trigger": false
+  },
+  {
+    "query": "この議事録の文章を3行で要約して。箇条書きにしてほしい",
+    "should_trigger": false
+  },
+  {
+    "query": "src/components/ 配下の3つのコンポーネントに同じバリデーション関数が複製されてるから、src/utils/validate.ts に共通化するリファクタをして",
+    "should_trigger": false
+  },
+  {
+    "query": "このスキルの description を書き直して。「issue 作って」と言われたときに発火しやすくなるようにキーワードを足してほしい",
+    "should_trigger": false
+  },
+  {
+    "query": "スキルのコンテキスト設計をレビューして。トークンの無駄や注意予算の使い方に問題がないか見てほしい",
+    "should_trigger": false
+  }
+]

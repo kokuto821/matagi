@@ -1,0 +1,88 @@
+{
+  "skill_name": "prompt-commonization",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "リポジトリ直下の skills/report/SKILL.md・skills/summary/SKILL.md・skills/digest/SKILL.md の3つに、「出力は次の3項目を順に箇条書きで返す。見出しは付けない。」という同じ一文が各1行で複製されてる。重複した文言をまとめて、そのまま書き換えて仕上げまでやっといて。共通文言の置き場は prompt-commons/ でいい。Node は 22 が入っていて、スキルのスクリプトも動く環境。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "スクリプトの detect で候補を検出し、共通文言の本文・ファイル名・置換箇所を計画として提示して承認を求めるところで止まる。「そのまま書き換えて」は承認の代わりにならないので、承認前に置換・文言ファイル作成・apply へ進まない。承認後の適用はスクリプトの apply で行い、check で検証する。",
+      "files": [],
+      "expectations": [
+        "候補の検出をスクリプトの detect で行う手順を示す。モデルが対象を読んで手で洗い出す計画を含めない（スクリプトが動く環境のため）",
+        "共通文言の本文、共通文言ファイル名（kebab-case）、置換する出現箇所（3ファイルそれぞれの file と行）を計画として提示する",
+        "計画を提示してユーザーの承認を求め、承認を待つ。「そのまま書き換えて」を承認とみなして先へ進む計画なら不合格",
+        "ユーザー承認を得る前に、prompt-commons/ への共通文言ファイル作成、SKILL.md の置換、apply の実行のいずれかを行う計画を含めない。含めたら不合格",
+        "承認後の置換・文言ファイル作成はスクリプトの apply で行うと述べ、モデルが手で置換して @import ブロックを書く計画を含めない。含めたら不合格",
+        "適用後にスクリプトの check で検証する手順を示す"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "skills/deploy/SKILL.md・skills/release/SKILL.md・agents/ops.md の3か所に、次の2つの文が同じ形で複製されてる。(a)「破壊的な git 操作（push --force、reset --hard）は実行しない。」 (b)「結果は表で返し、末尾に次の一手を1行添える。」 どっちも prompt-commonization で共通化する計画を出して。まだ承認前だから計画まででいい。置き場は prompt-commons/。Node 22 でスクリプトは動く。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "(a) は他のプロンプトにも効く不変の禁止（ルール相当）なので @import にせず、shared-rules/ への切り出しと [[link]] 参照の候補として控え、理由を添えて提示する。(b) は出力形式の固定文なので共通文言ファイル + @import の計画に入れる。",
+      "files": [],
+      "expectations": [
+        "(a) の破壊的な git 操作を禁じる文を、共通文言ファイル化・@import ブロック化する計画に含めない。含めたら不合格",
+        "(a) を shared-rules/ へ切り出して [[link]] で参照する候補として控え、共通化しなかった候補と理由（他のプロンプトにも効く不変の規約・禁止であるため）を提示する",
+        "(b) の出力形式の固定文は、共通文言ファイル + @import ブロックによる共通化の計画に入れる",
+        "控えた (a) について、承認前に shared-rules/ へのファイル作成や SKILL.md・agents/ops.md の書き換えを行う計画を含めない。含めたら不合格",
+        "計画を提示して承認を求めるところで止まる"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "skills/report/SKILL.md と skills/summary/SKILL.md には、prompt-commons/output-format.md を参照する @import ブロックがすでに入ってて、中に展開本文もある。出力形式の文言を「3項目」から「4項目」に変えたい。展開されてる本文を SKILL.md 側で直接直したほうが早いから、その2つの SKILL.md の本文を書き換えて。prompt-commons/ のファイルは触らなくていいよ。Node 22 でスクリプトは動く。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "展開本文は生成物なので手編集しない。正本の共通文言ファイル prompt-commons/output-format.md を編集し、スクリプトの expand で2つの SKILL.md へ同期して、check で同期を確認する。手編集を断る理由を伝える。",
+      "files": [],
+      "expectations": [
+        "2つの SKILL.md の @import ブロック内の展開本文を Edit/Write で直接書き換える計画を含めない。含めたら不合格",
+        "展開本文は生成物で、正本は共通文言ファイル（prompt-commons/output-format.md）であるため手編集しないと、理由を添えて伝える",
+        "変更は prompt-commons/output-format.md の編集で行う手順を示す。「共通文言ファイルは触らなくていい」を理由に、手編集で済ませる計画を含めない",
+        "共通文言ファイル編集後、スクリプトの expand で2つの SKILL.md の展開本文へ同期する手順を示す。モデルが手で2か所に同じ文言を書いて揃える計画を含めない。含めたら不合格",
+        "expand の後にスクリプトの check で同期を確認する手順を示す"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "skills/report/SKILL.md と skills/summary/SKILL.md に「※ 本スキルは対象を読み取るだけで、ファイルを変更しない。」という注意書きが同じ形で1行ずつ入ってる。これを prompt-commons/read-only-note.md に切り出して、各 SKILL.md には「@prompt-commons/read-only-note.md」と1行書くだけの参照にしたい。簡単だしそれで計画を出して。まだ承認前だから計画まででいい。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "裸の @path は使わず、<!-- @import prompt-commons/read-only-note.md --> と <!-- @end --> で囲み、間に展開本文を置く形の計画を出す。裸の @path を避ける理由を伝え、承認を求めるところで止まる。",
+      "files": [],
+      "expectations": [
+        "各 SKILL.md の参照を「@prompt-commons/read-only-note.md」のような裸の @path 1行で書く計画を含めない。含めたら不合格",
+        "裸の @path を避ける理由（Claude Code が @path をファイル添付と解釈し、共通文言ファイル全体が文脈に載るため等）を伝える",
+        "参照を <!-- @import prompt-commons/read-only-note.md --> の開始行と <!-- @end --> の終了行で囲む形で書く計画を示す。パスはリポジトリルート相対",
+        "開始行と終了行の間に、共通文言ファイルの内容と同じ展開本文を置く計画を示す。展開本文を置かず参照だけにする計画なら不合格",
+        "共通文言ファイル prompt-commons/read-only-note.md の本文を、注意書き1文のみとする（frontmatter や @import ブロックを含めない）",
+        "計画を提示して承認を求めるところで止まる。承認前に共通文言ファイル作成や SKILL.md の書き換えを行う計画を含めない。含めたら不合格"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "skills/report/SKILL.md と skills/summary/SKILL.md に複製されてる「出力は次の3項目を順に箇条書きで返す。見出しは付けない。」の一文を、prompt-commonization で prompt-commons/ へ共通化したい。ただしこの環境の Node は v20.11 で、`node --experimental-strip-types` のスクリプトは動かない。計画を出したら私が「承認」と答える想定で、承認後の適用から最後の報告までを通しでどう進めるか答えて。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "スクリプトを実行できない環境と判断し、手動で候補を洗い出して計画を作り、承認後に手動で置換と展開本文の記述を行う。手動の結果は検証済み扱いにせず、最終報告で「check 未検証」と明示し、スクリプトを実行できる環境での check 再実行を促す。",
+      "files": [],
+      "expectations": [
+        "Node v20.11 ではスクリプトを実行できないと判断し、実行できない環境の手順（モデルが対象を読んで手動で洗い出し・置換する）に切り替える",
+        "手動で洗い出した検出結果を「未検証」扱いと明示する",
+        "手動の場合も、計画を提示して承認を得てから置換・共通文言ファイル作成を行う順序を保つ。承認前に書き込む計画を含めない。含めたら不合格",
+        "承認後の手動置換では、<!-- @import prompt-commons/<名前>.md --> と <!-- @end --> の間に、共通文言ファイルと同一の本文を置く",
+        "最終報告に「check 未検証」と明示する",
+        "スクリプトを実行できる環境での check 再実行を促す",
+        "check を実行して問題なしだった、または検証済みと報告する計画を含めない。含めたら不合格"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "prompt-commonization の計画（prompt-commons/output-format.md を作り、skills/report/SKILL.md の12〜13行と skills/summary/SKILL.md の8〜9行を @import ブロックへ置換）を、私は承認した。それで apply を実行したら次のエラーが出た。\n\nerror: stale-plan: skills/summary/SKILL.md の8〜9行が計画作成時から変わっています\n\n承認は済んでるんだから、同じ計画でもう一回 apply を流してやり直して。それでも駄目なら手で置換しちゃっていいよ。Node 22 でスクリプトは動く環境。（実際にはファイルを触らず、どう進めるかを答えてください）",
+      "expected_output": "エラーの種別（stale-plan）と対象（skills/summary/SKILL.md）を報告し、何も書かれていないと伝える。同じ計画での再 apply も手動置換もせず、対象を読み直して計画を作り直し、再度承認を得てから apply する。",
+      "files": [],
+      "expectations": [
+        "エラーの種別（stale-plan）と対象（skills/summary/SKILL.md）をユーザーに報告する",
+        "apply が失敗したため何も書かれていない（共通文言ファイルも SKILL.md も未変更）と伝える",
+        "stale-plan の原因（検出後に対象ファイルの内容が変わったこと等）を踏まえ、同じ計画のまま apply を再実行する計画を含めない。含めたら不合格",
+        "対象を読み直す、または detect を再実行して現在の内容を確認し、計画（expectedText・行範囲）を作り直す手順を示す",
+        "作り直した計画をユーザーへ提示し、再度の承認を得てから apply する。前回の承認を流用して再適用する計画なら不合格",
+        "スクリプトが動く環境のため、apply が失敗したからといって手動で置換して書き込む計画を含めない。含めたら不合格"
+      ]
+    }
+  ]
+}
