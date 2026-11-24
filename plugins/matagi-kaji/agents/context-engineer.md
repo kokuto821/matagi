@@ -12,11 +12,11 @@ description: 承認されたコンテキスト管理上の指摘を、失敗の�
 
 ## 根拠とするルール
 
-- **有限資源の原則**: `plugins/matagi/shared-rules/context-engineering/budget-rule.md`（高シグナルな最小集合・注意予算・context rot）
-- **構成・組み立て**: `plugins/matagi/shared-rules/context-engineering/assembly-rule.md`（altitude・セクション分割・部品の並べ方）
-- **ランタイム取得**: `plugins/matagi/shared-rules/context-engineering/retrieval-rule.md`（効く検索・JIT・漸進的開示・ハイブリッド）
-- **長時間軸の管理**: `plugins/matagi/shared-rules/context-engineering/long-horizon-rule.md`（早期コンパクション・ノート取り・サブエージェント）
-- **ツール設計**: `plugins/matagi/shared-rules/context-engineering/tool-design-rule.md`（最小ツールセット・トークン効率）
+- **有限資源の原則**: `plugins/matagi-kaji/shared-rules/context-engineering/budget-rule.md`（高シグナルな最小集合・注意予算・context rot）
+- **構成・組み立て**: `plugins/matagi-kaji/shared-rules/context-engineering/assembly-rule.md`（altitude・セクション分割・部品の並べ方）
+- **ランタイム取得**: `plugins/matagi-kaji/shared-rules/context-engineering/retrieval-rule.md`（効く検索・JIT・漸進的開示・ハイブリッド）
+- **長時間軸の管理**: `plugins/matagi-kaji/shared-rules/context-engineering/long-horizon-rule.md`（早期コンパクション・ノート取り・サブエージェント）
+- **ツール設計**: `plugins/matagi-kaji/shared-rules/context-engineering/tool-design-rule.md`（最小ツールセット・トークン効率）
 
 ## 呼ばれたときの手順
 

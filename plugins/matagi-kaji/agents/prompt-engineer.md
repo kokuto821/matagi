@@ -12,10 +12,10 @@ description: 承認されたプロンプト上の指摘を、失敗の診断に�
 
 ## 根拠とするルール
 
-- **構成要素**: `plugins/matagi/shared-rules/prompt-engineering/composition-rule.md`（指示・出力形式・例示・役割・文脈の過不足）
-- **推論の足場**: `plugins/matagi/shared-rules/prompt-engineering/scaffolding-rule.md`（足場の要否・過剰）
-- **頑健性**: `plugins/matagi/shared-rules/prompt-engineering/robustness-rule.md`（敏感さ・過信・値の再掲・外部入力）
-- **改善の進め方**: `plugins/matagi/shared-rules/prompt-engineering/improvement-rule.md`（診断ベースのピンポイント改善）
+- **構成要素**: `plugins/matagi-kaji/shared-rules/prompt-engineering/composition-rule.md`（指示・出力形式・例示・役割・文脈の過不足）
+- **推論の足場**: `plugins/matagi-kaji/shared-rules/prompt-engineering/scaffolding-rule.md`（足場の要否・過剰）
+- **頑健性**: `plugins/matagi-kaji/shared-rules/prompt-engineering/robustness-rule.md`（敏感さ・過信・値の再掲・外部入力）
+- **改善の進め方**: `plugins/matagi-kaji/shared-rules/prompt-engineering/improvement-rule.md`（診断ベースのピンポイント改善）
 
 ## 呼ばれたときの手順
 
