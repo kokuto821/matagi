@@ -12,7 +12,7 @@
 | `backend-code-reviewer` | バックエンド コードレビュー・監査（backend専用規約は未整備のため design-rule・一般イディオム基準） | `backend-coder` エージェント |
 | `frontend-test-reviewer` | フロントエンド テスト規約準拠 既存テストレビュー・監査 | `frontend-tester` エージェント |
 | `backend-test-reviewer` | バックエンド 既存テストレビュー・監査（backend専用規約は未整備のため design-rule・一般作法基準） | `backend-tester` エージェント |
-| `test-design-reviewer` | テスト技法準拠 テスト観点・ケース設計 抜け漏れレビュー | なし（TDD サイクルから呼ばれない。単独起動用残置） |
+| `test-design-reviewer` | テスト技法準拠 テスト観点・ケース設計 抜け漏れレビュー | `tdd-workflow`（LIST 後の簡易チェック）。単独起動も可 |
 | `design-principles-reviewer` | design-rule（DRY/SRP/SoC等）準拠 設計原則レビュー（コード全般） | なし（単独起動用残置。`test-coding` から呼ばれない） |
 | `ui-reviewer` | ui-design ルール準拠 UI 実装レビュー | `ui-designer` |
 

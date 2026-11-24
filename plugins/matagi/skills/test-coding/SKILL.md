@@ -23,7 +23,8 @@ TDD **List（テストリスト洗い出し）・Red（失敗するテストを�
 - domain 判定基準・対応サブエージェント・専用サブエージェント不在時委譲方針 = [[domain-classification-rule]] (`shared-rules/coding-conventions/domain-classification-rule.md`) を唯一の正とする。本スキルに再掲しない。
 - テストコード実装 = [[design-rule]] (`shared-rules/design-principles/design-rule.md`) 設計原則（DRY/SRP/SoC等）従う。
 - 対象物 = テストコード。テスト仕様書（ドキュメント）作成は行わない。
-- 本スキル = List/Red フェーズ産出に専念、レビューは行わない。TDD サイクル中レビュー = tdd-workflow スキル Refactor フェーズ（`coding-review` 経由コーディング規約・テスト規約レビュー）に一本化（[[tdd-rule]] Phase 3、issue #39）。`test-design-reviewer`（テスト観点・ケース抜け漏れ）・`design-principles-reviewer`（設計原則）= 本スキルからの委譲を廃止。両者 エージェントとして独立起動可能なまま残すが、TDD サイクルからは呼ばれない。
+- 本スキル = List/Red フェーズ産出に専念、レビューは行わない。内蔵レビュー（`test-design-reviewer`・`design-principles-reviewer` への委譲）は廃止し、コード・テストのレビューは tdd-workflow の Refactor フェーズ（`coding-review` 経由）に集約（[[tdd-rule]] Phase 3、issue #39）。
+- 例外 = `test-design-reviewer` のみ、List 後の簡易チェックとして tdd-workflow が起動する（[[tdd-rule]] Phase 0）。本スキルからは起動しない。両エージェントとも単独起動は可能。
 
 ## 手順
 
@@ -33,12 +34,16 @@ flowchart TD
     END(["END"])
 
     subgraph L1["1 List テストリスト洗い出し"]
+        S1o{"呼出元が承認済みの指摘を渡したか？"}
+        S1p["指摘をリストに反映し 更新したリストとグループ分割案を返して終える"]
         S1e{"呼出元が現グループの項目を示したか？"}
         S1a["test-design の技法でテスト観点を決める"]
         S1b["テストケースを設計し test.todo が使える言語では test.todo で列挙する"]
         S1c{"呼出元が List のみを指定したか？"}
         S1d["Red に進まず リストとグループ分割案を返して終える"]
         S1f["グループ分割案をユーザーに提示し 合意を得て 先頭グループを現グループにする"]
+        S1o -->|YES| S1p
+        S1o -->|NO| S1e
         S1e -->|NO| S1a
         S1a --> S1b
         S1b --> S1c
@@ -56,7 +61,8 @@ flowchart TD
         S2b -->|NO| S2d
     end
 
-    START --> S1e
+    START --> S1o
+    S1p --> END
     S1e -->|YES| S2a
     S1f --> S2a
     S1d --> END
@@ -73,15 +79,17 @@ flowchart TD
 
 ### List（テストリスト洗い出し）
 
-1. **現グループの有無を確認する** — 呼出元が現グループ（形式 = `グループ名: 項目一覧`）を示した場合 = List を再生成せず Red（手順5）へ。グループの定義・分割の合意 = [[tdd-rule]] §2「Red-Green（Phase 1-2）の実施粒度」。tdd-workflow 経由では呼出元がユーザーと合意を取る。
-2. テスト観点を決める（[[test-design]] 技法を参照する）。呼出元が完了済み項目を渡した場合 = それを除いた未完了・新規項目のみを扱う。
-3. テストケースを設計する（`test.todo` 使える言語では `test.todo` で列挙する）
-4. **List のみ指定の扱い** — 呼出元が「List のみ」を指定した場合 = Red に進まず、リストとグループ分割案（形式 = `グループ名: 項目一覧`）を返して終える。指定がなく現グループも示されていない場合（単独起動）= グループ分割案をユーザーに提示して合意を得てから、先頭グループで Red へ。
+1. **承認済み指摘の反映** — 呼出元が現リストと承認済みの指摘（[[tdd-rule]] Phase 0 の簡易チェック）を渡した場合 = リストに反映し、更新したリストとグループ分割案を返して終える（以降の手順は行わない）。
+2. **現グループの有無を確認する** — 呼出元が現グループ（形式 = `グループ名: 項目一覧`）を示した場合 = List を再生成せず Red（domain 判定）へ。グループの定義・分割の合意 = [[tdd-rule]] §2「Red-Green（Phase 1-2）の実施粒度」。tdd-workflow 経由では呼出元がユーザーと合意を取る。
+3. テスト観点を決める（[[test-design]] 技法を参照する）。呼出元が完了済み項目を渡した場合 = それを除いた未完了・新規項目のみを扱う。
+4. テストケースを設計する（`test.todo` 使える言語では `test.todo` で列挙する）
+5. **List のみ指定の扱い** — 呼出元が「List のみ」を指定した場合 = Red に進まず、リストとグループ分割案（形式 = `グループ名: 項目一覧`）を返して終える。
+6. **単独起動の扱い** — 指定がなく現グループも示されていない場合 = グループ分割案をユーザーに提示して合意を得てから、先頭グループで Red へ。
 
 ### Red（失敗するテストを書く）
 
-5. **domain を判定する** — [[domain-classification-rule]] 判定基準従う。
-6. **失敗するテストコードを実装する（RED）**（隔離起動） — [[domain-classification-rule]] 対応表従い、frontend/backend = 専用サブエージェントへ、専用サブエージェント無い domain = 同ルールフォールバック方針従い汎用サブエージェントへ委譲。実装範囲 = 現グループ（[[tdd-rule]] §2 の制約に従う）。
+7. **domain を判定する** — [[domain-classification-rule]] 判定基準従う。
+8. **失敗するテストコードを実装する（RED）**（隔離起動） — [[domain-classification-rule]] 対応表従い、frontend/backend = 専用サブエージェントへ、専用サブエージェント無い domain = 同ルールフォールバック方針従い汎用サブエージェントへ委譲。実装範囲 = 現グループ（[[tdd-rule]] §2 の制約に従う）。
 
 ## 出力
 
