@@ -18,17 +18,21 @@ description: >
 
 - サイクル（List-Red-Green-Refactor-Commit）・コーディング標準 = [[tdd-rule]]（`shared-rules/coding-conventions/tdd-rule.md`）従う。「Red-Green-Refactor」通称。正確 = List 含む5フェーズ（[[tdd-rule]] §2）。フェーズ飛ばさず、現フェーズ（LIST/RED/GREEN/REFACTOR/COMMIT）常時明示。
 - レビュー・修正適用分離 = [[review-independence-rule]]（`matagi-kaji/shared-rules/harness-engineering/review-independence-rule.md`）従う。Refactor レビューも産出者と別エージェント、適用は産出者へ戻す。**産出者へ戻す前の承認は同ルール §指摘適用の承認 に従う**（REFACTOR 開始時に同節を Read。承認基準・不承認指摘の扱い・省略条件・ノート退避は同節を唯一の正とし再掲しない）。
+- **Red-Green の粒度**: グループの定義・分割と粒度変更の合意・グループ単位でも守る制約 = [[tdd-rule]] §2「Red-Green（Phase 1-2）の実施粒度」を唯一の正とし、本スキルに再掲しない。本スキル固有 = 合意済みの分割と進捗のノート退避（ルール「サイクルをまたぐ記憶」）と、手順1の分岐。
 - **産出者単一責任**: List/Red = `test-coding` スキル、Green・Refactor 適用 = `coding` スキル責任。各スキル自担当フェーズのみ、他フェーズ産出・自己完結しない。Refactor 実装適用を Green 同 `coding` スキルに揃える理由: レビュー（別エージェント）・適用（産出者）分離（[[review-independence-rule]]）維持＋実装担当産出者一貫のため。
 - **隔離（エージェント委譲）理由 2種。混同しない**:
   - **産出フェーズ（List/Red/Green）隔離**: [[selection-rule]]「隔離したい副次タスク」基準。テスト・実装試行錯誤→メイン会話汚染しやすいため`test-coding` / `coding` スキル in-context 起動、実コード生成は domain 判定後 専用（または汎用）サブエージェントへ隔離委譲（[[domain-classification-rule]]）。最終実装・テストコード結果のみ確認、生成過程逐次可視性は不要、という判断（issue #17 で明示承認済み）。
   - **Refactor フェーズ隔離**: [[review-independence-rule]] 基準。産出者本人 自作物の甘さ・盲点あり→産出者と別エージェントがレビュー。理由 =「メイン汚染」でなく「自己評価不信頼」。
   - 両者理由別。一方説明を他方へ流用しない。
 - **委譲種別**: スキル起動／エージェント委譲定義 = [[selection-rule]] 参照（再掲しない）。`test-coding` / `coding` / `coding-review` 全て本スキルから in-context 起動。各スキル内部 domain 判定後 具象（または汎用）サブエージェントへ隔離委譲。
-- **反復上限**: 1機能あたり最大 3 サイクル目安（サイクル・周の定義 = [[tdd-rule]] §2「Refactor の実施粒度」）。3 サイクルで緑にならない／未解決残る→サイクル続けず、達成範囲・残課題報告→人の判断を仰ぐ。対話中遵守の目安、ハーネス強制ではない（暴走 = メインスレッドで可視・中断可能）。上限確実強制したい場合のみ、commit 捕捉 hook を別途用意。
+- **反復上限**: 1機能あたり最大 3 サイクル目安。上限の単位 = サイクル、周（グループ）数は数えない（サイクル・周の定義 = [[tdd-rule]] §2「Red-Green（Phase 1-2）の実施粒度」）。3 サイクルで緑にならない／未解決残る→サイクル続けず、達成範囲・残課題報告→人の判断を仰ぐ。対話中遵守の目安、ハーネス強制ではない（暴走 = メインスレッドで可視・中断可能）。上限確実強制したい場合のみ、commit 捕捉 hook を別途用意。
 - **Refactor 実施粒度**: Red-Green と別、まとめて1回のみ（詳細・理由 = [[tdd-rule]] §2「Refactor の実施粒度」参照。再掲しない）。
 - **Refactor 停止条件**: 対象が1issue全体に拡大するため、レビュー→適用は複数ラウンド許容、無制限には反復しない。**最大 5 ラウンド**目安、途中で指摘収束→打ち切り。5 ラウンド到達でも未収束→反復続けず、残課題報告→人の判断を仰ぐ。反復上限同様、対話中遵守の目安・ハーネス強制ではない。各ラウンド境界で、指摘要旨・承認結果・適用状況を `tdd-<issue番号>-notes.md` に数行退避→次ラウンドへ（ルール「サイクルをまたぐ記憶」）。
-- **サイクルをまたぐ記憶**: 決定・未解決事項・次サイクル狙い→**git 管理外の**スクラッチパッド `tdd-<issue番号>-notes.md`（issue 番号 = 現ブランチ名から取得、取れなければ `x`）に数行退避、次サイクル冒頭で読み直し（[[long-horizon-rule]]）。前回実行の別ノートは取り込まない。
-- **コミット**: 中間コミット（手順2）・Refactor 後コミット（手順5）とも [[commit]]（`skills/commit/SKILL.md`）in-context 起動で行う。メッセージ形式（issue 番号・プレフィックス）・承認 = 同スキル担当、本スキルは `git add` / `git commit` を直接打たない。起動時に**コミット単位の意図を渡す**: 中間コミット = Red のテストと Green の実装を緑の状態の1単位としてまとめる（テストのみの RED コミットに分割させない。根拠 = [[tdd-rule]] Phase 4・Phase 5）。commit が失敗・中断・不承認 → 未コミットのまま次フェーズへ進まず、状態を報告して判断を仰ぐ。変更なし終了（Refactor 指摘なし等）= 失敗扱いしない（S2d・S5c は NO）。コミット後、使い終えた差分出力はノートの要点（コミット単位・メッセージ）に畳み、再参照しない（[[long-horizon-rule]]）。
+- **サイクルをまたぐ記憶**: **git 管理外の**スクラッチパッド `tdd-<issue番号>-notes.md`（issue 番号 = 現ブランチ名から取得、取れなければ `x`）に数行退避（[[long-horizon-rule]]）。前回実行の別ノートは取り込まない。
+  - 保持項目: 決定・未解決事項・次サイクル狙い／テストリスト（`グループ名: 項目一覧`、完了・未完了の別。分割前の項目は「未分割」欄）。Refactor ラウンド記録は別の見出しに分け、周の冒頭ではリスト・進捗の見出しだけを読む。
+  - 書き込み: 分割の合意直後／グループの中間コミット直後／新規項目に気づいた時点（リストに追記し「未分割」とする。List/Red 中の追加は [[tdd-rule]] Phase 0、Green 中は Phase 2、Refactor 中は Phase 3）／最初から緑の項目をリストから外したとき。
+  - 読み戻し: サイクル冒頭と各周の冒頭（手順1）。
+- **コミット**: 中間コミット（手順2）・Refactor 後コミット（手順5）とも [[commit]]（`skills/commit/SKILL.md`）in-context 起動で行う。メッセージ形式（issue 番号・プレフィックス）・承認 = 同スキル担当、本スキルは `git add` / `git commit` を直接打たない。起動時に**コミット単位の意図を渡す**: 中間コミット = 現グループの Red のテストと Green の実装を緑の状態の1単位としてまとめる（テストのみの RED コミットに分割させない。根拠 = [[tdd-rule]] Phase 4・Phase 5）。commit が失敗・中断・不承認 → 未コミットのまま次フェーズへ進まず、状態を報告して判断を仰ぐ。変更なし終了（Refactor 指摘なし等）= 失敗扱いしない（S2d・S5c は NO）。コミット後、使い終えた差分出力はノートの要点（コミット単位・メッセージ）に畳み、再参照しない（[[long-horizon-rule]]）。
 - 規約具体値再掲せず、上記ルール唯一の正として参照（[[externalization-rule]]）。
 
 ## 手順
@@ -39,15 +43,28 @@ flowchart TD
     END(["END"])
 
     subgraph L1["1 List と Red 失敗するテストを書く"]
-        S1a["test-coding を起動し テストリストを洗い出して 1項目の失敗するテストを実装させる"]
-        S1b["テストが RED であることを確認する"]
-        S1a --> S1b
+        S1a{"ノートに合意済みのグループ分割があり 未分割の項目がないか？"}
+        S1b["test-coding を List のみ指定で起動し 完了済み項目を除く未完了と新規項目のリストとグループ分割案を返させる"]
+        S1c["グループ分割案をユーザーに提示する"]
+        S1g{"合意されたか？"}
+        S1h["リストと分割をノートに退避する"]
+        S1d["test-coding を現グループ指定で起動し 現グループの失敗するテストを実装させる"]
+        S1e["現グループの全テストが RED であることを確認する"]
+        S1a -->|NO| S1b
+        S1b --> S1c
+        S1c --> S1g
+        S1g -->|NO| S1c
+        S1g -->|YES| S1h
+        S1h --> S1d
+        S1a -->|YES| S1d
+        S1d --> S1e
     end
 
     subgraph L2["2 Green テストを通す最小実装"]
         S2a["coding を起動し テストを通す最小限の実装をさせる"]
         S2b["全テストが GREEN であることを確認する"]
-        S2c["commit を起動し 緑の状態を1単位として中間コミットさせる"]
+        S2c["commit を起動し 緑の状態をグループ1単位として中間コミットさせる"]
+        S2f["完了グループをノートに退避する"]
         S2d{"commit が失敗または中断したか？"}
         S2e["未コミットのまま止め 状態を報告して人の判断を仰ぐ"]
         S2a --> S2b
@@ -108,8 +125,9 @@ flowchart TD
     end
 
     START --> S1a
-    S1b --> S2a
-    S2d -->|NO| S3a
+    S1e --> S2a
+    S2d -->|NO| S2f
+    S2f --> S3a
     S2e --> END
     S3a -->|YES| S4a
     S3b -->|NO| S1a
@@ -125,8 +143,8 @@ flowchart TD
 
     classDef user fill:#fff3bf,stroke:#f08c00,color:#000
     classDef delegate fill:#d0ebff,stroke:#1971c2,color:#000
-    class S2e,S3c,S4f,S4g,S4h,S5d user
-    class S1a,S2a,S2c,S4a,S4c,S5b delegate
+    class S1c,S1g,S2e,S3c,S4f,S4g,S4h,S5d user
+    class S1b,S1d,S2a,S2c,S4a,S4c,S5b delegate
 ```
 
 遷移は図に従い、判定基準・詳細は下の本文に従う。
@@ -134,10 +152,11 @@ flowchart TD
 凡例: 黄 = ユーザーの確認・承認、青 = 他スキル・エージェントへの委譲
 
 1. **List — テストリストを洗い出す** / **Red — 失敗するテストを書く**
-   - `test-coding` スキル in-context 起動。同スキル 検証すべき振る舞いシナリオ洗い出し（List。[[tdd-rule]] Phase 0）→リストから1項目選択→失敗テスト実装（Red。[[tdd-rule]] Phase 1）。「失敗テストのみ実装、実装コード書かない」明示。Red 実装段階 同スキル内部 domain 判定後 対応サブエージェント（例: `frontend-tester` / `backend-tester`、専用無し domain = 汎用サブエージェント）へ隔離委譲（[[domain-classification-rule]]）。テスト RED 確認。
+   - ノートを読み戻し、合意済みの分割があり未分割の項目がなければ、未完了の先頭グループを現グループとして Red へ。なし（初回・ノート不在・未分割の項目あり）→ `test-coding` スキルを「List のみ」指定で in-context 起動し、完了済み項目を渡して、未完了・新規項目のリスト（[[tdd-rule]] Phase 0）とグループ分割案を返させる→分割案をユーザーに提示して合意を得る（合意の要件 = [[tdd-rule]] §2「Red-Green（Phase 1-2）の実施粒度」。不合意なら修正して再提示）→リストと分割をノートに退避。
+   - `test-coding` スキル in-context 起動（現グループの項目をノートから渡して指定。List は再生成させない）。現グループの失敗テスト実装（Red。[[tdd-rule]] Phase 1）。「失敗テストのみ実装、実装コード書かない」明示。Red 実装段階 同スキル内部 domain 判定後 対応サブエージェント（例: `frontend-tester` / `backend-tester`、専用無し domain = 汎用サブエージェント）へ隔離委譲（[[domain-classification-rule]]）。現グループの全テスト RED 確認（最初から緑の項目は [[tdd-rule]] §2 に従う）。
 2. **Green — テストを通す最小実装**
-   - `coding` スキル in-context 起動。テスト = Red で用意済み→実装のみ。同スキル内部 domain 判定後 対応サブエージェント（例: `frontend-coder` / `backend-coder`、専用無し domain = 汎用サブエージェント）へ隔離委譲（[[domain-classification-rule]]）。テストを通す最小限のみ、余分機能足さない。全テスト GREEN 確認後、即 [[commit]]（`skills/commit/SKILL.md`）in-context 起動で中間コミット（ルール「Refactor の実施粒度」・「コミット」）。
-3. **反復** — テストリスト空まで 手順1〜2（List/Red → Green）反復（[[tdd-rule]] Phase 4）。反復上限（ルール「反復上限」）未到達→リスト次項目で手順1へ戻る。Refactor はこの反復に含めない。
+   - `coding` スキル in-context 起動。テスト = Red で用意済み→実装のみ。同スキル内部 domain 判定後 対応サブエージェント（例: `frontend-coder` / `backend-coder`、専用無し domain = 汎用サブエージェント）へ隔離委譲（[[domain-classification-rule]]）。テストを通す最小限のみ、余分機能足さない。全テスト GREEN 確認後、即 [[commit]]（`skills/commit/SKILL.md`）in-context 起動で中間コミット（ルール「Red-Green の粒度」・「コミット」）。
+3. **反復** — テストリスト空まで 手順1〜2（List/Red → Green）をグループごとに反復（[[tdd-rule]] Phase 4）。未完了グループがあれば手順1へ戻る（各周の冒頭でノートを読み戻す）。反復上限（ルール「反復上限」。サイクル単位）に達していれば報告して終了。Refactor はこの反復に含めない。
 4. **Refactor — レビュー主導の改善（緑維持、テストリスト全項目完了後まとめて1回）**
    - `coding-review` スキル in-context 起動。同スキル内部 domain 判定後 コーディング規約・テスト規約（frontend = 追加で UI デザイン）観点で該当レビューサブエージェントへ隔離委譲、指摘のみ返る。指摘受領→[[review-independence-rule]] §指摘適用の承認 に従い承認を得る→承認分を産出者（Green 同 `coding` スキル委譲実装）が全テスト緑維持のまま適用。ラウンドで適用した指摘なし→手順5へ。レビュー→適用 複数ラウンド許容、**最大5ラウンドで打ち切り**（ルール「Refactor の停止条件」）。指摘収束まで、または5ラウンド到達まで反復。
 5. **Commit — チェックポイントを記録**
@@ -146,4 +165,4 @@ flowchart TD
 
 ## 出力
 
-- 現フェーズ（LIST/RED/GREEN/REFACTOR/COMMIT）、委譲先（入口スキル＋判明していれば内部分岐した具象サブエージェント）と結果、テスト緑/赤状態、コミット単位（中間コミット／Refactor 後コミットの別）、サイクル番号（例: 2 サイクル目）、Refactor 指摘の承認結果（不承認指摘 = 残課題）
+- 現フェーズ（LIST/RED/GREEN/REFACTOR/COMMIT）、現グループと合意済みグループ分割の進捗、委譲先（入口スキル＋判明していれば内部分岐した具象サブエージェント）と結果、テスト緑/赤状態、コミット単位（中間コミット／Refactor 後コミットの別）、サイクル番号（例: 2 サイクル目）、Refactor 指摘の承認結果（不承認指摘 = 残課題）
