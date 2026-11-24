@@ -104,9 +104,13 @@ flowchart TD
     class S2c,S4a,S5a delegate
 ```
 
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
 遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
+<!-- @import plugins/matagi-kaji/prompt-commons/legend-user-and-delegation.md -->
 凡例: 黄 = ユーザーの確認・承認、青 = 他スキル・エージェントへの委譲
+<!-- @end -->
 
 ### 1. skill-creator の導入を確認する
 

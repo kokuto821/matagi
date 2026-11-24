@@ -64,9 +64,13 @@ flowchart TD
     class S3a delegate
 ```
 
-遷移は図、判定基準・詳細は下の本文に従う。
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
+<!-- @import plugins/matagi-kaji/prompt-commons/legend-delegation.md -->
 凡例: 青 = 他スキル・エージェントへの委譲
+<!-- @end -->
 
 ### 1. レビュー対象を確定する
 

@@ -55,7 +55,9 @@ flowchart TD
     S5c --> END
 ```
 
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
 遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
 1. 対象特定: AGENTS.md / CLAUDE.md・`rules/`・`skills/`・`agents/`・hooks。差分判明 → 変更箇所優先。対象が多い場合 = 資産単位で順次走査。
 2. [[determinism-rule]]・[[harness-rule]] 読込。

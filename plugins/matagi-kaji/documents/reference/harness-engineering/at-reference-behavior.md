@@ -11,7 +11,7 @@ issue #106 の設計前に行った実機検証の記録。検証 = Claude Code 
 | SKILL.md 本文の `@rootfile.md#fragment` | fragment は剥がされ、ファイル全体が添付される |
 | SKILL.md 本文の `<!-- @b.md -->`（HTML コメント内） | 添付される |
 | SKILL.md 本文の `` `@c.md` ``（インラインコード） | 添付されない |
-| SKILL.md 本文の `<!-- @import prompt-commons.md#x -->` | 添付されない（`@` 直後が `import`） |
+| SKILL.md 本文の `<!-- @import prompt-commons.md#x -->`（検証時の記法。現行は 1ファイル1文言でキー・見出し指定なし。[[commonization-rule]] §記法） | 添付されない（`@` 直後が `import`） |
 | エージェント定義本文の `@agentfile.md` | 展開も添付もされない。文字列のまま |
 | SKILL.md 本文の `${CLAUDE_SKILL_DIR}` | スキルディレクトリの絶対パスへ展開される |
 | SKILL.md 本文の `${CLAUDE_PLUGIN_ROOT}` | 展開されない（プロジェクト直下のスキルで検証） |

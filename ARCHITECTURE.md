@@ -17,6 +17,16 @@ matagi/
 │   ├── template/               ← テンプレート
 │   └── .claude-plugin/         ← プラグインマニフェスト
 │
+├── plugins/matagi-kaji/        ← ハーネス作成系（プロンプト・コンテキスト設計・ステアリング構成のレビュー）
+│   ├── skills/                 ← スキル（SKILL.md。スクリプトとテストは skills/<name>/scripts/ に同梱）
+│   ├── agents/                 ← サブエージェント定義
+│   ├── shared-rules/           ← 参照層（任意タイミングで参照）
+│   ├── prompt-commons/         ← プロンプト共通文言ファイル（@import で参照）
+│   ├── documents/              ← 調査・参考ドキュメント
+│   ├── knowledge/              ← 経験・知見メモ
+│   ├── template/               ← スキル・エージェントのテンプレート
+│   └── .claude-plugin/         ← プラグインマニフェスト
+│
 ├── .claude-plugin/             ← マーケットプレイスカタログ（marketplace.json）
 │
 └── .claude/                    ← Claude Code 設定（settings.local.json）

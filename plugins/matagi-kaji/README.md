@@ -13,6 +13,7 @@ matagi 本体開発のみ使うスキル群（プロンプト・コンテキス�
 - `documents/reference/` … 参照用資料
 - `knowledge/` … 開発で得た経験・知見メモ
 - `template/` … スキル・エージェントのテンプレート（`create-skill` 使用）
+- `prompt-commons/` … プロンプト間で共通化した定型文の共通文言ファイル（`@import` で参照。`prompt-commonization` 使用）
 - `.claude-plugin/` … 本プラグインのマニフェスト
 
 ## 依存関係

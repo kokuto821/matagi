@@ -62,9 +62,13 @@ flowchart TD
     class S2b delegate
 ```
 
-遷移は図、判定基準・詳細は下の本文に従う。
+<!-- @import plugins/matagi-kaji/prompt-commons/transition-note.md -->
+遷移は図に従い、判定基準・詳細は下の本文に従う。
+<!-- @end -->
 
+<!-- @import plugins/matagi-kaji/prompt-commons/legend-delegation.md -->
 凡例: 青 = 他スキル・エージェントへの委譲
+<!-- @end -->
 
 ### 1. レビュー範囲を特定する
 
@@ -78,7 +82,9 @@ flowchart TD
 - **単一ファイル・少量の差分、または委譲できない環境**: 本スキル内で直接レビュー。手法選択の基準=
   [[selection-rule]] / [[harness-rule]]、事実=[[steering-claude-code]]。決定論的処理は `agents/determinism-reviewer.md` の定義に従う。
 
+<!-- @import plugins/matagi-kaji/prompt-commons/review-agent-handoff.md -->
 エージェントへ「レビュー対象ファイル／差分」と「指摘のみ・修正は適用しない」旨を渡す。
+<!-- @end -->
 
 ## 出力
 
