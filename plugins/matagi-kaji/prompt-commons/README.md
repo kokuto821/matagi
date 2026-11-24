@@ -11,7 +11,7 @@
 - 共通化の目的 = 複製文言のドリフト防止。トークン削減ではない。展開本文は各プロンプトに残るうえ、ブロックのコメント行ぶん実行時の文字数は増える。
 - 対象 = `plugins/matagi-kaji/` の `skills/*/SKILL.md`・`agents/*.md`。`plugins/matagi/` 側は未対応（必要なら別 issue）。
 - `template/` は対象外。複製先に本ディレクトリが無く `check` が壊れるため、素の固定文のまま置く（`shared-rules/template/template-rule.md`）。
-- テンプレートから新規作成したスキル・エージェントは素の固定文で生まれる。複製を残さないため、作成後に `prompt-commonization` の `detect` で取り込む。
+- テンプレートから新規作成したスキル・エージェントは素の固定文で生まれる。`detect` は素の文言が複数出現する重複だけを列挙し、既存の共通文言ファイルとは照合しないため、新規1本だけでは検出されない。スキルの手順は「候補なし」で終わるため、取り込みは計画 JSON を手で作って `apply` に渡す（`phrases` に既存と同名・同一 `text`、`occurrences` に行範囲と `expectedText`。形式 = `skills/prompt-commonization/reference/plan-format.md`）。
 - 「凡例: 黄 = ユーザーの確認・承認」のみの行は短文のため、共通化していない。
 - `ai-engineering-review` の「各エージェントへ…旨を渡す。」は複数宛ての意図的な差分のため、`review-agent-handoff.md` を使わない。
 - `README.md` は共通文言ファイルではない。文言ファイルは本 README 以外の `*.md`。

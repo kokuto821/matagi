@@ -199,7 +199,7 @@ description: >
 ---
 ```
 
-本文構成（概要／ルール／手順／出力・500行未満）と手順の記述形式（mermaid `flowchart TD`）は [[template-rule]] (`shared-rules/template/template-rule.md`) を唯一の出典とする。テンプレート構成そのまま埋める。構成を独自に定義し直さない。Step 4 で外部化したルールあり→`## ルール` 節に参照記載、なし→節ごと削除。
+本文構成（概要／ルール／手順／出力・500行未満）と手順の記述形式（mermaid `flowchart TD`）は [[template-rule]] (`shared-rules/template/template-rule.md`) を唯一の出典とする（固定文の文言のみ、`plugins/matagi-kaji/prompt-commons/` の共通文言ファイルが正。template-rule 参照）。テンプレート構成そのまま埋める。構成を独自に定義し直さない。Step 4 で外部化したルールあり→`## ルール` 節に参照記載、なし→節ごと削除。
 
 description・手順・出力など指示文を書くとき、[[composition-rule]] (`shared-rules/prompt-engineering/composition-rule.md`) の構成要素が揃っているか確認。多段判断を含むスキル・エージェント→[[scaffolding-rule]] (`shared-rules/prompt-engineering/scaffolding-rule.md`) に従い推論の足場を組み込む（単純タスクには足さない）。
 
